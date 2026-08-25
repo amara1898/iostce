@@ -1381,7 +1381,36 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
         </div>
     </div>
 
-    <div class="modal-overlay" id="role-modal"><div class="modal-content" style="height: auto; max-height: 85vh;"><div class="modal-header"><h3>角色面板</h3><button class="close-btn" onclick="closeRoleModal()">关闭</button></div><div class="modal-body" style="padding: 16px;"><div style="border: 1px dashed var(--line-color); padding: 12px; margin-bottom: 16px;"><div class="setting-label" style="border-bottom: none; padding-bottom: 4px;">建立新角色</div><div style="display: flex; gap: 12px; align-items: flex-end;"><div style="position: relative; cursor: pointer; flex-shrink: 0;" onclick="document.getElementById('new-role-avatar-upload').click()"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="new-role-avatar-preview" style="width: 42px; height: 42px; border-radius: var(--avatar-radius); object-fit: cover; border: 1px solid var(--line-color); background: #fafafa;"><div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 9px; background: #fff; border: 1px solid var(--line-color); padding: 1px 4px; white-space: nowrap;">头像</div></div><input type="file" id="new-role-avatar-upload" accept="image/*" onchange="previewNewRoleAvatar(event)"><div class="input-item" style="flex: 1; margin-bottom: 2px;"><input type="text" id="new-role-name" placeholder="输入角色姓名..."></div><button class="icon-btn btn-noshadow" style="width:auto; padding: 4px 10px; font-size: 13px; margin-bottom: 2px; border: 1px solid var(--line-color); box-shadow: 2px 2px 0 var(--line-color);" onclick="saveNewRole()">保存</button></div></div><div class="setting-label" style="margin-bottom: 8px;">已有角色档案</div><div id="role-list" style="display: flex; flex-direction: column; gap: 8px;"></div></div></div></div>
+    <div class="modal-overlay" id="role-modal">
+        <div class="modal-content" style="height:auto; max-height:88vh;">
+            <div class="modal-header"><h3>角色面板</h3><button class="close-btn" onclick="closeRoleModal()">关闭</button></div>
+            <div class="modal-body" style="padding:16px;">
+                <div style="border-radius:16px; padding:18px 14px 14px; margin-bottom:18px; background:#f2f2f7;">
+                    <div class="setting-label" style="border-bottom:none; padding:0 0 12px; font-size:13px; color:#6e6e73;">建立新角色</div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <button type="button" aria-label="添加角色照片" onclick="document.getElementById('new-role-avatar-upload').click()" style="position:relative;width:88px;height:88px;border:0;padding:0;border-radius:50%;background:#d1d1d6;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:visible;box-shadow:none;">
+                            <svg id="new-role-avatar-placeholder" width="52" height="52" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true" style="display:block;"><circle cx="12" cy="8" r="4.25"></circle><path d="M4.2 21c.55-4.15 3.2-6.25 7.8-6.25s7.25 2.1 7.8 6.25H4.2z"></path></svg>
+                            <img src="" id="new-role-avatar-preview" alt="角色头像预览" style="display:none;position:absolute;inset:0;width:88px;height:88px;border-radius:50%;object-fit:cover;border:0;background:#d1d1d6;">
+                            <span style="position:absolute;right:-1px;bottom:1px;width:28px;height:28px;border-radius:50%;background:#007aff;color:#fff;display:flex;align-items:center;justify-content:center;border:3px solid #f2f2f7;box-sizing:border-box;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5h3l1.4-2h7.2l1.4 2h3v9.5H4z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+                            </span>
+                        </button>
+                        <button type="button" onclick="document.getElementById('new-role-avatar-upload').click()" style="border:0;background:transparent;color:#007aff;font-size:13px;padding:8px 8px 14px;cursor:pointer;">添加照片</button>
+                        <input type="file" id="new-role-avatar-upload" accept="image/*" onchange="previewNewRoleAvatar(event)" style="display:none;">
+                        <div style="width:100%;background:#fff;border-radius:12px;overflow:hidden;margin-top:2px;">
+                            <div style="min-height:46px;display:flex;align-items:center;padding:0 13px;">
+                                <input type="text" id="new-role-name" placeholder="姓名" autocomplete="off" style="width:100%;border:0;outline:none;background:transparent;font-size:16px;color:var(--text-main);font-family:inherit;padding:0;">
+                            </div>
+                        </div>
+                        <button type="button" onclick="saveNewRole()" style="width:100%;min-height:44px;margin-top:12px;border:0;border-radius:12px;background:#007aff;color:#fff;font-size:16px;font-weight:500;cursor:pointer;">添加角色</button>
+                    </div>
+                </div>
+                <div class="setting-label" style="margin-bottom:4px;">已有角色</div>
+                <div style="font-size:11px;color:var(--text-sub);line-height:1.5;margin:0 2px 12px;">在每个角色下面绑定字卡组。角色的字卡回复只会从已绑定的分组中抽取。</div>
+                <div id="role-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+            </div>
+        </div>
+    </div>
 
 <!-- 美化与定制面板 (全新重构版) -->
 <div class="modal-overlay" id="theme-modal">
@@ -1555,22 +1584,14 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
                 <div class="tab-pane active" id="tab-pref">
                     <div class="card-group">
                         <div class="setting-label">视觉呈现</div>
-                        <div class="input-item"><span>当前角色代号</span><input type="text" id="set-them-name" onchange="updateSettings()" placeholder="当前角色的称呼"></div>
-                        <div class="input-item" style="padding-top: 5px;"><span>自己代号 (全局)</span><input type="text" id="set-me-name" onchange="updateSettings()" placeholder="自己的称呼"></div>
-                        <div style="display: flex; gap: 8px; padding-top: 15px;">
-    <button class="btn-full" style="padding: 8px; font-size: 12px;" onclick="document.getElementById('them-avatar-upload').click()">更换 Ta 的头像</button>
+                        <div class="input-item"><span>我的显示名称</span><input type="text" id="set-me-name" onchange="updateSettings()" placeholder="我的称呼"></div>
+                        <div style="display: flex; padding-top: 15px;">
     <button class="btn-full" style="padding: 8px; font-size: 12px;" onclick="document.getElementById('me-avatar-upload').click()">更换我的头像</button>
 </div>
                         <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>头像圆角 (<span id="radius-val" style="font-family:monospace;">0</span>%)</span></div><input type="range" id="set-avatar-radius" min="0" max="50" step="1" oninput="updateRadiusRealtime()" onchange="updateSettings()"></div>
                         <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>全局字号 (<span id="fontsize-val" style="font-family:monospace;">15</span>px)</span></div><input type="range" id="set-font-size" min="12" max="24" step="1" oninput="updateFontSizeRealtime()" onchange="updateSettings()"></div>
 <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>全局字重 (<span id="fontweight-val" style="font-family:monospace;">300</span>)</span></div><input type="range" id="set-font-weight" min="100" max="900" step="100" oninput="updateFontWeightRealtime()" onchange="updateSettings()"></div>
-<div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; margin-top:15px;">
-    <span style="font-size: 13px; color: var(--text-main); font-weight: 300;">启用状态</span>
-    <label class="toggle-switch">
-        <input type="checkbox" id="set-status-emoji-enable" onchange="updateSettings()">
-        <span class="toggle-slider"></span>
-    </label>
-</div>
+
                     </div>
                     
                                         <div class="card-group">
@@ -1598,11 +1619,16 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
                         <div class="input-item" style="padding-top: 5px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>最快响应 (秒)</span><span id="min-delay-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-min-delay" min="0" max="120" step="1" oninput="updateDelayDisplay()" onchange="updateSettings()"></div>
                         <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>最慢响应 (秒)</span><span id="max-delay-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-max-delay" min="0" max="300" step="1" oninput="updateDelayDisplay()" onchange="updateSettings()"></div>
                         <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>单次最多回复 (条)</span><span id="max-reply-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-max-reply" min="1" max="10" step="1" oninput="updateReplyCountDisplay()" onchange="updateSettings()"></div>
-                        <div style="height:1px; background:var(--line-light); opacity:.55; margin:16px 0 12px;"></div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0;">
+                    </div>
+                </div>
+
+                <div class="tab-pane" id="tab-card">
+                    <div class="card-group">
+                        <div class="setting-label">拼字卡</div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">
                             <div style="padding-right:12px;">
-                                <div style="font-size:13px; color:var(--text-main);">拼字卡</div>
-                                <div style="font-size:11px; color:var(--text-sub); margin-top:3px; line-height:1.4;">把多条文字字卡随机拼进同一个回复气泡</div>
+                                <div style="font-size:13px;color:var(--text-main);">在一个气泡里组合多条字卡</div>
+                                <div style="font-size:11px;color:var(--text-sub);margin-top:3px;line-height:1.45;">只会从当前角色已绑定的字卡组里抽取。</div>
                             </div>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="set-card-stitch-enable" onchange="updateSettings()">
@@ -1610,16 +1636,9 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
                             </label>
                         </div>
                         <div id="card-stitch-range-wrap" style="display:none;">
-                            <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>一次最少拼 (条字卡)</span><span id="min-stitch-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-min-stitch" min="1" max="10" step="1" oninput="updateStitchCardDisplay('min')" onchange="updateSettings()"></div>
-                            <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>一次最多拼 (条字卡)</span><span id="max-stitch-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-max-stitch" min="1" max="10" step="1" oninput="updateStitchCardDisplay('max')" onchange="updateSettings()"></div>
+                            <div class="input-item" style="padding-top:15px;"><div style="display:flex;justify-content:space-between;width:100%;"><span>一次最少拼 (条)</span><span id="min-stitch-val" style="font-family:monospace;font-size:12px;"></span></div><input type="range" id="set-min-stitch" min="1" max="10" step="1" oninput="updateStitchCardDisplay('min')" onchange="updateSettings()"></div>
+                            <div class="input-item" style="padding-top:15px;"><div style="display:flex;justify-content:space-between;width:100%;"><span>一次最多拼 (条)</span><span id="max-stitch-val" style="font-family:monospace;font-size:12px;"></span></div><input type="range" id="set-max-stitch" min="1" max="10" step="1" oninput="updateStitchCardDisplay('max')" onchange="updateSettings()"></div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="tab-pane" id="tab-card">
-                    <div class="card-group">
-                        <div class="setting-label">允许自动回复的分组 (当前角色)</div>
-                        <div id="card-allowed-groups" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
                     </div>
                     <div class="card-group">
                         <div class="setting-label">解析录入区</div>
@@ -2167,13 +2186,13 @@ function rebuildThemeCSS() {
 }
 
 function applySettingsToUI() {
+appState.settings.enableStatusEmoji = false;
 applyDarkMode();
     const role = getCurrentRole();
         document.getElementById('main-top-bar').className = 'top-bar ' + (appState.settings.topbarLayout || 'layout-modern');
     const layoutSelect = document.getElementById('set-topbar-layout');
     if(layoutSelect) layoutSelect.value = appState.settings.topbarLayout || 'layout-modern';
     document.getElementById('them-name-display').innerHTML = (role.name || 'Ta') + ' <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>';
-    document.getElementById('set-them-name').value = role.name || '';
     document.getElementById('them-avatar').src = role.avatar || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
     document.getElementById('me-name-display').innerText = appState.settings.meName || '我';
@@ -2228,8 +2247,6 @@ if(appState.settings.timeStyle === 'time-top') document.body.classList.add('time
 }
 
 function updateSettings() {
-    const role = getCurrentRole();
-    role.name = document.getElementById('set-them-name').value || 'Ta';
     appState.settings.meName = document.getElementById('set-me-name').value || '我';
     appState.settings.avatarRadius = Number(document.getElementById('set-avatar-radius').value); appState.settings.fontSize = Number(document.getElementById('set-font-size').value); appState.settings.fontWeight = Number(document.getElementById('set-font-weight').value);
 appState.settings.minDelaySec = Number(document.getElementById('set-min-delay').value); appState.settings.maxDelaySec = Number(document.getElementById('set-max-delay').value); appState.settings.maxReplyCount = Number(document.getElementById('set-max-reply').value);
@@ -2274,11 +2291,100 @@ appState.settings.aiAutoTime = document.getElementById('set-ai-auto-time').value
 let tempNewRoleAvatar = '';
 function openRoleModal() { renderRoleList(); document.getElementById('role-modal').classList.add('open'); }
 function closeRoleModal() { document.getElementById('role-modal').classList.remove('open'); }
-function previewNewRoleAvatar(e) { if(e.target.files[0]) { compressImage(e.target.files[0], 200).then(b64 => { tempNewRoleAvatar = b64; document.getElementById('new-role-avatar-preview').src = b64; }); } }
-async function saveNewRole() { const name = document.getElementById('new-role-name').value.trim(); if(!name) { await uiAlert('请输入角色代号'); return; } const id = 'role_' + Date.now(); appState.roles.push({ id, name, avatar: tempNewRoleAvatar, messages: [], allowedCardGroups: [...new Set(appState.cards.map(c=>c.group))], allowedStickerGroups: [...new Set(appState.stickers.map(s=>s.group))] }); tempNewRoleAvatar = ''; document.getElementById('new-role-avatar-preview').src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; document.getElementById('new-role-name').value = ''; document.getElementById('new-role-avatar-upload').value = ''; switchRole(id); renderRoleList(); }
-function renderRoleList() { const list = document.getElementById('role-list'); list.innerHTML = ''; appState.roles.forEach(role => { const div = document.createElement('div'); div.style.cssText = `display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--line-color); padding: 8px 12px; ${role.id === appState.currentRoleId ? 'background: #fafafa; border-width: 2px;' : ''}`; div.innerHTML = `<div style="display:flex; align-items:center; gap:12px; flex:1; cursor:pointer;" onclick="switchRole('${role.id}')"><img src="${role.avatar || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'}" style="width:36px; height:36px; border-radius:var(--avatar-radius); border:1px solid var(--line-color); object-fit:cover; background:#fff;"><span style="font-size:14px; font-weight:300;">${role.name} ${role.id === appState.currentRoleId ? '(当前)' : ''}</span></div>${appState.roles.length > 1 ? `<button class="btn-noshadow icon-btn" style="padding:4px 8px; font-size:12px; color:#d32f2f;" onclick="deleteRole('${role.id}')">抹除</button>` : ''}`; list.appendChild(div); }); }
+function previewNewRoleAvatar(e) {
+    if(!e.target.files[0]) return;
+    compressImage(e.target.files[0], 200).then(b64 => {
+        tempNewRoleAvatar = b64;
+        const preview = document.getElementById('new-role-avatar-preview');
+        const placeholder = document.getElementById('new-role-avatar-placeholder');
+        if(preview) { preview.src = b64; preview.style.display = 'block'; }
+        if(placeholder) placeholder.style.display = 'none';
+    });
+}
+function getAllWordcardGroups() {
+    const groups = [...new Set((appState.cards || []).map(c => c.group || '日常'))];
+    if(!groups.includes('日常')) groups.unshift('日常');
+    return groups;
+}
+function escapeRolePanelText(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function ensureRoleCardBindings(role) {
+    if(!role) return [];
+    if(!Array.isArray(role.allowedCardGroups)) role.allowedCardGroups = [...getAllWordcardGroups()];
+    return role.allowedCardGroups;
+}
+async function saveNewRole() {
+    const name = document.getElementById('new-role-name').value.trim();
+    if(!name) { await uiAlert('请输入角色姓名'); return; }
+    const id = 'role_' + Date.now();
+    appState.roles.push({ id, name, avatar: tempNewRoleAvatar, messages: [], allowedCardGroups: [...getAllWordcardGroups()], allowedStickerGroups: [...new Set(appState.stickers.map(s=>s.group))] });
+    tempNewRoleAvatar = '';
+    const newRolePreview = document.getElementById('new-role-avatar-preview');
+    const newRolePlaceholder = document.getElementById('new-role-avatar-placeholder');
+    if(newRolePreview) { newRolePreview.src = ''; newRolePreview.style.display = 'none'; }
+    if(newRolePlaceholder) newRolePlaceholder.style.display = 'block';
+    document.getElementById('new-role-name').value = '';
+    document.getElementById('new-role-avatar-upload').value = '';
+    appState.currentRoleId = id;
+    chatDisplayCount = 60;
+    await saveState();
+    applySettingsToUI(); renderMessages(); updateStatsDisplay(); renderRoleList();
+}
+function toggleRoleCardBinding(roleId, encodedGroup, checked) {
+    const role = appState.roles.find(r => r.id === roleId);
+    if(!role) return;
+    const group = decodeURIComponent(encodedGroup);
+    ensureRoleCardBindings(role);
+    if(checked) {
+        if(!role.allowedCardGroups.includes(group)) role.allowedCardGroups.push(group);
+    } else {
+        role.allowedCardGroups = role.allowedCardGroups.filter(g => g !== group);
+    }
+    saveState();
+    const countEl = document.getElementById('role-bind-count-' + roleId);
+    if(countEl) countEl.textContent = role.allowedCardGroups.length + ' 个已绑定';
+}
+function setAllRoleCardBindings(roleId, bindAll) {
+    const role = appState.roles.find(r => r.id === roleId);
+    if(!role) return;
+    role.allowedCardGroups = bindAll ? [...getAllWordcardGroups()] : [];
+    saveState();
+    renderRoleList();
+}
+function renderRoleList() {
+    const list = document.getElementById('role-list');
+    if(!list) return;
+    const groups = getAllWordcardGroups();
+    list.innerHTML = '';
+    appState.roles.forEach(role => {
+        ensureRoleCardBindings(role);
+        const current = role.id === appState.currentRoleId;
+        const card = document.createElement('div');
+        card.style.cssText = `border:1px solid var(--line-light);border-radius:16px;background:var(--bg);overflow:hidden;${current ? 'box-shadow:0 0 0 1px #007aff inset;' : ''}`;
+        const groupHtml = groups.map(g => {
+            const encoded = encodeURIComponent(g);
+            const checked = role.allowedCardGroups.includes(g) ? 'checked' : '';
+            return `<label style="display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:10px;background:rgba(120,120,128,.08);font-size:12px;cursor:pointer;"><input type="checkbox" class="card-checkbox" ${checked} onchange="toggleRoleCardBinding('${role.id}','${encoded}',this.checked)"><span>${escapeRolePanelText(g)}</span></label>`;
+        }).join('');
+        card.innerHTML = `
+            <div style="display:flex;align-items:center;padding:12px 12px 10px;gap:10px;">
+                <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer;" onclick="switchRole('${role.id}')">
+                    ${role.avatar ? `<img src="${role.avatar}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;background:#d1d1d6;">` : `<div style="width:42px;height:42px;border-radius:50%;background:#d1d1d6;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="27" height="27" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><circle cx="12" cy="8" r="4.25"></circle><path d="M4.2 21c.55-4.15 3.2-6.25 7.8-6.25s7.25 2.1 7.8 6.25H4.2z"></path></svg></div>`}
+                    <div style="min-width:0;"><div style="font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeRolePanelText(role.name || 'Ta')}</div><div style="font-size:11px;color:var(--text-sub);margin-top:2px;">${current ? '当前角色' : '点这里切换到此角色'}</div></div>
+                </div>
+                ${appState.roles.length > 1 ? `<button class="btn-noshadow" style="border:none;background:transparent;color:#ff3b30;font-size:12px;padding:6px;" onclick="deleteRole('${role.id}')">删除</button>` : ''}
+            </div>
+            <div style="height:1px;background:var(--line-light);margin-left:64px;opacity:.7;"></div>
+            <div style="padding:11px 12px 12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><div><div style="font-size:13px;">绑定字卡组</div><div id="role-bind-count-${role.id}" style="font-size:10px;color:var(--text-sub);margin-top:2px;">${role.allowedCardGroups.length} 个已绑定</div></div><div style="display:flex;gap:10px;"><button class="btn-noshadow" style="border:none;background:transparent;color:#007aff;font-size:11px;padding:3px;" onclick="setAllRoleCardBindings('${role.id}',true)">全选</button><button class="btn-noshadow" style="border:none;background:transparent;color:#007aff;font-size:11px;padding:3px;" onclick="setAllRoleCardBindings('${role.id}',false)">清空</button></div></div>
+                <div style="display:flex;flex-wrap:wrap;gap:7px;">${groupHtml || '<span style="font-size:11px;color:var(--text-sub);">还没有字卡分组</span>'}</div>
+            </div>`;
+        list.appendChild(card);
+    });
+}
 function switchRole(id) { appState.currentRoleId = id; chatDisplayCount = 60; saveState(); applySettingsToUI(); renderMessages(); updateStatsDisplay(); closeRoleModal(); }
-async function deleteRole(id) { if(await uiConfirm("确定抹除该角色及其所有聊天记录吗？")) { appState.roles = appState.roles.filter(r => r.id !== id); if(appState.currentRoleId === id) appState.currentRoleId = appState.roles[0].id; saveState(); if(document.getElementById('role-modal').classList.contains('open')) renderRoleList(); else { applySettingsToUI(); renderMessages(); updateStatsDisplay(); } } }
+async function deleteRole(id) { if(await uiConfirm("确定删除该角色及其所有聊天记录吗？")) { appState.roles = appState.roles.filter(r => r.id !== id); if(appState.currentRoleId === id) appState.currentRoleId = appState.roles[0].id; saveState(); if(document.getElementById('role-modal').classList.contains('open')) renderRoleList(); else { applySettingsToUI(); renderMessages(); updateStatsDisplay(); } } }
 async function uploadThemAvatar(e) { if(e.target.files[0]) { const role = getCurrentRole(); role.avatar = await compressImage(e.target.files[0], 200); applySettingsToUI(); saveState(); renderMessages(); } e.target.value = ''; }
 function clearBubbleCSS() { document.getElementById('set-bubble-css').value = ''; appState.settings.bubbleCSS = ''; updateSettings(); }
 async function saveBubblePreset() { const css = document.getElementById('set-bubble-css').value.trim(); if(!css) { await uiAlert("当前输入框为空"); return; } const name = await uiPrompt("为预设起个名字:", "存为预设", "起个名字吧..."); if(name) { appState.settings.bubblePresets.push({ name, css }); saveState(); renderBubblePresets(); } }
@@ -2671,6 +2777,12 @@ async function sendInstantImage(e) {
     e.target.value = ''; 
 }
 
+function getBoundWordcardsForRole(role) {
+    if(!role) return [];
+    ensureRoleCardBindings(role);
+    return (appState.cards || []).filter(c => role.allowedCardGroups.includes(c.group));
+}
+
 function renderAllowedGroups() {
     const role = getCurrentRole();
     const cardGroups = [...new Set(appState.cards.map(c => c.group))]; if(!cardGroups.includes('日常')) cardGroups.unshift('日常'); if(!role.allowedCardGroups) role.allowedCardGroups = [...cardGroups];
@@ -2683,8 +2795,10 @@ function renderAllowedGroups() {
 }
 function updateAllowedGroups() {
     const role = getCurrentRole();
-    role.allowedCardGroups = Array.from(document.querySelectorAll('#card-allowed-groups input:checked')).map(cb => cb.value);
-    role.allowedStickerGroups = Array.from(document.querySelectorAll('#sticker-allowed-groups input:checked')).map(cb => cb.value);
+    const cardContainer = document.getElementById('card-allowed-groups');
+    const stickerContainer = document.getElementById('sticker-allowed-groups');
+    if(cardContainer) role.allowedCardGroups = Array.from(cardContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+    if(stickerContainer) role.allowedStickerGroups = Array.from(stickerContainer.querySelectorAll('input:checked')).map(cb => cb.value);
     saveState();
 }
 
@@ -3181,7 +3295,7 @@ function triggerAutoReply() {
     if(!role.allowedCardGroups) role.allowedCardGroups = [...new Set(appState.cards.map(c => c.group))];
     if(!role.allowedStickerGroups) role.allowedStickerGroups = [...new Set(appState.stickers.map(s => s.group))];
 
-    let validCards = appState.cards.filter(c => role.allowedCardGroups.includes(c.group)).map(c => ({ text: c.text, type: 'text' }));
+    let validCards = getBoundWordcardsForRole(role).map(c => ({ text: c.text, type: 'text' }));
     let validStickers = appState.stickers.filter(s => role.allowedStickerGroups.includes(s.group)).map(s => ({ text: s.url, type: 'img' }));
     
 const customPatsStr = appState.settings.customPats || "";
@@ -3871,7 +3985,7 @@ function taMakeMove() {
         // Ta 说话的机制 (30% 概率触发，从语料库抽一句)
         if(Math.random() < 0.3) {
             const role = getCurrentRole();
-            const validCards = appState.cards.filter(card => role.allowedCardGroups.includes(card.group));
+            const validCards = getBoundWordcardsForRole(role);
             if(validCards.length > 0) {
                 const bubble = document.getElementById('gomoku-ta-bubble');
                 bubble.innerText = validCards[Math.floor(Math.random() * validCards.length)].text;
@@ -5119,7 +5233,7 @@ function checkAndGenerateThemDiary() {
             // 从字卡库里随机抽1-2句话当做日记内容
             let content = "今天又是普普通通的一天。";
             const role = getCurrentRole();
-            const validCards = appState.cards.filter(c => role.allowedCardGroups.includes(c.group));
+            const validCards = getBoundWordcardsForRole(role);
             if(validCards.length > 0) {
                 content = validCards[Math.floor(Math.random() * validCards.length)].text;
                 if(Math.random() < 0.5 && validCards.length > 1) {
@@ -5226,7 +5340,7 @@ function sendMail() {
 
     let taContent = "见字如面。\n\n你的来信我已收到。";
     const role = getCurrentRole();
-    const validCards = appState.cards.filter(c => role.allowedCardGroups.includes(c.group));
+    const validCards = getBoundWordcardsForRole(role);
     if(validCards.length >= 2) {
         taContent += "\n" + validCards[Math.floor(Math.random() * validCards.length)].text;
         taContent += "\n\n" + validCards[Math.floor(Math.random() * validCards.length)].text;
@@ -6476,7 +6590,7 @@ async function addPiggyMoney() {
     // --- 抽取随机字卡作为专属回复 ---
     let replyText = "收到啦，继续加油！";
     const role = getCurrentRole();
-    const validCards = appState.cards.filter(c => role.allowedCardGroups.includes(c.group));
+    const validCards = getBoundWordcardsForRole(role);
     if(validCards.length > 0) {
         replyText = validCards[Math.floor(Math.random() * validCards.length)].text;
     }
