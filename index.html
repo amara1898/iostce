@@ -769,10 +769,15 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
 </div>
 <!-- 侧边折叠急救模块：iOS 风格 -->
 <div id="rescue-sidebar">
-    <button type="button" class="ios-rescue-handle" onclick="toggleRescueSidebar()" aria-label="急救">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+    <button type="button" class="ios-rescue-handle" onclick="rescueHandleClick(event)" aria-label="快捷工具，可拖动">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.2"></circle></svg>
     </button>
-    <button type="button" class="ios-rescue-action" onclick="rescueEmoji()">清空状态表情</button>
+    <button type="button" class="ios-rescue-action ios-rescue-tip-action" onclick="iosOpenTips()" aria-label="打开使用提示">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M8.2 14.6A6.3 6.3 0 1 1 15.8 14.6c-.9.7-1.3 1.4-1.4 2.4h-4.8c-.1-1-.5-1.7-1.4-2.4Z"></path></svg><span>提示</span>
+    </button>
+    <button type="button" class="ios-rescue-action ios-rescue-emergency-action" onclick="rescueEmoji()" aria-label="清空异常状态表情">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>急救</span>
+    </button>
 </div>
     <!-- 更新日志悬浮球 -->
 <div id="update-float-ball" style="display: none; position: fixed; right: 20px; bottom: 120px; width: 44px; height: 44px; background: var(--text-main); color: var(--bg); border-radius: 50%; justify-content: center; align-items: center; box-shadow: 4px 4px 0 var(--line-color); z-index: 99999; cursor: pointer; transition: transform 0.1s;">
@@ -1777,50 +1782,32 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
 
 <!-- 数据导出筛选面板 -->
 <div class="modal-overlay" id="export-modal" style="z-index: 100000;">
-    <div class="modal-content" style="height: auto; max-height: 80vh;">
-        <div class="modal-header">
+    <div class="modal-content ios-export-sheet">
+        <div class="modal-header ios-export-header">
             <h3>选择要备份的数据</h3>
             <button class="close-btn" onclick="closeExportModal()">取消</button>
         </div>
-        <div class="modal-body" style="padding: 16px;">
-            <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 16px;">勾选你想包含在备份文件中的数据模块：</div>
-            
-            <div style="display:flex; flex-direction:column; gap:12px; margin-bottom: 24px;">
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-                    <input type="checkbox" class="card-checkbox export-cb" value="settings" checked> 基础设置 (字体/壁纸/UI)
-                </label>
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-                    <input type="checkbox" class="card-checkbox export-cb" value="roles" checked> 角色与聊天记录
-                </label>
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-                    <input type="checkbox" class="card-checkbox export-cb" value="cards" checked> 词库与字卡
-                </label>
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-                    <input type="checkbox" class="card-checkbox export-cb" value="stickers" checked> 本地表情包图库
-                </label>
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-                    <input type="checkbox" class="card-checkbox export-cb" value="diaryData" checked> 日记与慢信
-                </label>
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-                    <input type="checkbox" class="card-checkbox export-cb" value="periods" checked> 月经记录
-                </label>
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-                    <input type="checkbox" class="card-checkbox export-cb" value="anniversaries" checked> 纪念日
-                </label>
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-                    <input type="checkbox" class="card-checkbox export-cb" value="musicList" checked> 一起听歌单
-                </label>
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-                    <input type="checkbox" class="card-checkbox export-cb" value="tarotHistory" checked> 神秘学(塔罗)历史
-                </label>
-                
-                <label style="display:flex; align-items:center; font-size:14px; gap:8px;">
-    <input type="checkbox" class="card-checkbox export-cb" value="piggyBank" checked> 共同存钱罐记录
-</label>
-
+        <div class="modal-body ios-export-body">
+            <div class="ios-export-note">勾选你想包含在备份文件中的数据模块：</div>
+            <div class="ios-export-list">
+                <label><input type="checkbox" class="card-checkbox export-cb" value="settings" checked><span>基础设置（字体 / 壁纸 / UI）</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="roles" checked><span>角色、单聊与纪念册</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="groupChats" checked><span>群聊记录</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="cards" checked><span>词库与字卡</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="stickers" checked><span>本地表情包图库</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="photos" checked><span>照片与相册</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="diaryData" checked><span>日记与慢信</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="periods" checked><span>月经记录</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="anniversaries" checked><span>纪念日</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="wishes" checked><span>心愿单</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="musicList" checked><span>一起听歌单</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="tarotHistory" checked><span>神秘学（塔罗）历史</span></label>
+                <label><input type="checkbox" class="card-checkbox export-cb" value="piggyBank" checked><span>共同存钱罐记录</span></label>
             </div>
-            
-            <button class="btn-full primary" onclick="confirmExportData()">生成备份文件</button>
+        </div>
+        <div class="ios-export-footer">
+            <button class="btn-full primary ios-export-primary" onclick="confirmExportData()">导出备份</button>
+            <button class="ios-export-copy" onclick="copyExportData()">复制备份数据</button>
         </div>
     </div>
 </div>
@@ -3267,6 +3254,7 @@ function markMyMessagesAsRead() {
 }
 
 function buildStitchedCardText(validCards) {
+    buildStitchedCardText.lastSources = [];
     if(!appState.settings.enableCardStitch || !Array.isArray(validCards) || validCards.length === 0) return null;
     let minCount = Math.max(1, Number(appState.settings.minStitchCards) || 2);
     let maxCount = Math.max(minCount, Number(appState.settings.maxStitchCards) || 4);
@@ -3279,7 +3267,9 @@ function buildStitchedCardText(validCards) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return shuffled.slice(0, targetCount).map(c => String(c.text || '')).join('，');
+    const selected = shuffled.slice(0, targetCount);
+    buildStitchedCardText.lastSources = selected.map(c => ({ text:String(c.text || ''), group:String(c.group || '') })).filter(c => c.text);
+    return selected.map(c => String(c.text || '')).join('，');
 }
 
 let autoReplyTimer = null; // 【新增】防刷屏全局锁
@@ -3290,7 +3280,7 @@ function triggerAutoReply() {
     if(!role.allowedCardGroups) role.allowedCardGroups = [...new Set(appState.cards.map(c => c.group))];
     if(!role.allowedStickerGroups) role.allowedStickerGroups = [...new Set(appState.stickers.map(s => s.group))];
 
-    let validCards = getBoundWordcardsForRole(role).map(c => ({ text: c.text, type: 'text' }));
+    let validCards = getBoundWordcardsForRole(role).map(c => ({ text: c.text, group: c.group || '日常', type: 'text', isWordcard: true }));
     let validStickers = appState.stickers.filter(s => role.allowedStickerGroups.includes(s.group)).map(s => ({ text: s.url, type: 'img' }));
     
 const customPatsStr = appState.settings.customPats || "";
@@ -3382,9 +3372,16 @@ if (randomItem.type === 'sys_pat') {
                 // --- 抽到了普通字卡或表情 ---
                 else {
                     let itemToSent = { ...randomItem };
+                    let cardSources = [];
+                    if(itemToSent.type === 'text' && itemToSent.isWordcard) {
+                        cardSources = [{ text:String(itemToSent.text || ''), group:String(itemToSent.group || '日常') }];
+                    }
                     if (itemToSent.type === 'text' && appState.settings.enableCardStitch) {
                         const stitchedText = buildStitchedCardText(validCards);
-                        if (stitchedText) itemToSent.text = stitchedText;
+                        if (stitchedText) {
+                            itemToSent.text = stitchedText;
+                            cardSources = Array.isArray(buildStitchedCardText.lastSources) ? buildStitchedCardText.lastSources.slice() : cardSources;
+                        }
                     }
                     const customEmojisStr = appState.settings.customEmojis || "";
                     const emojis = customEmojisStr.split(/[\s\n]+/).filter(e => e.trim() !== "");
@@ -3410,7 +3407,8 @@ if (randomItem.type === 'sys_pat') {
                         sender: 'them', 
                         time: Date.now(), 
                         quoteText: null, 
-                        isRead: false 
+                        isRead: false,
+                        cardSources: cardSources
                     }); 
                 }
                 
@@ -3425,67 +3423,103 @@ if (randomItem.type === 'sys_pat') {
 function openExportModal() { document.getElementById('export-modal').classList.add('open'); }
 function closeExportModal() { document.getElementById('export-modal').classList.remove('open'); }
 
-function confirmExportData() {
-    const checkedBoxes = document.querySelectorAll('.export-cb:checked');
-    if(checkedBoxes.length === 0) { showToast("至少要选择一项哦"); return; }
-    
-    let exportObj = {};
+function buildSelectedBackup() {
+    const checkedBoxes = Array.from(document.querySelectorAll('.export-cb:checked'));
+    if(checkedBoxes.length === 0) return null;
+    const exportObj = {
+        _traceBackup: {
+            version: 17,
+            exportedAt: new Date().toISOString()
+        }
+    };
     checkedBoxes.forEach(cb => {
         const key = cb.value;
-        if(appState[key] !== undefined) {
-            // 深拷贝一份数据，避免污染当前运行的程序
-            exportObj[key] = JSON.parse(JSON.stringify(appState[key]));
-        }
+        if(appState[key] !== undefined) exportObj[key] = JSON.parse(JSON.stringify(appState[key]));
     });
-    
-    // 【新增：给备份文件“瘦身”】剔除体积巨大的自定义字体和壁纸
-    if (exportObj.settings) {
-        delete exportObj.settings.customFont;
-        delete exportObj.settings.chatWallpaper;
-    }
-    
-    // 如果导出了角色，顺带把当前选中的角色ID带上
     if(exportObj.roles) exportObj.currentRoleId = appState.currentRoleId;
-    
-    const jsonStr = JSON.stringify(exportObj);
-    
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const filename = `Trace-backup-${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}.json`;
+    return { exportObj, jsonStr: JSON.stringify(exportObj), filename };
+}
+
+async function confirmExportData() {
+    const backup = buildSelectedBackup();
+    if(!backup) { showToast("至少要选择一项哦"); return; }
+    const { jsonStr, filename } = backup;
+    const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+    let file = null;
+    try { file = new File([blob], filename, { type: 'application/json' }); } catch(e) {}
+
+    closeExportModal();
+
+    // iPhone / iPad Safari 与主屏幕 Web App：优先交给系统分享面板。
+    // 用户可以直接选“存储到文件”，比 Blob 自动下载稳定得多。
+    if(file && navigator.share) {
+        try {
+            const shareData = { files: [file], title: 'Trace 备份' };
+            if(!navigator.canShare || navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+                showToast("备份已交给系统保存");
+                return;
+            }
+        } catch(e) {
+            if(e && e.name === 'AbortError') { showToast("已取消备份"); return; }
+            console.warn('系统分享备份失败，改用下载方式', e);
+        }
+    }
+
+    // 桌面浏览器 / 不支持文件分享的浏览器：使用下载链接。
     try {
-        // 尝试使用高兼容性的 Blob 方式触发下载
-        const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8" });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a'); 
-        a.href = url; 
-        a.download = "config_export_" + Date.now() + ".json"; 
-        document.body.appendChild(a); // 某些严格的浏览器要求元素必须在DOM中才能点击
-        a.click(); 
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        closeExportModal();
-        showToast("✅ 备份文件已生成");
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        // iOS 若过早 revoke，下载有机会被取消，所以延迟释放。
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        showToast("备份文件已生成");
     } catch(e) {
-        // 如果依然被浏览器强行拦截，执行复制到剪贴板的备用方案
-        closeExportModal();
-        fallbackExport(jsonStr);
+        await fallbackExport(jsonStr);
     }
 }
 
-// 兜底方案：强行复制到剪贴板
-function fallbackExport(text) {
-    const textArea = document.createElement("textarea");
+async function copyExportData() {
+    const backup = buildSelectedBackup();
+    if(!backup) { showToast("至少要选择一项哦"); return; }
+    closeExportModal();
+    await fallbackExport(backup.jsonStr, true);
+}
+
+async function fallbackExport(text, userRequested = false) {
+    try {
+        if(navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            await uiAlert(userRequested ? "备份数据已经复制到剪贴板。可以粘贴到文件 App 或任意文本编辑器，并保存为 .json 文件。" : "文件保存没有成功，已把备份数据复制到剪贴板。请粘贴到文件 App 或文本编辑器并保存为 .json 文件。", "备份已复制");
+            return true;
+        }
+    } catch(e) { console.warn('clipboard API failed', e); }
+
+    const textArea = document.createElement('textarea');
     textArea.value = text;
-    textArea.style.position = "fixed";  // 防止页面滚动
-    textArea.style.opacity = "0";
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '0';
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
-    try {
-        document.execCommand('copy');
-        uiAlert("由于当前浏览器限制了直接下载，已自动将所有备份数据【复制到了您的剪贴板】！\n\n👉 请在手机里新建一个普通的文本文件，粘贴进去，把后缀名改为 .json 即可作为备份文件使用。");
-    } catch (err) {
-        uiAlert("当前浏览器环境极其严格，无法下载也无法复制，建议使用系统自带的 Chrome 等浏览器打开此网页。");
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch(e) {}
+    textArea.remove();
+    if(ok) {
+        await uiAlert("备份数据已经复制到剪贴板。可以粘贴到文件 App 或任意文本编辑器，并保存为 .json 文件。", "备份已复制");
+        return true;
     }
-    document.body.removeChild(textArea);
+    await uiAlert("浏览器没有允许自动保存或复制。请在 Safari 中再试一次，或者把网站添加到主屏幕后使用“导出备份”。", "备份失败");
+    return false;
 }
 
 function importData(e) { 
@@ -8105,17 +8139,42 @@ body.ios-system-theme #typing-indicator .bubble-avatar { display:none !important
 
 /* Rescue: no more pixel tab. */
 body.ios-system-theme #rescue-sidebar {
-    position:fixed !important; right:-142px !important; top:132px !important; z-index:99999 !important; display:flex !important; align-items:center !important;
-    gap:8px; padding:6px; border:0 !important; border-radius:22px 0 0 22px !important; background:rgba(248,248,248,.9) !important;
-    box-shadow:0 8px 28px rgba(0,0,0,.15) !important; -webkit-backdrop-filter:blur(22px) saturate(180%); backdrop-filter:blur(22px) saturate(180%);
-    transition:right .28s cubic-bezier(.2,.8,.2,1) !important;
+    position:fixed !important; right:12px !important; top:132px !important; left:auto !important; z-index:99999 !important;
+    display:flex !important; align-items:center !important; gap:0 !important; padding:0 !important; border:0 !important;
+    border-radius:24px !important; background:transparent !important; box-shadow:none !important;
+    -webkit-backdrop-filter:none; backdrop-filter:none; touch-action:none; user-select:none; -webkit-user-select:none;
+    transition:none !important;
 }
-body.dark-mode.ios-system-theme #rescue-sidebar { background:rgba(44,44,46,.9) !important; }
-body.ios-system-theme #rescue-sidebar.open { right:8px !important; }
-body.ios-system-theme .ios-rescue-handle { width:40px;height:40px;min-width:40px;border:0;border-radius:50%;background:#fff;color:var(--ios-red);display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.12);padding:0; }
-body.dark-mode.ios-system-theme .ios-rescue-handle { background:#3a3a3c; }
-body.ios-system-theme .ios-rescue-handle svg { width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round; }
-body.ios-system-theme .ios-rescue-action { width:128px; min-height:40px; border:0; border-radius:12px; background:var(--ios-red); color:#fff; font:inherit; font-size:14px; font-weight:600; padding:0 12px; white-space:nowrap; }
+body.ios-system-theme #rescue-sidebar.open {
+    gap:8px !important; padding:6px !important; background:rgba(248,248,248,.92) !important;
+    box-shadow:0 8px 28px rgba(0,0,0,.15) !important; -webkit-backdrop-filter:blur(22px) saturate(180%); backdrop-filter:blur(22px) saturate(180%);
+}
+body.dark-mode.ios-system-theme #rescue-sidebar.open { background:rgba(44,44,46,.92) !important; }
+body.ios-system-theme #rescue-sidebar.rescue-free-position { right:auto !important; }
+body.ios-system-theme #rescue-sidebar.expand-left { flex-direction:row-reverse !important; }
+/* AssistiveTouch-style floating handle: quiet when idle, solid while interacting. */
+body.ios-system-theme .ios-rescue-handle {
+    width:44px;height:44px;min-width:44px;border:.5px solid rgba(255,255,255,.34);border-radius:50%;
+    background:rgba(60,60,67,.34);color:rgba(255,255,255,.92);display:grid;place-items:center;
+    box-shadow:0 2px 9px rgba(0,0,0,.10);padding:0;touch-action:none;cursor:grab;
+    opacity:.58;-webkit-backdrop-filter:blur(12px) saturate(150%);backdrop-filter:blur(12px) saturate(150%);
+    transition:opacity .18s ease, background-color .18s ease, box-shadow .18s ease, transform .12s ease !important;
+}
+body.ios-system-theme .ios-rescue-handle:active,
+body.ios-system-theme #rescue-sidebar.open .ios-rescue-handle,
+body.ios-system-theme #rescue-sidebar.rescue-dragging .ios-rescue-handle {
+    opacity:1;background:rgba(60,60,67,.90);border-color:rgba(255,255,255,.24);
+    box-shadow:0 4px 16px rgba(0,0,0,.22);
+}
+body.ios-system-theme .ios-rescue-handle:active { cursor:grabbing; transform:scale(.95); }
+body.dark-mode.ios-system-theme .ios-rescue-handle { background:rgba(92,92,97,.38); }
+body.dark-mode.ios-system-theme .ios-rescue-handle:active,
+body.dark-mode.ios-system-theme #rescue-sidebar.open .ios-rescue-handle,
+body.dark-mode.ios-system-theme #rescue-sidebar.rescue-dragging .ios-rescue-handle { background:rgba(92,92,97,.94); }
+body.ios-system-theme .ios-rescue-handle svg { width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2.15; }
+body.ios-system-theme .ios-rescue-action { display:none; width:128px; min-height:40px; border:0; border-radius:12px; background:var(--ios-red); color:#fff; font:inherit; font-size:14px; font-weight:600; padding:0 12px; white-space:nowrap; }
+body.ios-system-theme #rescue-sidebar.open .ios-rescue-action { display:block; }
+body.ios-system-theme #rescue-sidebar.rescue-dragging { opacity:.92; }
 
 /* Round iOS controls instead of square pixel handles/checks. */
 body.ios-system-theme input[type="range"] { height:28px !important; margin:2px 0 !important; }
@@ -8228,13 +8287,852 @@ body.dark-mode .ios-conversation-edit-bar { background:rgba(28,28,30,.94); }
         document.querySelectorAll('#ios-settings-content .ios-section-label').forEach(label=>{ const next=label.nextElementSibling; if(next?.classList.contains('ios-list-card') && !next.children.length){ next.remove(); label.remove(); } });
     };
 
-    /* If the rescue function still toggles inline right values, normalize to the new .open class. */
-    window.toggleRescueSidebar=function(){ document.getElementById('rescue-sidebar')?.classList.toggle('open'); };
+    /* 急救悬浮按钮：可拖动、可记忆位置；轻点展开/收起。 */
+    let rescueDragMoved=false;
+    let rescueIgnoreNextClick=false;
+    const RESCUE_POS_KEY='trace_ios_rescue_position_v1';
 
-    document.addEventListener('DOMContentLoaded',()=>{ document.querySelector('.ios-profile-card')?.remove(); setTimeout(()=>{ iosRenderConversations(); iosRenderSettings?.(); },0); });
-    window.addEventListener('load',()=>setTimeout(()=>{ iosRenderConversations(document.getElementById('ios-message-search')?.value||''); iosRenderSettings?.(); },180));
+    function rescueClampPosition(sidebar, x, y, opened){
+        const margin=8;
+        const width=opened ? Math.min(sidebar.scrollWidth || 188, window.innerWidth - margin*2) : 44;
+        const height=opened ? Math.max(sidebar.scrollHeight || 52, 52) : 44;
+        return {
+            x:Math.max(margin, Math.min(x, window.innerWidth - width - margin)),
+            y:Math.max(Math.max(margin, (window.visualViewport?.offsetTop||0)+margin), Math.min(y, window.innerHeight - height - Math.max(margin, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0) - margin))
+        };
+    }
+
+    function rescueApplyFreePosition(x,y,save=true){
+        const sidebar=document.getElementById('rescue-sidebar'); if(!sidebar)return;
+        const pos=rescueClampPosition(sidebar,Number(x)||8,Number(y)||132,sidebar.classList.contains('open'));
+        sidebar.classList.add('rescue-free-position');
+        sidebar.style.setProperty('left',pos.x+'px','important');
+        sidebar.style.setProperty('top',pos.y+'px','important');
+        sidebar.style.setProperty('right','auto','important');
+        sidebar.classList.toggle('expand-left', pos.x > window.innerWidth/2);
+        if(save){ try{ localStorage.setItem(RESCUE_POS_KEY,JSON.stringify(pos)); }catch(e){} }
+    }
+
+    window.toggleRescueSidebar=function(){
+        const sidebar=document.getElementById('rescue-sidebar'); if(!sidebar)return;
+        sidebar.classList.toggle('open');
+        if(sidebar.classList.contains('rescue-free-position')){
+            const x=parseFloat(sidebar.style.left)||8, y=parseFloat(sidebar.style.top)||132;
+            requestAnimationFrame(()=>rescueApplyFreePosition(x,y,true));
+        }
+    };
+
+    window.rescueHandleClick=function(e){
+        e?.preventDefault?.(); e?.stopPropagation?.();
+        if(rescueIgnoreNextClick){ rescueIgnoreNextClick=false; return; }
+        window.toggleRescueSidebar();
+    };
+
+    function initRescueDrag(){
+        const sidebar=document.getElementById('rescue-sidebar');
+        const handle=sidebar?.querySelector('.ios-rescue-handle');
+        if(!sidebar||!handle||handle.dataset.dragReady==='1')return;
+        handle.dataset.dragReady='1';
+        try{
+            const saved=JSON.parse(localStorage.getItem(RESCUE_POS_KEY)||'null');
+            if(saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) rescueApplyFreePosition(saved.x,saved.y,false);
+        }catch(e){}
+
+        let active=false,startX=0,startY=0,originX=0,originY=0,pointerId=null;
+        const begin=(clientX,clientY,id)=>{
+            active=true; pointerId=id; rescueDragMoved=false;
+            const r=sidebar.getBoundingClientRect(); originX=r.left; originY=r.top; startX=clientX; startY=clientY;
+            sidebar.classList.add('rescue-dragging');
+        };
+        const move=(clientX,clientY)=>{
+            if(!active)return;
+            const dx=clientX-startX,dy=clientY-startY;
+            if(Math.abs(dx)>4||Math.abs(dy)>4) rescueDragMoved=true;
+            if(!rescueDragMoved)return;
+            // 拖动时先收起，避免展开面板占据大面积并影响定位。
+            sidebar.classList.remove('open');
+            rescueApplyFreePosition(originX+dx,originY+dy,false);
+        };
+        const end=()=>{
+            if(!active)return; active=false; sidebar.classList.remove('rescue-dragging');
+            if(rescueDragMoved){
+                rescueIgnoreNextClick=true;
+                const r=sidebar.getBoundingClientRect(); rescueApplyFreePosition(r.left,r.top,true);
+                setTimeout(()=>{rescueIgnoreNextClick=false;},350);
+            }
+        };
+
+        if(window.PointerEvent){
+            handle.addEventListener('pointerdown',ev=>{ if(ev.button!==undefined&&ev.button!==0)return; try{handle.setPointerCapture(ev.pointerId)}catch(e){} begin(ev.clientX,ev.clientY,ev.pointerId); });
+            handle.addEventListener('pointermove',ev=>{ if(!active || (pointerId!==null&&ev.pointerId!==pointerId))return; move(ev.clientX,ev.clientY); });
+            handle.addEventListener('pointerup',end); handle.addEventListener('pointercancel',end);
+        }else{
+            handle.addEventListener('touchstart',ev=>{ const t=ev.touches[0]; if(t)begin(t.clientX,t.clientY,'touch'); },{passive:true});
+            handle.addEventListener('touchmove',ev=>{ const t=ev.touches[0]; if(t){move(t.clientX,t.clientY); if(rescueDragMoved)ev.preventDefault();} },{passive:false});
+            handle.addEventListener('touchend',end); handle.addEventListener('touchcancel',end);
+        }
+        window.addEventListener('resize',()=>{
+            if(!sidebar.classList.contains('rescue-free-position'))return;
+            rescueApplyFreePosition(parseFloat(sidebar.style.left)||8,parseFloat(sidebar.style.top)||132,true);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{ document.querySelector('.ios-profile-card')?.remove(); initRescueDrag(); setTimeout(()=>{ iosRenderConversations(); iosRenderSettings?.(); },0); });
+    window.addEventListener('load',()=>setTimeout(()=>{ initRescueDrag(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); iosRenderSettings?.(); },180));
 })();
 </script>
 
+
+
+<!-- ===== v12: iOS feature polish + group chat ===== -->
+<style id="ios-v12-polish">
+/* ---------- sheet visibility / safe-area fixes ---------- */
+body.ios-system-theme #gacha-modal,
+body.ios-system-theme #decision-modal,
+body.ios-system-theme #diary-modal,
+body.ios-system-theme #period-modal,
+body.ios-system-theme #piggy-bank-modal {
+  height:100dvh !important;
+}
+body.ios-system-theme #gacha-modal .modal-content,
+body.ios-system-theme #decision-modal .modal-content,
+body.ios-system-theme #diary-modal .modal-content,
+body.ios-system-theme #period-modal .modal-content,
+body.ios-system-theme #piggy-bank-modal .modal-content {
+  display:flex !important;
+  flex-direction:column !important;
+  height:min(88dvh,760px) !important;
+  max-height:calc(100dvh - max(var(--ios-safe-top), 8px)) !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+  border-radius:22px 22px 0 0 !important;
+}
+body.ios-system-theme #gacha-modal .modal-header,
+body.ios-system-theme #decision-modal .modal-header,
+body.ios-system-theme #diary-modal .modal-header,
+body.ios-system-theme #period-modal .modal-header,
+body.ios-system-theme #piggy-bank-modal .modal-header,
+body.ios-system-theme #decision-modal .tab-nav,
+body.ios-system-theme #diary-modal .tab-nav { flex:0 0 auto !important; }
+body.ios-system-theme #gacha-modal .modal-body,
+body.ios-system-theme #decision-modal .modal-body,
+body.ios-system-theme #diary-modal .modal-body,
+body.ios-system-theme #period-modal .modal-body,
+body.ios-system-theme #piggy-bank-modal .modal-body {
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  padding:16px 16px calc(32px + var(--ios-safe-bottom)) !important;
+}
+
+/* ---------- iOS controls inside feature sheets ---------- */
+body.ios-system-theme #gacha-modal .modal-body,
+body.ios-system-theme #decision-modal .modal-body,
+body.ios-system-theme #diary-modal .modal-body,
+body.ios-system-theme #period-modal .modal-body,
+body.ios-system-theme #piggy-bank-modal .modal-body { gap:16px !important; }
+body.ios-system-theme #gacha-modal .btn-full,
+body.ios-system-theme #decision-modal .btn-full,
+body.ios-system-theme #diary-modal .btn-full,
+body.ios-system-theme #period-modal .btn-full,
+body.ios-system-theme #piggy-bank-modal .btn-full {
+  min-height:48px !important; border-radius:13px !important; font-size:16px !important; letter-spacing:0 !important;
+}
+body.ios-system-theme #decision-modal input,
+body.ios-system-theme #diary-modal input,
+body.ios-system-theme #diary-modal textarea,
+body.ios-system-theme #piggy-bank-modal input {
+  min-height:44px !important; border:0 !important; border-radius:12px !important; background:var(--ios-fill) !important;
+  padding:0 13px !important; font:inherit !important; color:var(--ios-label) !important; box-shadow:none !important;
+}
+body.ios-system-theme #diary-modal textarea { min-height:130px !important; padding:12px 13px !important; }
+
+/* gacha: rounded, soft, no pixel borders/shadows */
+body.ios-system-theme #gacha-modal .gacha-machine { width:154px !important; margin:10px auto 4px !important; filter:none !important; }
+body.ios-system-theme #gacha-modal .gacha-globe {
+  width:154px !important; height:154px !important; border:0 !important; border-radius:50% 50% 30px 30px !important;
+  background:linear-gradient(180deg,#f8f8fa,#ececf1) !important; box-shadow:inset 0 0 0 .5px var(--ios-separator),0 8px 26px rgba(0,0,0,.08) !important;
+}
+body.dark-mode.ios-system-theme #gacha-modal .gacha-globe { background:linear-gradient(180deg,#3a3a3c,#262628) !important; }
+body.ios-system-theme #gacha-modal .gacha-ball { width:38px !important; height:38px !important; border:0 !important; box-shadow:0 2px 8px rgba(0,0,0,.10) !important; }
+body.ios-system-theme #gacha-modal .gacha-ball.b1 { background:#ff9f0a !important; top:78px !important; left:20px !important; }
+body.ios-system-theme #gacha-modal .gacha-ball.b2 { background:#64d2ff !important; top:61px !important; left:65px !important; }
+body.ios-system-theme #gacha-modal .gacha-ball.b3 { background:#bf5af2 !important; top:99px !important; left:50px !important; }
+body.ios-system-theme #gacha-modal .gacha-base {
+  width:132px !important; height:78px !important; border:0 !important; border-radius:0 0 22px 22px !important;
+  background:var(--ios-card) !important; box-shadow:0 8px 22px rgba(0,0,0,.10) !important;
+}
+body.ios-system-theme #gacha-modal .gacha-knob { width:28px !important; height:28px !important; border:0 !important; background:var(--ios-blue) !important; top:14px !important; box-shadow:0 1px 6px rgba(0,122,255,.28) !important; }
+body.ios-system-theme #gacha-modal .gacha-outlet { width:52px !important; height:25px !important; border:0 !important; background:var(--ios-fill) !important; border-radius:16px 16px 0 0 !important; }
+body.ios-system-theme #gacha-topic-text { border:0 !important; border-radius:16px !important; background:var(--ios-card) !important; box-shadow:none !important; font-size:16px !important; font-weight:500 !important; }
+
+/* decision: large iOS action card instead of tiny square */
+body.ios-system-theme #decision-modal .decision-box {
+  width:min(82vw,340px) !important; height:132px !important; border:0 !important; border-radius:22px !important;
+  background:var(--ios-card) !important; color:var(--ios-label) !important; box-shadow:0 5px 18px rgba(0,0,0,.08) !important;
+  font-size:22px !important; font-weight:600 !important; letter-spacing:0 !important; padding:20px !important;
+}
+body.ios-system-theme #decision-modal .decision-box:active { transform:scale(.985) !important; box-shadow:0 2px 10px rgba(0,0,0,.06) !important; }
+body.ios-system-theme #decision-modal .input-item input { border-bottom:0 !important; }
+
+/* diary / mail */
+body.ios-system-theme #diary-modal .diary-list { gap:10px !important; }
+body.ios-system-theme #diary-modal .diary-card,
+body.ios-system-theme #diary-modal .mail-card {
+  border:0 !important; border-radius:16px !important; background:var(--ios-card) !important; box-shadow:none !important; padding:14px !important;
+}
+body.ios-system-theme #diary-modal .diary-card.them { border:0 !important; background:var(--ios-card) !important; }
+body.ios-system-theme #diary-modal .diary-header { border-bottom:.5px solid var(--ios-separator) !important; padding-bottom:9px !important; margin-bottom:10px !important; }
+body.ios-system-theme #diary-modal .diary-mood { border:0 !important; border-radius:999px !important; background:var(--ios-fill) !important; padding:4px 8px !important; font-weight:500 !important; }
+body.ios-system-theme #diary-modal .setting-label span[onclick*="showMoodStats"] { border:0 !important; box-shadow:none !important; color:var(--ios-blue) !important; padding:4px 0 !important; }
+body.ios-system-theme #diary-modal #mail-transit-status { border:0 !important; border-radius:14px !important; background:var(--ios-fill) !important; }
+
+/* period calendar */
+body.ios-system-theme #period-modal .period-calendar {
+  border:0 !important; border-radius:20px !important; background:var(--ios-card) !important; box-shadow:none !important; padding:14px !important;
+}
+body.ios-system-theme #period-modal .period-header { font-size:17px !important; font-weight:600 !important; }
+body.ios-system-theme #period-modal .period-header .icon-btn { width:38px !important; height:38px !important; border-radius:50% !important; background:var(--ios-fill) !important; color:var(--ios-blue) !important; padding:0 !important; }
+body.ios-system-theme #period-modal .period-day { border:0 !important; border-radius:50% !important; font-size:14px !important; }
+body.ios-system-theme #period-modal .period-day.today { box-shadow:inset 0 0 0 1.5px var(--ios-red) !important; color:var(--ios-red) !important; }
+body.ios-system-theme #period-modal .period-day.is-period { background:#ffe5ea !important; color:#ff2d55 !important; }
+body.dark-mode.ios-system-theme #period-modal .period-day.is-period { background:#4a1d29 !important; color:#ff6b8a !important; }
+body.ios-system-theme #period-modal .period-day.is-predicted { box-shadow:inset 0 0 0 1px rgba(255,45,85,.45) !important; color:#ff2d55 !important; }
+body.ios-system-theme #period-modal .period-day.selected { background:var(--ios-red) !important; color:#fff !important; }
+body.ios-system-theme #period-modal .period-list-item { border:0 !important; border-radius:14px !important; background:var(--ios-card) !important; box-shadow:none !important; }
+
+/* piggy bank */
+body.ios-system-theme #piggy-bank-modal .piggy-bank-wrap {
+  border:0 !important; border-radius:18px !important; background:var(--ios-card) !important; box-shadow:none !important; padding:16px !important;
+}
+body.ios-system-theme #piggy-bank-modal #pb-status { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif !important; font-variant-numeric:tabular-nums; }
+body.ios-system-theme #piggy-bank-modal .piggy-bank-wrap > div:nth-of-type(2) { height:8px !important; border:0 !important; border-radius:999px !important; background:var(--ios-fill) !important; overflow:hidden !important; }
+body.ios-system-theme #piggy-bank-modal #pb-bar { border-radius:999px !important; background:var(--ios-blue) !important; }
+body.ios-system-theme #piggy-bank-modal #pb-records-area > * { border:0 !important; border-radius:14px !important; box-shadow:none !important; background:var(--ios-card) !important; }
+
+/* focus screen */
+body.ios-system-theme #focus-modal { background:#000 !important; }
+body.ios-system-theme #focus-wrap { height:100dvh !important; background-color:#111 !important; }
+body.ios-system-theme #focus-wrap .focus-mask { background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.72)) !important; -webkit-backdrop-filter:blur(18px) saturate(120%); backdrop-filter:blur(18px) saturate(120%); }
+body.ios-system-theme #focus-close-btn { top:calc(var(--ios-safe-top) + 12px) !important; right:16px !important; background:rgba(255,255,255,.12) !important; color:#fff !important; border:0 !important; border-radius:999px !important; padding:9px 14px !important; font-size:15px !important; }
+body.ios-system-theme #focus-modal .focus-avatar { width:84px !important; height:84px !important; border-radius:50% !important; border:0 !important; box-shadow:0 10px 32px rgba(0,0,0,.32) !important; }
+body.ios-system-theme #focus-modal .focus-bubble { border:0 !important; border-radius:17px !important; box-shadow:0 8px 24px rgba(0,0,0,.18) !important; font-size:14px !important; }
+body.ios-system-theme #focus-modal .focus-bubble::after { border:0 !important; }
+body.ios-system-theme #focus-modal .focus-timer { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif !important; font-size:68px !important; letter-spacing:-2px !important; font-variant-numeric:tabular-nums; text-shadow:none !important; margin:34px 0 !important; }
+body.ios-system-theme #focus-modal #focus-group-select { border:0 !important; border-radius:12px !important; background:rgba(255,255,255,.13) !important; color:#fff !important; padding:8px 12px !important; font-size:14px !important; }
+body.ios-system-theme #focus-modal .focus-time-opts { gap:9px !important; }
+body.ios-system-theme #focus-modal .focus-opt-btn { border:0 !important; border-radius:999px !important; background:rgba(255,255,255,.10) !important; color:rgba(255,255,255,.74) !important; padding:10px 16px !important; font-size:14px !important; }
+body.ios-system-theme #focus-modal .focus-opt-btn.active { background:#fff !important; color:#111 !important; }
+body.ios-system-theme #focus-modal .focus-btn { border:0 !important; border-radius:14px !important; min-width:160px; background:rgba(255,255,255,.14) !important; color:#fff !important; letter-spacing:0 !important; font-size:16px !important; }
+body.ios-system-theme #focus-modal #focus-settings-area > button.focus-btn { background:#fff !important; color:#000 !important; }
+body.ios-system-theme #focus-modal .focus-settings > div:last-of-type span { border-bottom:0 !important; color:rgba(255,255,255,.65) !important; }
+
+/* ---------- group chat ---------- */
+#ios-new-group-btn { display:grid; place-items:center; }
+#ios-new-group-btn svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+#ios-page-messages.ios-editing #ios-new-group-btn { visibility:hidden; }
+.ios-group-avatar { width:48px; height:48px; flex:0 0 48px; border-radius:50%; background:var(--ios-fill); position:relative; overflow:hidden; display:grid; place-items:center; }
+.ios-group-avatar .ga { position:absolute; width:27px; height:27px; border-radius:50%; overflow:hidden; background:#aeb3bc; display:grid; place-items:center; color:#fff; font-size:11px; font-weight:600; box-shadow:0 0 0 1.5px var(--ios-card); }
+.ios-group-avatar .ga img { width:100%; height:100%; object-fit:cover; }
+.ios-group-avatar .ga:nth-child(1){left:3px;top:3px}.ios-group-avatar .ga:nth-child(2){right:3px;top:7px}.ios-group-avatar .ga:nth-child(3){left:11px;bottom:2px}
+
+.ios-group-create-overlay { position:fixed; inset:0; z-index:100550; display:none; align-items:flex-end; background:rgba(0,0,0,.25); -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px); }
+.ios-group-create-overlay.open { display:flex; }
+.ios-group-create-sheet { width:100%; max-width:620px; margin:0 auto; max-height:88dvh; display:flex; flex-direction:column; overflow:hidden; border-radius:22px 22px 0 0; background:var(--ios-bg); color:var(--ios-label); box-shadow:0 -8px 28px rgba(0,0,0,.16); padding-bottom:var(--ios-safe-bottom); }
+.ios-group-create-head { height:54px; flex:0 0 54px; display:grid; grid-template-columns:90px 1fr 90px; align-items:center; background:var(--ios-card); border-bottom:.5px solid var(--ios-separator); padding:0 8px; }
+.ios-group-create-head strong { text-align:center; font-size:17px; }
+.ios-group-create-head button { border:0; background:transparent; color:var(--ios-blue); font:inherit; font-size:16px; }
+.ios-group-create-head button:first-child { text-align:left; }.ios-group-create-head button:last-child{text-align:right;font-weight:600}
+.ios-group-create-body { min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 16px 26px; }
+.ios-group-name-input { width:100%; height:48px; border:0; border-radius:12px; background:var(--ios-card); color:var(--ios-label); padding:0 14px; font:inherit; font-size:16px; outline:none; }
+.ios-group-member-list { margin-top:14px; overflow:hidden; border-radius:14px; background:var(--ios-card); }
+.ios-group-member-row { min-height:58px; display:flex; align-items:center; gap:12px; padding:5px 14px; border-bottom:.5px solid var(--ios-separator); }
+.ios-group-member-row:last-child{border-bottom:0}.ios-group-member-row img,.ios-group-member-fallback{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#aeb3bc;color:#fff;display:grid;place-items:center;font-weight:600}
+.ios-group-check { margin-left:auto; width:24px;height:24px;border-radius:50%;border:1.5px solid #c7c7cc;display:grid;place-items:center; }
+.ios-group-member-row.selected .ios-group-check { background:var(--ios-blue);border-color:var(--ios-blue); }
+.ios-group-member-row.selected .ios-group-check::after { content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(0,-1px); }
+
+.ios-group-chat-page { position:fixed; inset:0; z-index:100300; display:none; flex-direction:column; background:var(--ios-card); color:var(--ios-label); }
+.ios-group-chat-page.open { display:flex; }
+.ios-group-chat-head { flex:0 0 auto; min-height:calc(88px + var(--ios-safe-top)); padding:calc(var(--ios-safe-top) + 8px) 14px 8px; display:grid; grid-template-columns:82px 1fr 82px; align-items:end; border-bottom:.5px solid var(--ios-separator); background:color-mix(in srgb,var(--ios-card) 94%, transparent); -webkit-backdrop-filter:blur(20px) saturate(180%); backdrop-filter:blur(20px) saturate(180%); }
+.ios-group-back { align-self:center; justify-self:start; border:0;background:transparent;color:var(--ios-blue);font:inherit;font-size:17px;display:flex;align-items:center;gap:2px;padding:8px 0; }
+.ios-group-back svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ios-group-head-center { display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0; }
+.ios-group-head-center .ios-group-avatar { width:42px;height:42px;flex-basis:42px; }.ios-group-head-center .ios-group-avatar .ga{width:24px;height:24px}.ios-group-head-center .ios-group-name{font-size:13px;font-weight:500;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ios-group-members-btn { align-self:center; justify-self:end; border:0;background:transparent;color:var(--ios-blue);font:inherit;font-size:15px;padding:8px 0; }
+.ios-group-message-list { flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 14px 10px; background:var(--ios-card); }
+.ios-group-message { display:flex; flex-direction:column; margin:4px 0 7px; max-width:78%; }
+.ios-group-message.me { margin-left:auto; align-items:flex-end; }.ios-group-message.them { margin-right:auto; align-items:flex-start; }
+.ios-group-sender { margin:0 10px 3px; color:var(--ios-secondary); font-size:11px; }
+.ios-group-bubble { border-radius:19px; padding:8px 12px 9px; font-size:17px; line-height:1.28; word-break:break-word; background:#e9e9eb; color:#000; }
+body.dark-mode .ios-group-bubble { background:#3a3a3c;color:#fff; }.ios-group-message.me .ios-group-bubble { background:var(--ios-blue);color:#fff; }
+.ios-group-time { display:none; font-size:10px; color:var(--ios-secondary); margin:3px 8px 0; }
+body.ios-show-timestamp .ios-group-time { display:block; }
+.ios-group-typing { min-height:28px; padding:0 20px; color:var(--ios-secondary); font-size:12px; display:flex;align-items:center;gap:8px; }
+.ios-group-typing-dots { display:inline-flex;gap:4px;background:#e9e9eb;border-radius:15px;padding:8px 10px; }.ios-group-typing-dots i{width:5px;height:5px;border-radius:50%;background:#8e8e93;animation:iosTypingDot 1.2s infinite ease-in-out}.ios-group-typing-dots i:nth-child(2){animation-delay:.16s}.ios-group-typing-dots i:nth-child(3){animation-delay:.32s}
+.ios-group-compose { flex:0 0 auto; display:flex;align-items:flex-end;gap:8px;padding:7px 12px calc(7px + var(--ios-safe-bottom));border-top:.5px solid var(--ios-separator);background:color-mix(in srgb,var(--ios-card) 96%, transparent); }
+.ios-group-compose input { flex:1; min-height:38px; border:1px solid #c7c7cc; border-radius:20px; background:transparent; color:var(--ios-label); font:inherit; font-size:16px; padding:7px 13px; outline:none; }
+body.dark-mode .ios-group-compose input { border-color:#48484a; }
+.ios-group-send { width:38px;height:38px;border:0;border-radius:50%;background:var(--ios-blue);color:#fff;display:grid;place-items:center;padding:0; }.ios-group-send svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+</style>
+
+<div class="ios-group-create-overlay" id="ios-group-create-overlay" onclick="if(event.target===this) iosCloseGroupCreate()">
+  <div class="ios-group-create-sheet" role="dialog" aria-modal="true" aria-label="新建群聊">
+    <div class="ios-group-create-head"><button type="button" onclick="iosCloseGroupCreate()">取消</button><strong>新建群聊</strong><button type="button" onclick="iosCreateGroupChat()">创建</button></div>
+    <div class="ios-group-create-body"><input class="ios-group-name-input" id="ios-group-name-input" placeholder="群聊名称（可选）"><div class="ios-group-member-list" id="ios-group-member-list"></div></div>
+  </div>
+</div>
+
+<section class="ios-group-chat-page" id="ios-group-chat-page" aria-label="群聊">
+  <header class="ios-group-chat-head"><button class="ios-group-back" onclick="iosCloseGroupChat()"><svg viewBox="0 0 24 24"><path d="m15 4-8 8 8 8"></path></svg><span>信息</span></button><div class="ios-group-head-center" id="ios-group-head-center"></div><button class="ios-group-members-btn" onclick="iosShowGroupMembers()">成员</button></header>
+  <div class="ios-group-message-list" id="ios-group-message-list"></div>
+  <div class="ios-group-typing" id="ios-group-typing" style="display:none"></div>
+  <div class="ios-group-compose"><input id="ios-group-input" placeholder="iMessage 信息" onkeydown="if(event.key==='Enter'){event.preventDefault();iosSendGroupMessage()}"><button class="ios-group-send" onclick="iosSendGroupMessage()" aria-label="发送"><svg viewBox="0 0 24 24"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"></path></svg></button></div>
+</section>
+
+<script id="ios-v12-script">
+(()=>{
+  const esc12=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+  const time12=t=>{ if(!t)return ''; const d=new Date(t); const now=new Date(); const same=d.toDateString()===now.toDateString(); return same?d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false}):`${d.getMonth()+1}/${d.getDate()}`; };
+  const fullTime12=t=>new Date(t||Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});
+  let groupSelected=new Set(), groupOpenId=null, editV12=false, editSelectedV12=new Set();
+  const ensureGroups=()=>{ if(typeof appState!=='undefined' && !Array.isArray(appState.groupChats)) appState.groupChats=[]; return appState?.groupChats||[]; };
+  const roleById=id=>(appState.roles||[]).find(r=>String(r.id)===String(id));
+  const roleAvatarMini=(role,cls='')=>role?.avatar?`<img class="${cls}" src="${esc12(role.avatar)}" alt="">`:`<div class="ios-group-member-fallback ${cls}">${esc12((role?.name||'T').trim().slice(0,1)||'T')}</div>`;
+  const groupAvatar=(group)=>{ const roles=(group?.memberIds||[]).map(roleById).filter(Boolean).slice(0,3); return `<div class="ios-group-avatar">${roles.map((r,i)=>`<span class="ga">${r.avatar?`<img src="${esc12(r.avatar)}" alt="">`:esc12((r.name||'T').slice(0,1))}</span>`).join('')}</div>`; };
+  const plainGroupMsg=m=>String(m?.content||'').replace(/<[^>]+>/g,'').trim() || '开始一段新对话';
+
+  function installCompose(){
+    const nav=document.querySelector('#ios-page-messages .ios-small-nav'); if(!nav)return;
+    let btn=document.getElementById('ios-new-group-btn');
+    if(!btn){ btn=document.createElement('button'); btn.id='ios-new-group-btn'; btn.className='ios-nav-action'; btn.setAttribute('aria-label','新建群聊'); btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M13.5 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-7.5"></path><path d="m14 10 6-6M16 4h4v4"></path></svg>'; btn.onclick=iosOpenGroupCreate; nav.lastElementChild?.replaceWith(btn); }
+  }
+
+  window.iosOpenGroupCreate=function(){
+    ensureGroups(); groupSelected.clear(); const input=document.getElementById('ios-group-name-input'); if(input)input.value='';
+    const list=document.getElementById('ios-group-member-list');
+    list.innerHTML=(appState.roles||[]).map(r=>`<div class="ios-group-member-row" data-id="${esc12(r.id)}" onclick="iosToggleGroupMember('${esc12(r.id)}',this)">${r.avatar?`<img src="${esc12(r.avatar)}" alt="">`:`<div class="ios-group-member-fallback">${esc12((r.name||'T').slice(0,1))}</div>`}<div style="font-size:16px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc12(r.name||'Ta')}</div><span class="ios-group-check"></span></div>`).join('') || '<div style="padding:24px;text-align:center;color:var(--ios-secondary)">还没有角色</div>';
+    document.getElementById('ios-group-create-overlay')?.classList.add('open');
+  };
+  window.iosCloseGroupCreate=()=>document.getElementById('ios-group-create-overlay')?.classList.remove('open');
+  window.iosToggleGroupMember=function(id,row){ const k=String(id); groupSelected.has(k)?groupSelected.delete(k):groupSelected.add(k); row?.classList.toggle('selected',groupSelected.has(k)); };
+  window.iosCreateGroupChat=async function(){
+    if(groupSelected.size<2){ showToast?.('至少选择两个角色'); return; }
+    const ids=[...groupSelected], roles=ids.map(roleById).filter(Boolean), entered=(document.getElementById('ios-group-name-input')?.value||'').trim();
+    const group={id:'group_'+Date.now(),name:entered||roles.map(r=>r.name).join('、'),memberIds:ids,messages:[],createdAt:Date.now(),lastMessageTime:Date.now()};
+    ensureGroups().push(group); if(typeof saveState==='function') await saveState(); iosCloseGroupCreate(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); iosOpenGroupChat(group.id);
+  };
+
+  function renderGroupHead(group){ const roles=(group.memberIds||[]).map(roleById).filter(Boolean); document.getElementById('ios-group-head-center').innerHTML=`${groupAvatar(group)}<div class="ios-group-name">${esc12(group.name||roles.map(r=>r.name).join('、')||'群聊')}</div>`; }
+  function renderGroupMessages(group){
+    const box=document.getElementById('ios-group-message-list'); if(!box)return;
+    box.innerHTML=(group.messages||[]).map(m=>{ const me=m.senderId==='me', role=me?null:roleById(m.senderId); return `<div class="ios-group-message ${me?'me':'them'}">${me?'':`<div class="ios-group-sender">${esc12(role?.name||'成员')}</div>`}<div class="ios-group-bubble">${esc12(m.content)}</div><div class="ios-group-time">${esc12(fullTime12(m.time))}</div></div>`; }).join('') || '<div style="text-align:center;color:var(--ios-secondary);font-size:13px;padding:30px 0">开始群聊</div>';
+    requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
+  }
+  function currentGroup(){ return ensureGroups().find(g=>String(g.id)===String(groupOpenId)); }
+  window.iosOpenGroupChat=async function(id){
+    const g=ensureGroups().find(x=>String(x.id)===String(id)); if(!g)return; groupOpenId=String(id); (g.messages||[]).forEach(m=>{ if(m.senderId!=='me')m.isRead=true; }); if(typeof saveState==='function')saveState(); renderGroupHead(g); renderGroupMessages(g); document.getElementById('ios-group-chat-page')?.classList.add('open'); document.getElementById('ios-group-input')?.focus(); iosRenderConversations(document.getElementById('ios-message-search')?.value||'');
+  };
+  window.iosCloseGroupChat=function(){ document.getElementById('ios-group-chat-page')?.classList.remove('open'); groupOpenId=null; document.getElementById('ios-group-typing').style.display='none'; iosRenderConversations(document.getElementById('ios-message-search')?.value||''); };
+  window.iosShowGroupMembers=function(){ const g=currentGroup(); if(!g)return; const names=(g.memberIds||[]).map(roleById).filter(Boolean).map(r=>r.name).join('\n'); if(typeof uiAlert==='function')uiAlert(names||'暂无成员','群聊成员'); };
+
+  function groupReplyText(role){
+    let cards=[]; try{ cards=typeof getBoundWordcardsForRole==='function'?getBoundWordcardsForRole(role):[]; }catch(e){}
+    if(!cards.length) cards=(appState.cards||[]).filter(c=>!role?.allowedCardGroups || role.allowedCardGroups.includes(c.group));
+    if(!cards.length) return '嗯嗯';
+    if(appState.settings?.enableCardStitch && typeof buildStitchedCardText==='function'){
+      const t=buildStitchedCardText(cards.map(c=>({text:c.text,type:'text'}))); if(t)return t;
+    }
+    return String(cards[Math.floor(Math.random()*cards.length)]?.text||'嗯嗯');
+  }
+  function setGroupTyping(role,show){ const el=document.getElementById('ios-group-typing'); if(!el)return; if(!show){el.style.display='none';el.innerHTML='';return;} el.style.display='flex'; el.innerHTML=`<span>${esc12(role?.name||'成员')}</span><span class="ios-group-typing-dots"><i></i><i></i><i></i></span>`; }
+  window.iosSendGroupMessage=async function(){
+    const g=currentGroup(), input=document.getElementById('ios-group-input'); if(!g||!input)return; const text=input.value.trim(); if(!text)return; input.value='';
+    g.messages.push({id:'gm_'+Date.now(),senderId:'me',content:text,time:Date.now(),isRead:true}); g.lastMessageTime=Date.now(); renderGroupMessages(g); if(typeof saveState==='function')saveState(); iosRenderConversations(document.getElementById('ios-message-search')?.value||'');
+    const members=(g.memberIds||[]).map(roleById).filter(Boolean); if(!members.length)return; const shuffled=members.slice().sort(()=>Math.random()-.5); const n=Math.min(shuffled.length,Math.random()<.35?2:1);
+    for(let i=0;i<n;i++){
+      const role=shuffled[i]; setTimeout(()=>setGroupTyping(role,true),350+i*1100);
+      setTimeout(()=>{ const still=currentGroup(); const target=ensureGroups().find(x=>String(x.id)===String(g.id)); if(!target)return; setGroupTyping(role,false); const open=still&&String(still.id)===String(g.id)&&document.getElementById('ios-group-chat-page')?.classList.contains('open'); target.messages.push({id:'gm_'+Date.now()+'_'+i,senderId:String(role.id),content:groupReplyText(role),time:Date.now(),isRead:!!open}); target.lastMessageTime=Date.now(); if(open)renderGroupMessages(target); if(typeof saveState==='function')saveState(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); },900+i*1250+Math.random()*500);
+    }
+  };
+
+  window.iosRenderConversations=function(filter=''){
+    ensureGroups(); installCompose(); const list=document.getElementById('ios-conversation-list'); if(!list)return; const q=String(filter||'').trim().toLowerCase();
+    const roleItems=(appState.roles||[]).filter(r=>!r.iosConversationHidden && (!q||String(r.name||'').toLowerCase().includes(q))).map(role=>{ const msgs=role.messages||[],last=msgs.at(-1); return {kind:'role',id:String(role.id),name:role.name||'Ta',last,lastTime:last?.time||0,unread:msgs.some(m=>m.sender==='them'&&m.isRead===false),avatar:`${role.avatar?`<img class="ios-avatar" src="${esc12(role.avatar)}" alt="">`:`<div class="ios-avatar ios-avatar-fallback">${esc12((role.name||'T').slice(0,1))}</div>`}`,preview:last?String(last.text||'').replace(/<[^>]+>/g,'').trim():'开始一段新对话'}; });
+    const groupItems=ensureGroups().filter(g=>!q||String(g.name||'').toLowerCase().includes(q)).map(g=>{ const last=(g.messages||[]).at(-1); return {kind:'group',id:String(g.id),name:g.name||'群聊',last,lastTime:last?.time||g.lastMessageTime||g.createdAt||0,unread:(g.messages||[]).some(m=>m.senderId!=='me'&&m.isRead===false),avatar:groupAvatar(g),preview:last?plainGroupMsg(last):'开始群聊'}; });
+    const items=[...roleItems,...groupItems].sort((a,b)=>b.lastTime-a.lastTime);
+    if(!items.length){ list.innerHTML='<div class="ios-empty">没有对话</div>'; return; }
+    list.innerHTML=items.map(it=>{ const key=`${it.kind}:${it.id}`, selected=editSelectedV12.has(key), lead=editV12?`<span class="ios-conversation-select ${selected?'selected':''}"></span>`:(it.unread?'<div class="ios-unread-dot"></div>':'<div style="width:10px;flex:none"></div>'); return `<div class="ios-conversation-row" onclick="iosOpenConversationV12('${it.kind}','${esc12(it.id)}')">${lead}${it.avatar}<div class="ios-row-main"><div class="ios-row-top"><div class="ios-row-title">${esc12(it.name)}</div><div class="ios-row-time">${esc12(time12(it.lastTime))}</div><div class="ios-chevron"></div></div><div class="ios-row-preview">${esc12(it.preview)}</div></div></div>`; }).join(''); iosUpdateConversationEditBar();
+  };
+  window.iosOpenConversationV12=function(kind,id){ const key=`${kind}:${id}`; if(editV12){ editSelectedV12.has(key)?editSelectedV12.delete(key):editSelectedV12.add(key); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); return; } if(kind==='group')iosOpenGroupChat(id); else iosOpenChat(id); };
+  window.iosToggleConversationEdit=function(){ editV12=!editV12; editSelectedV12.clear(); document.getElementById('ios-page-messages')?.classList.toggle('ios-editing',editV12); const b=document.getElementById('ios-conversation-edit-btn'); if(b)b.textContent=editV12?'完成':'编辑'; iosRenderConversations(document.getElementById('ios-message-search')?.value||''); };
+  window.iosUpdateConversationEditBar=function(){ const b=document.getElementById('ios-delete-conversations-btn'); if(!b)return; const n=editSelectedV12.size; b.disabled=!n; b.textContent=n?`删除（${n}）`:'删除'; };
+  window.iosDeleteSelectedConversations=async function(){
+    if(!editSelectedV12.size)return; const ok=typeof uiConfirm==='function'?await uiConfirm('聊天记录会被删除；群聊会从列表中移除。','删除对话'):confirm('删除所选对话？'); if(!ok)return;
+    for(const key of editSelectedV12){ const [kind,id]=key.split(':'); if(kind==='role'){ const role=roleById(id); if(role){role.messages=[];role.iosConversationHidden=true;} } else if(kind==='group'){ appState.groupChats=ensureGroups().filter(g=>String(g.id)!==String(id)); } }
+    editSelectedV12.clear(); editV12=false; document.getElementById('ios-page-messages')?.classList.remove('ios-editing'); const b=document.getElementById('ios-conversation-edit-btn'); if(b)b.textContent='编辑'; if(typeof saveState==='function')await saveState(); iosRenderConversations(document.getElementById('ios-message-search')?.value||'');
+  };
+
+  const showPrev=window.iosShowPage; window.iosShowPage=function(page){ if(page!=='messages'&&editV12){editV12=false;editSelectedV12.clear();document.getElementById('ios-page-messages')?.classList.remove('ios-editing');const b=document.getElementById('ios-conversation-edit-btn');if(b)b.textContent='编辑';} const out=showPrev?.(page); if(page==='messages')setTimeout(()=>{installCompose();iosRenderConversations(document.getElementById('ios-message-search')?.value||'')},0); return out; };
+
+  function patchPeriodArrows(){ document.querySelectorAll('#period-modal .period-header .icon-btn').forEach((b,i)=>{ b.innerHTML=i===0?'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>':'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>'; }); }
+  function boot12(){ ensureGroups(); installCompose(); patchPeriodArrows(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); }
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(boot12,0)); window.addEventListener('load',()=>setTimeout(boot12,220));
+})();
+</script>
+
+
+<style id="ios-role-card-stats-v13-style">
+/* ===== v13 · 角色字卡频率 / Health 风格 ===== */
+#ios-role-stats-page{position:fixed;inset:0;z-index:10000060;display:none;background:var(--ios-bg);color:var(--ios-label);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:max(env(safe-area-inset-bottom,0px),18px);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif}
+#ios-role-stats-page.open{display:block}
+.ios-stats-nav{position:sticky;top:0;z-index:5;min-height:56px;padding:calc(env(safe-area-inset-top,0px) + 6px) 16px 8px;display:grid;grid-template-columns:76px 1fr 76px;align-items:end;background:color-mix(in srgb,var(--ios-bg) 88%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--ios-separator)}
+@supports not (background:color-mix(in srgb,white 50%,black)){.ios-stats-nav{background:var(--ios-bg)}}
+.ios-stats-back,.ios-stats-chat{border:0;background:transparent;color:var(--ios-blue);font:inherit;font-size:17px;padding:4px 0;display:flex;align-items:center;gap:3px;cursor:pointer}.ios-stats-chat{justify-content:flex-end}.ios-stats-back svg,.ios-stats-chat svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ios-stats-nav-title{text-align:center;font-size:17px;font-weight:600;line-height:24px}
+.ios-stats-wrap{padding:16px}.ios-stats-profile{display:flex;align-items:center;gap:12px;margin:2px 2px 16px}.ios-stats-profile .ios-avatar{width:58px;height:58px}.ios-stats-name{font-size:28px;font-weight:700;letter-spacing:-.4px}.ios-stats-sub{font-size:13px;color:var(--ios-secondary);margin-top:2px}
+.ios-health-card{background:var(--ios-card);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 .5px 0 rgba(60,60,67,.08)}
+.ios-health-eyebrow{font-size:13px;color:var(--ios-secondary);margin-bottom:4px}.ios-health-value{font-size:34px;font-weight:700;letter-spacing:-1px;line-height:1.05}.ios-health-value small{font-size:15px;color:var(--ios-secondary);font-weight:500;letter-spacing:0;margin-left:5px}.ios-health-note{font-size:13px;color:var(--ios-secondary);margin-top:7px;line-height:1.45}
+.ios-health-segment{display:flex;background:var(--ios-fill);border-radius:9px;padding:2px;margin:0 0 14px}.ios-health-segment button{flex:1;border:0;background:transparent;border-radius:7px;padding:7px 4px;font:inherit;font-size:13px;color:var(--ios-label);cursor:pointer}.ios-health-segment button.active{background:var(--ios-card);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.ios-health-chart-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:12px}.ios-health-chart-title{font-size:17px;font-weight:600}.ios-health-chart-caption{font-size:12px;color:var(--ios-secondary)}
+.ios-health-bars{display:flex;flex-direction:column;gap:12px}.ios-health-bar-row{display:grid;grid-template-columns:minmax(72px,1.1fr) minmax(120px,2.4fr) 34px;align-items:center;gap:10px}.ios-health-bar-label{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ios-health-bar-track{height:12px;background:rgba(255,45,85,.12);border-radius:999px;overflow:hidden}.ios-health-bar-fill{height:100%;min-width:4px;border-radius:999px;background:#ff2d55;transition:width .28s ease}.ios-health-bar-count{text-align:right;font-size:13px;font-variant-numeric:tabular-nums;color:var(--ios-secondary)}
+.ios-ranking-title{font-size:20px;font-weight:700;margin:22px 2px 8px}.ios-rank-card{background:var(--ios-card);border-radius:14px;overflow:hidden}.ios-rank-row{position:relative;display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:10px;padding:12px 14px;min-height:58px}.ios-rank-row:not(:last-child)::after{content:"";position:absolute;left:58px;right:0;bottom:0;height:.5px;background:var(--ios-separator)}.ios-rank-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,45,85,.1);color:#ff2d55;font-size:13px;font-weight:700}.ios-rank-main{min-width:0}.ios-rank-text{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ios-rank-group{font-size:12px;color:var(--ios-secondary);margin-top:3px}.ios-rank-metric{text-align:right}.ios-rank-count{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}.ios-rank-percent{font-size:11px;color:var(--ios-secondary);margin-top:2px}.ios-stats-empty{text-align:center;color:var(--ios-secondary);padding:36px 10px 44px;font-size:14px;line-height:1.5}
+</style>
+<script id="ios-role-card-stats-v13-script">
+(function(){
+  let roleStatsId=null, roleStatsRange='all';
+  const esc13=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  function plain13(v){ const d=document.createElement('div'); d.innerHTML=String(v??''); return (d.textContent||d.innerText||'').trim(); }
+  function ensureStatsPage(){
+    let page=document.getElementById('ios-role-stats-page'); if(page)return page;
+    page=document.createElement('section'); page.id='ios-role-stats-page'; page.innerHTML=`<header class="ios-stats-nav"><button class="ios-stats-back" onclick="iosCloseRoleStats()"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg><span>角色</span></button><div class="ios-stats-nav-title">字卡统计</div><button class="ios-stats-chat" id="ios-stats-chat-btn"><span>聊天</span><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4.2A7 7 0 0 1 3 13V8a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path></svg></button></header><div id="ios-role-stats-body" class="ios-stats-wrap"></div>`;
+    document.body.appendChild(page); return page;
+  }
+  function catalogFor(role){
+    const all=(appState?.cards||[]).map(c=>({text:String(c.text||'').trim(),group:String(c.group||'日常')})).filter(c=>c.text);
+    const seen=new Set(); return all.filter(c=>{ const k=c.text+'\u0000'+c.group; if(seen.has(k))return false; seen.add(k); return true; });
+  }
+  function sourceKey(src){ return String(src.text||'').trim()+'\u0000'+String(src.group||'日常'); }
+  function inferSources(msg,catalog){
+    if(Array.isArray(msg?.cardSources)&&msg.cardSources.length) return msg.cardSources.map(s=>({text:String(s.text||'').trim(),group:String(s.group||'日常')})).filter(s=>s.text);
+    if(!msg || !['text','mix'].includes(msg.type)) return [];
+    const raw=plain13(msg.text||msg.content||'').replace(/\s+/g,' ').trim(); if(!raw)return [];
+    const exact=catalog.filter(c=>c.text===raw); if(exact.length)return [exact[0]];
+    const parts=raw.split(/[，\n]/).map(x=>x.trim()).filter(Boolean); const found=[]; const used=new Set();
+    for(const part of parts){
+      let hit=catalog.find(c=>c.text===part);
+      if(!hit){
+        const candidates=catalog.filter(c=>c.text.length>=2 && part.includes(c.text)).sort((a,b)=>b.text.length-a.text.length);
+        hit=candidates[0];
+      }
+      if(hit){ const k=sourceKey(hit); if(!used.has(k)){used.add(k);found.push(hit);} }
+    }
+    if(found.length)return found;
+    const candidates=catalog.filter(c=>c.text.length>=3 && raw.includes(c.text)).sort((a,b)=>b.text.length-a.text.length);
+    if(candidates.length)return [candidates[0]];
+    return [];
+  }
+  function statsFor(role,range){
+    const catalog=catalogFor(role), counts=new Map(), now=Date.now(); let cutoff=0;
+    if(range==='7d')cutoff=now-7*86400000; else if(range==='30d')cutoff=now-30*86400000;
+    const feed=[];
+    (role.messages||[]).forEach(m=>{ if(m.sender==='them')feed.push(m); });
+    (appState.groupChats||[]).forEach(g=>(g.messages||[]).forEach(m=>{ if(String(m.senderId)===String(role.id)) feed.push({type:'text',text:m.content,time:m.time,cardSources:m.cardSources}); }));
+    feed.forEach(m=>{ if(cutoff && Number(m.time||0)<cutoff)return; inferSources(m,catalog).forEach(src=>{ const k=sourceKey(src); const item=counts.get(k)||{text:src.text,group:src.group||'日常',count:0}; item.count++; counts.set(k,item); }); });
+    const rows=[...counts.values()].sort((a,b)=>b.count-a.count || a.text.localeCompare(b.text,'zh-CN')); const total=rows.reduce((n,x)=>n+x.count,0); return {rows,total,unique:rows.length};
+  }
+  function avatar13(role){ if(role.avatar)return `<img class="ios-avatar" src="${esc13(role.avatar)}" alt="">`; return `<div class="ios-avatar ios-avatar-fallback">${esc13((role.name||'T').slice(0,1))}</div>`; }
+  function renderStats(){
+    const role=(appState.roles||[]).find(r=>String(r.id)===String(roleStatsId)); const body=document.getElementById('ios-role-stats-body'); if(!role||!body)return;
+    const st=statsFor(role,roleStatsRange), max=st.rows[0]?.count||1, top5=st.rows.slice(0,5), top=st.rows[0];
+    const seg=`<div class="ios-health-segment"><button class="${roleStatsRange==='all'?'active':''}" onclick="iosSetRoleStatsRange('all')">全部</button><button class="${roleStatsRange==='30d'?'active':''}" onclick="iosSetRoleStatsRange('30d')">30天</button><button class="${roleStatsRange==='7d'?'active':''}" onclick="iosSetRoleStatsRange('7d')">7天</button></div>`;
+    const bars=top5.length?top5.map(x=>`<div class="ios-health-bar-row"><div class="ios-health-bar-label" title="${esc13(x.text)}">${esc13(x.text)}</div><div class="ios-health-bar-track"><div class="ios-health-bar-fill" style="width:${Math.max(4,x.count/max*100)}%"></div></div><div class="ios-health-bar-count">${x.count}</div></div>`).join(''):'<div class="ios-stats-empty">还没有统计到字卡。<br>继续聊一会儿，排行就会慢慢长出来。</div>';
+    const ranking=st.rows.length?`<div class="ios-ranking-title">排行榜</div><div class="ios-rank-card">${st.rows.slice(0,30).map((x,i)=>`<div class="ios-rank-row"><div class="ios-rank-num">${i+1}</div><div class="ios-rank-main"><div class="ios-rank-text">${esc13(x.text)}</div><div class="ios-rank-group">${esc13(x.group||'日常')}</div></div><div class="ios-rank-metric"><div class="ios-rank-count">${x.count} 次</div><div class="ios-rank-percent">${st.total?Math.round(x.count/st.total*100):0}%</div></div></div>`).join('')}</div>`:'';
+    body.innerHTML=`<div class="ios-stats-profile">${avatar13(role)}<div><div class="ios-stats-name">${esc13(role.name||'Ta')}</div><div class="ios-stats-sub">聊天中的字卡使用趋势</div></div></div>${seg}<div class="ios-health-card"><div class="ios-health-eyebrow">字卡出现次数</div><div class="ios-health-value">${st.total}<small>次</small></div><div class="ios-health-note">${top?`最常出现的是「${esc13(top.text)}」，共 ${top.count} 次。`: '目前还没有足够的字卡记录。'} · 已识别 ${st.unique} 种字卡</div></div><div class="ios-health-card"><div class="ios-health-chart-head"><div class="ios-health-chart-title">出现频率最高</div><div class="ios-health-chart-caption">Top 5</div></div><div class="ios-health-bars">${bars}</div></div>${ranking}`;
+    const chat=document.getElementById('ios-stats-chat-btn'); if(chat)chat.onclick=()=>{ window.iosCloseRoleStats(); if(typeof window.iosOpenChat==='function')window.iosOpenChat(String(role.id)); };
+  }
+  window.iosOpenRoleStats=function(id){ roleStatsId=String(id); roleStatsRange='all'; const p=ensureStatsPage(); p.classList.add('open'); renderStats(); p.scrollTop=0; };
+  window.iosCloseRoleStats=function(){ document.getElementById('ios-role-stats-page')?.classList.remove('open'); roleStatsId=null; };
+  window.iosSetRoleStatsRange=function(range){ roleStatsRange=range; renderStats(); };
+  const oldRoles=window.iosRenderRolesPage;
+  window.iosRenderRolesPage=function(){
+    const list=document.getElementById('ios-role-page-list'); if(!list||typeof appState==='undefined')return;
+    const roles=appState.roles||[]; if(!roles.length){list.innerHTML='<div class="ios-empty">还没有角色</div>';return;}
+    list.innerHTML=roles.map(role=>{ const st=statsFor(role,'all'); const top=st.rows[0]; return `<div class="ios-role-row" onclick="iosOpenRoleStats('${esc13(role.id)}')">${avatar13(role)}<div class="ios-row-main"><div class="ios-row-title">${esc13(role.name||'Ta')}</div><div class="ios-row-preview">${top?`最常出现：${esc13(top.text)} · ${top.count} 次`:'还没有字卡统计'}</div></div><div class="ios-role-count">${st.total} 次</div><div class="ios-chevron"></div></div>`; }).join('');
+  };
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&document.getElementById('ios-role-stats-page')?.classList.contains('open'))window.iosCloseRoleStats(); });
+  setTimeout(()=>{ try{ window.iosRenderRolesPage?.(); }catch(e){} },60);
+})();
+</script>
+
+
+
+<style id="ios-relationship-v14-style">
+/* ===== v14 · Relationship dashboard + closer iMessage surface ===== */
+:root{--ios-chat-surface:#f7f7f9}
+body.ios-system-theme.dark-mode{--ios-chat-surface:#0b0b0d}
+body.ios-system-theme #chat-area{
+  background:var(--ios-chat-surface)!important;
+}
+body.ios-system-theme #main-top-bar,
+body.ios-system-theme .bottom-bar{
+  background:color-mix(in srgb,var(--ios-chat-surface) 84%,transparent)!important;
+  -webkit-backdrop-filter:saturate(180%) blur(22px)!important;
+  backdrop-filter:saturate(180%) blur(22px)!important;
+}
+@supports not (background:color-mix(in srgb,white 50%,black)){
+  body.ios-system-theme #main-top-bar,body.ios-system-theme .bottom-bar{background:var(--ios-chat-surface)!important}
+}
+body.ios-system-theme #msg-input{background:rgba(255,255,255,.72)!important}
+body.ios-system-theme.dark-mode #msg-input{background:rgba(44,44,46,.78)!important}
+
+/* iMessage-like curved tail. The second pseudo element cuts the tail with the chat surface. */
+body.ios-system-theme #chat-area .bubble{overflow:visible!important;isolation:isolate}
+body.ios-system-theme #chat-area .bubble>*{position:relative;z-index:2}
+body.ios-system-theme #chat-area .me .bubble::before,
+body.ios-system-theme #chat-area .them .bubble::before,
+body.ios-system-theme #chat-area .me .bubble::after,
+body.ios-system-theme #chat-area .them .bubble::after{content:""!important;display:block!important;position:absolute!important;pointer-events:none!important}
+body.ios-system-theme #chat-area .me .bubble::before{right:-7px!important;bottom:0!important;width:18px!important;height:18px!important;background:var(--ios-blue)!important;border-bottom-left-radius:14px!important;z-index:0!important}
+body.ios-system-theme #chat-area .me .bubble::after{right:-10px!important;bottom:-1px!important;width:10px!important;height:20px!important;background:var(--ios-chat-surface)!important;border-bottom-left-radius:10px!important;z-index:1!important}
+body.ios-system-theme #chat-area .them .bubble::before{left:-7px!important;bottom:0!important;width:18px!important;height:18px!important;background:#e9e9eb!important;border-bottom-right-radius:14px!important;z-index:0!important}
+body.ios-system-theme #chat-area .them .bubble::after{left:-10px!important;bottom:-1px!important;width:10px!important;height:20px!important;background:var(--ios-chat-surface)!important;border-bottom-right-radius:10px!important;z-index:1!important}
+body.ios-system-theme.dark-mode #chat-area .them .bubble::before{background:#2c2c2e!important}
+/* Transparent media/system bubbles must stay tail-free. */
+body.ios-system-theme #chat-area .bubble[style*="background: transparent"]::before,
+body.ios-system-theme #chat-area .bubble[style*="background: transparent"]::after,
+body.ios-system-theme #chat-area .message-wrap.system .bubble::before,
+body.ios-system-theme #chat-area .message-wrap.system .bubble::after{display:none!important}
+
+/* Role detail: Health-style dashboard */
+.ios-rel-segment{display:flex;background:var(--ios-fill);border-radius:10px;padding:2px;margin:0 0 14px;position:sticky;top:68px;z-index:3;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.ios-rel-segment button{flex:1;border:0;background:transparent;color:var(--ios-label);border-radius:8px;padding:7px 3px;font:inherit;font-size:12px;white-space:nowrap}
+.ios-rel-segment button.active{background:var(--ios-card);box-shadow:0 1px 3px rgba(0,0,0,.14);font-weight:600}
+.ios-rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ios-rel-mini{background:var(--ios-card);border-radius:15px;padding:14px;min-height:92px}
+.ios-rel-mini-label{font-size:12px;color:var(--ios-secondary);margin-bottom:6px}.ios-rel-mini-value{font-size:28px;line-height:1;font-weight:700;letter-spacing:-.7px}.ios-rel-mini-value small{font-size:12px;color:var(--ios-secondary);font-weight:500;margin-left:3px}.ios-rel-mini-note{font-size:11px;color:var(--ios-secondary);margin-top:6px;line-height:1.35}
+.ios-rel-section-title{font-size:20px;font-weight:700;margin:20px 2px 8px;letter-spacing:-.2px}.ios-rel-section-sub{font-size:12px;color:var(--ios-secondary);margin:-4px 2px 9px}
+.ios-week-chart{background:var(--ios-card);border-radius:16px;padding:16px 12px 12px;margin-bottom:14px}
+.ios-week-bars{height:150px;display:grid;grid-template-columns:repeat(7,1fr);align-items:end;gap:8px;border-bottom:.5px solid var(--ios-separator);padding:10px 2px 0}
+.ios-week-col{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;min-width:0}.ios-week-value{font-size:10px;color:var(--ios-secondary);font-variant-numeric:tabular-nums;min-height:12px}.ios-week-track{height:112px;width:100%;max-width:24px;border-radius:7px 7px 2px 2px;background:rgba(255,45,85,.10);display:flex;align-items:flex-end;overflow:hidden}.ios-week-fill{width:100%;min-height:3px;border-radius:7px 7px 2px 2px;background:#ff2d55;transition:height .25s ease}.ios-week-day{font-size:11px;color:var(--ios-secondary);white-space:nowrap}.ios-week-day.today{color:#ff2d55;font-weight:600}
+.ios-rel-callout{background:var(--ios-card);border-radius:16px;padding:15px 16px;margin-bottom:14px}.ios-rel-callout-title{font-size:13px;color:var(--ios-secondary);margin-bottom:6px}.ios-rel-callout-main{font-size:18px;font-weight:600;line-height:1.35}.ios-rel-callout-sub{font-size:12px;color:var(--ios-secondary);line-height:1.45;margin-top:7px}
+
+.ios-rel-calendar-card{background:var(--ios-card);border-radius:16px;padding:14px 12px 12px;margin-bottom:14px}.ios-rel-cal-head{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;margin-bottom:10px}.ios-rel-cal-head button{width:34px;height:34px;border:0;border-radius:50%;background:var(--ios-fill);color:var(--ios-blue);display:grid;place-items:center}.ios-rel-cal-head svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.ios-rel-cal-title{text-align:center;font-size:17px;font-weight:600}.ios-rel-cal-weekdays,.ios-rel-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.ios-rel-cal-weekdays span{text-align:center;color:var(--ios-secondary);font-size:10px;padding:2px 0 5px}.ios-rel-day{aspect-ratio:1/1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;position:relative;color:var(--ios-label);font-variant-numeric:tabular-nums}.ios-rel-day.empty{visibility:hidden}.ios-rel-day.today{box-shadow:inset 0 0 0 1.5px var(--ios-blue)}.ios-rel-day[data-level="1"]{background:rgba(255,45,85,.12)}.ios-rel-day[data-level="2"]{background:rgba(255,45,85,.25)}.ios-rel-day[data-level="3"]{background:rgba(255,45,85,.48);color:#fff}.ios-rel-day[data-level="4"]{background:#ff2d55;color:#fff;font-weight:600}.ios-rel-cal-legend{display:flex;align-items:center;gap:5px;justify-content:flex-end;margin-top:10px;font-size:10px;color:var(--ios-secondary)}.ios-rel-cal-dot{width:10px;height:10px;border-radius:50%}.ios-rel-cal-summary{display:flex;justify-content:space-between;align-items:flex-end;margin:2px 2px 10px}.ios-rel-cal-summary strong{font-size:27px;letter-spacing:-.7px}.ios-rel-cal-summary span{font-size:12px;color:var(--ios-secondary)}
+
+/* v15 · Mail-like relationship categories + merged Memory calendar/album */
+.ios-rel-segment{display:flex!important;gap:8px!important;overflow-x:auto!important;background:transparent!important;border-radius:0!important;padding:0 0 2px!important;margin:0 0 14px!important;scrollbar-width:none}
+.ios-rel-segment::-webkit-scrollbar{display:none}
+.ios-rel-segment button{flex:0 0 auto!important;min-width:112px!important;border-radius:18px!important;background:var(--ios-fill)!important;color:var(--ios-secondary)!important;padding:9px 16px!important;font-size:13px!important;font-weight:600!important;box-shadow:none!important}
+.ios-rel-segment button.active{background:var(--ios-blue)!important;color:#fff!important;box-shadow:none!important}
+.ios-memory-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:22px 2px 9px}
+.ios-memory-sub{font-size:12px;color:var(--ios-secondary);margin-top:3px;line-height:1.35}
+.ios-memory-add{border:0;background:var(--ios-fill);color:var(--ios-blue);height:34px;border-radius:17px;padding:0 12px;display:flex;align-items:center;gap:5px;font:inherit;font-size:13px;font-weight:600;white-space:nowrap}
+.ios-memory-add svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.ios-memory-card{background:var(--ios-card);border-radius:16px;overflow:hidden;margin-bottom:24px}
+.ios-memory-row{position:relative;display:flex;align-items:flex-start;gap:11px;padding:13px 12px}
+.ios-memory-row::after{content:"";position:absolute;left:54px;right:0;bottom:0;height:.5px;background:var(--ios-separator)}
+.ios-memory-row:last-child::after{display:none}
+.ios-memory-icon{width:30px;height:30px;border-radius:9px;background:rgba(255,45,85,.12);color:#ff2d55;display:flex;align-items:center;justify-content:center;flex:none}
+.ios-memory-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ios-memory-main{min-width:0;flex:1}.ios-memory-date{font-size:11px;color:var(--ios-secondary);margin-bottom:2px}.ios-memory-title{font-size:15px;font-weight:600;color:var(--ios-label);line-height:1.25}.ios-memory-note{font-size:12px;color:var(--ios-secondary);line-height:1.4;margin-top:4px;white-space:pre-wrap}
+.ios-memory-delete{border:0;background:transparent;color:var(--ios-red);font:inherit;font-size:12px;padding:3px 2px;flex:none}
+
+</style>
+<script id="ios-relationship-v14-script">
+(function(){
+  let relRoleId=null, relTab='cards', relRange='all', relMonth=new Date();
+  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const plain=v=>{const d=document.createElement('div');d.innerHTML=String(v??'');return(d.textContent||d.innerText||'').trim()};
+  const roleById=id=>(appState.roles||[]).find(r=>String(r.id)===String(id));
+  const dayKey=t=>{const d=new Date(Number(t)||Date.now());return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+  const midnight=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const fmtMD=d=>`${d.getMonth()+1}月${d.getDate()}日`;
+  const avatar=role=>role.avatar?`<img class="ios-avatar" src="${esc(role.avatar)}" alt="">`:`<div class="ios-avatar ios-avatar-fallback">${esc((role.name||'T').slice(0,1))}</div>`;
+
+  function cardCatalog(){const seen=new Set();return(appState.cards||[]).map(c=>({text:String(c.text||'').trim(),group:String(c.group||'日常')})).filter(c=>c.text).filter(c=>{const k=c.text+'\0'+c.group;if(seen.has(k))return false;seen.add(k);return true})}
+  function inferCardSources(msg,catalog){
+    if(Array.isArray(msg?.cardSources)&&msg.cardSources.length)return msg.cardSources.map(s=>({text:String(s.text||'').trim(),group:String(s.group||'日常')})).filter(s=>s.text);
+    if(!msg||!['text','mix'].includes(msg.type))return[];const raw=plain(msg.text||msg.content||'').replace(/\s+/g,' ').trim();if(!raw)return[];
+    const exact=catalog.find(c=>c.text===raw);if(exact)return[exact];const parts=raw.split(/[，\n]/).map(x=>x.trim()).filter(Boolean),out=[],seen=new Set();
+    for(const p of parts){let hit=catalog.find(c=>c.text===p);if(!hit)hit=catalog.filter(c=>c.text.length>=2&&p.includes(c.text)).sort((a,b)=>b.text.length-a.text.length)[0];if(hit){const k=hit.text+'\0'+hit.group;if(!seen.has(k)){seen.add(k);out.push(hit)}}}
+    if(out.length)return out;const hit=catalog.filter(c=>c.text.length>=3&&raw.includes(c.text)).sort((a,b)=>b.text.length-a.text.length)[0];return hit?[hit]:[];
+  }
+  function cardStats(role,range='all',customStart=0,customEnd=0){
+    const cat=cardCatalog(),counts=new Map(),now=Date.now();let start=customStart,end=customEnd||Infinity;if(!customStart){if(range==='7d')start=now-7*86400000;else if(range==='30d')start=now-30*86400000;else start=0}
+    const feed=[];(role.messages||[]).forEach(m=>{if(m.sender==='them')feed.push(m)});(appState.groupChats||[]).forEach(g=>(g.messages||[]).forEach(m=>{if(String(m.senderId)===String(role.id))feed.push({type:'text',text:m.content,time:m.time,cardSources:m.cardSources})}));
+    feed.forEach(m=>{const t=Number(m.time||0);if(t<start||t>=end)return;inferCardSources(m,cat).forEach(src=>{const k=src.text+'\0'+src.group,item=counts.get(k)||{text:src.text,group:src.group,count:0};item.count++;counts.set(k,item)})});
+    const rows=[...counts.values()].sort((a,b)=>b.count-a.count||a.text.localeCompare(b.text,'zh-CN'));return{rows,total:rows.reduce((n,x)=>n+x.count,0),unique:rows.length};
+  }
+  function privateMessages(role,start=0,end=Infinity){return(role.messages||[]).filter(m=>['me','them'].includes(m.sender)&&Number(m.time||0)>=start&&Number(m.time||0)<end)}
+  function weekBounds(){const now=new Date(),today=midnight(now),offset=(today.getDay()+6)%7,start=new Date(today);start.setDate(today.getDate()-offset);const end=new Date(start);end.setDate(start.getDate()+7);return{start,end,now}}
+  function weekStats(role){
+    const {start,end,now}=weekBounds(),msgs=privateMessages(role,+start,+end),days=[];let max=0,busy=null;
+    for(let i=0;i<7;i++){const d=new Date(start);d.setDate(start.getDate()+i);const next=new Date(d);next.setDate(d.getDate()+1);const arr=msgs.filter(m=>Number(m.time)>=+d&&Number(m.time)<+next),me=arr.filter(m=>m.sender==='me').length,them=arr.filter(m=>m.sender==='them').length,total=arr.length;days.push({d,total,me,them});if(total>max){max=total;busy={d,total}}}
+    const me=msgs.filter(m=>m.sender==='me').length,them=msgs.filter(m=>m.sender==='them').length,active=days.filter(x=>x.total>0).length,cards=cardStats(role,'all',+start,+end);return{start,end,now,msgs,days,total:msgs.length,me,them,active,busy,cards,max:max||1};
+  }
+  function monthStats(role,date){
+    const y=date.getFullYear(),m=date.getMonth(),start=new Date(y,m,1),end=new Date(y,m+1,1),msgs=privateMessages(role,+start,+end),map=new Map();msgs.forEach(x=>map.set(dayKey(x.time),(map.get(dayKey(x.time))||0)+1));const values=[...map.values()],max=Math.max(1,...values);return{y,m,start,end,msgs,map,max,active:map.size,total:msgs.length};
+  }
+  function levelFor(n,max){if(!n)return 0;const r=n/max;if(r<=.22)return 1;if(r<=.48)return 2;if(r<=.75)return 3;return 4}
+
+  function cardsView(role){
+    const st=cardStats(role,relRange),max=st.rows[0]?.count||1,top=st.rows[0],top5=st.rows.slice(0,5);
+    const seg=`<div class="ios-health-segment"><button class="${relRange==='all'?'active':''}" onclick="iosRelSetRange('all')">全部</button><button class="${relRange==='30d'?'active':''}" onclick="iosRelSetRange('30d')">30天</button><button class="${relRange==='7d'?'active':''}" onclick="iosRelSetRange('7d')">7天</button></div>`;
+    const bars=top5.length?top5.map(x=>`<div class="ios-health-bar-row"><div class="ios-health-bar-label">${esc(x.text)}</div><div class="ios-health-bar-track"><div class="ios-health-bar-fill" style="width:${Math.max(4,x.count/max*100)}%"></div></div><div class="ios-health-bar-count">${x.count}</div></div>`).join(''):'<div class="ios-stats-empty">还没有统计到字卡。<br>继续聊一会儿，趋势就会慢慢长出来。</div>';
+    const rank=st.rows.length?`<div class="ios-ranking-title">排行榜</div><div class="ios-rank-card">${st.rows.slice(0,30).map((x,i)=>`<div class="ios-rank-row"><div class="ios-rank-num">${i+1}</div><div class="ios-rank-main"><div class="ios-rank-text">${esc(x.text)}</div><div class="ios-rank-group">${esc(x.group)}</div></div><div class="ios-rank-metric"><div class="ios-rank-count">${x.count} 次</div><div class="ios-rank-percent">${st.total?Math.round(x.count/st.total*100):0}%</div></div></div>`).join('')}</div>`:'';
+    return `${seg}<div class="ios-health-card"><div class="ios-health-eyebrow">字卡出现次数</div><div class="ios-health-value">${st.total}<small>次</small></div><div class="ios-health-note">${top?`最常出现「${esc(top.text)}」，共 ${top.count} 次。`:'目前还没有足够记录。'} · 已识别 ${st.unique} 种</div></div><div class="ios-health-card"><div class="ios-health-chart-head"><div class="ios-health-chart-title">出现频率最高</div><div class="ios-health-chart-caption">Top 5</div></div><div class="ios-health-bars">${bars}</div></div>${rank}`;
+  }
+  function weekView(role){
+    const w=weekStats(role),weekNames=['一','二','三','四','五','六','日'];const todayKey=dayKey(Date.now());
+    const bars=w.days.map((x,i)=>`<div class="ios-week-col"><div class="ios-week-value">${x.total||''}</div><div class="ios-week-track"><div class="ios-week-fill" style="height:${x.total?Math.max(5,x.total/w.max*100):0}%"></div></div><div class="ios-week-day ${dayKey(x.d)===todayKey?'today':''}">周${weekNames[i]}</div></div>`).join('');
+    const top=w.cards.rows[0]; const busy=w.busy&&w.busy.total?`${fmtMD(w.busy.d)} · ${w.busy.total} 条`:'本周还没有聊天';
+    return `<div class="ios-rel-grid"><div class="ios-rel-mini"><div class="ios-rel-mini-label">本周消息</div><div class="ios-rel-mini-value">${w.total}<small>条</small></div><div class="ios-rel-mini-note">你 ${w.me} · ${esc(role.name||'Ta')} ${w.them}</div></div><div class="ios-rel-mini"><div class="ios-rel-mini-label">活跃天数</div><div class="ios-rel-mini-value">${w.active}<small>/ 7 天</small></div><div class="ios-rel-mini-note">${fmtMD(w.start)} – ${fmtMD(new Date(+w.end-1))}</div></div></div><div class="ios-week-chart"><div class="ios-health-chart-head"><div class="ios-health-chart-title">本周互动趋势</div><div class="ios-health-chart-caption">每天消息数</div></div><div class="ios-week-bars">${bars}</div></div><div class="ios-rel-callout"><div class="ios-rel-callout-title">本周最热闹</div><div class="ios-rel-callout-main">${busy}</div><div class="ios-rel-callout-sub">${w.total?`本周一共聊了 ${w.total} 条消息，其中你发了 ${w.me} 条，${esc(role.name||'Ta')} 发了 ${w.them} 条。`:'从本周第一条消息开始，这里会自动生成周报。'}</div></div><div class="ios-rel-callout"><div class="ios-rel-callout-title">本周高频字卡</div><div class="ios-rel-callout-main">${top?`「${esc(top.text)}」`:'暂无'}</div><div class="ios-rel-callout-sub">${top?`${esc(top.group)} · 出现 ${top.count} 次`:'聊得再多一点就能看到。'}</div></div>`;
+  }
+  function ensureMemories(role){
+    if(!role)return[];
+    if(!Array.isArray(role.memories))role.memories=[];
+    return role.memories;
+  }
+  function autoMemoryItems(role){
+    const items=[];
+    const msgs=(role.messages||[]).slice().sort((a,b)=>Number(a.time||0)-Number(b.time||0));
+    const firstChat=msgs.find(m=>['me','them'].includes(m.sender)&&Number(m.time||0)>0);
+    if(firstChat)items.push({id:'auto-first-chat',time:Number(firstChat.time),title:'第一次聊天',note:'从这一天开始，你们的聊天被记录了下来。',auto:true,kind:'chat'});
+    const firstCall=msgs.find(m=>m.sender==='system'&&/(视频|语音|通话|呼叫)/.test(plain(m.text||m.content||''))&&Number(m.time||0)>0);
+    if(firstCall)items.push({id:'auto-first-call',time:Number(firstCall.time),title:'第一次通话',note:plain(firstCall.text||firstCall.content||'').replace(/\s+/g,' ').trim().slice(0,90)||'留下了一次通话记录。',auto:true,kind:'call'});
+    const firstMedia=msgs.find(m=>(m.type==='img'||m.type==='mix'||m.img)&&Number(m.time||0)>0);
+    if(firstMedia)items.push({id:'auto-first-media',time:Number(firstMedia.time),title:'第一次分享图片',note:'聊天里第一次留下了图片或贴图。',auto:true,kind:'photo'});
+    return items;
+  }
+  function memoryTimeline(role){
+    const manual=ensureMemories(role).map(x=>({...x,auto:false}));
+    return [...manual,...autoMemoryItems(role)].filter(x=>Number(x.time||0)>0).sort((a,b)=>Number(b.time||0)-Number(a.time||0));
+  }
+  function calendarBlock(role){
+    const ms=monthStats(role,relMonth),firstWeek=(new Date(ms.y,ms.m,1).getDay()+6)%7,daysIn=new Date(ms.y,ms.m+1,0).getDate(),today=dayKey(Date.now()),cells=[];for(let i=0;i<firstWeek;i++)cells.push('<div class="ios-rel-day empty"></div>');
+    for(let d=1;d<=daysIn;d++){const dt=new Date(ms.y,ms.m,d),k=dayKey(dt),n=ms.map.get(k)||0,l=levelFor(n,ms.max);cells.push(`<div class="ios-rel-day ${k===today?'today':''}" data-level="${l}" title="${n?`${n} 条消息`:'没有聊天'}">${d}</div>`)}
+    return `<div class="ios-rel-cal-summary"><div><span>本月互动</span><br><strong>${ms.total}</strong> <span>条消息</span></div><div style="text-align:right"><span>活跃 ${ms.active} 天</span></div></div><div class="ios-rel-calendar-card"><div class="ios-rel-cal-head"><button onclick="iosRelMonth(-1)" aria-label="上个月"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></button><div class="ios-rel-cal-title">${ms.y}年${ms.m+1}月</div><button onclick="iosRelMonth(1)" aria-label="下个月"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></svg></button></div><div class="ios-rel-cal-weekdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div class="ios-rel-cal-grid">${cells.join('')}</div><div class="ios-rel-cal-legend"><span>少</span><i class="ios-rel-cal-dot" style="background:rgba(255,45,85,.12)"></i><i class="ios-rel-cal-dot" style="background:rgba(255,45,85,.25)"></i><i class="ios-rel-cal-dot" style="background:rgba(255,45,85,.48)"></i><i class="ios-rel-cal-dot" style="background:#ff2d55"></i><span>多</span></div></div>`;
+  }
+  function memoryView(role){
+    const items=memoryTimeline(role);
+    const rows=items.length?items.slice(0,40).map(x=>{const d=new Date(Number(x.time||0));const date=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;const icon=x.kind==='call'?'phone':x.kind==='photo'?'photo':'heart';const svg=icon==='phone'?'<svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.7 19.7 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"></path></svg>':icon==='photo'?'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m21 15-5-5L5 20"></path></svg>':'<svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"></path></svg>';
+      return `<div class="ios-memory-row"><div class="ios-memory-icon">${svg}</div><div class="ios-memory-main"><div class="ios-memory-date">${date}</div><div class="ios-memory-title">${esc(x.title||'一条纪念')}</div><div class="ios-memory-note">${esc(x.note||'')}</div></div>${x.auto?'':`<button class="ios-memory-delete" onclick="iosDeleteMemory('${esc(role.id)}','${esc(x.id)}')">删除</button>`}</div>`}).join(''):'<div class="ios-stats-empty">这里还没有纪念。<br>可以先记下今天发生的一件小事。</div>';
+    return `${calendarBlock(role)}<div class="ios-memory-head"><div><div class="ios-rel-section-title">纪念册</div><div class="ios-memory-sub">周历和纪念放在一起，按时间慢慢长出来。</div></div><button class="ios-memory-add" onclick="iosAddMemory()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>添加纪念</button></div><div class="ios-memory-card">${rows}</div>`;
+  }
+  function render(){
+    const role=roleById(relRoleId),body=document.getElementById('ios-role-stats-body');if(!role||!body)return;document.querySelector('#ios-role-stats-page .ios-stats-nav-title').textContent='关系';
+    const tabs=`<div class="ios-rel-segment"><button class="${relTab==='cards'?'active':''}" onclick="iosRelTab('cards')">字卡趋势</button><button class="${relTab==='week'?'active':''}" onclick="iosRelTab('week')">恋爱周报</button><button class="${relTab==='memory'?'active':''}" onclick="iosRelTab('memory')">纪念</button></div>`;
+    const content=relTab==='week'?weekView(role):relTab==='memory'?memoryView(role):cardsView(role);
+    body.innerHTML=`<div class="ios-stats-profile">${avatar(role)}<div><div class="ios-stats-name">${esc(role.name||'Ta')}</div><div class="ios-stats-sub">你们的聊天与关系趋势</div></div></div>${tabs}${content}`;
+    const chat=document.getElementById('ios-stats-chat-btn');if(chat)chat.onclick=()=>{document.getElementById('ios-role-stats-page')?.classList.remove('open');if(typeof window.iosOpenChat==='function')window.iosOpenChat(String(role.id))};
+  }
+  window.iosRelTab=function(tab){relTab=tab;render();document.getElementById('ios-role-stats-page')?.scrollTo({top:0,behavior:'smooth'})};
+  window.iosRelSetRange=function(range){relRange=range;render()};
+  window.iosRelMonth=function(delta){relMonth=new Date(relMonth.getFullYear(),relMonth.getMonth()+delta,1);render()};
+  window.iosAddMemory=async function(){
+    const role=roleById(relRoleId);if(!role)return;
+    const title=typeof uiPrompt==='function'?await uiPrompt('想记住什么？','添加纪念','例如：今天一起听了很久的歌'):prompt('想记住什么？');
+    if(!title||!String(title).trim())return;
+    const note=typeof uiPrompt==='function'?await uiPrompt('可以再写一句备注（可留空）','纪念备注',''):prompt('备注（可留空）')||'';
+    ensureMemories(role).push({id:'mem_'+Date.now(),time:Date.now(),title:String(title).trim(),note:String(note||'').trim(),kind:'heart'});
+    if(typeof saveState==='function')await saveState();render();
+  };
+  window.iosDeleteMemory=async function(roleId,id){
+    const role=roleById(roleId);if(!role)return;const ok=typeof uiConfirm==='function'?await uiConfirm('删除这条纪念？','删除纪念'):confirm('删除这条纪念？');if(!ok)return;
+    role.memories=ensureMemories(role).filter(x=>String(x.id)!==String(id));if(typeof saveState==='function')await saveState();render();
+  };
+  const oldOpen=window.iosOpenRoleStats;window.iosOpenRoleStats=function(id){relRoleId=String(id);relTab='cards';relRange='all';relMonth=new Date();if(typeof oldOpen==='function')oldOpen(id);requestAnimationFrame(render)};
+  const oldClose=window.iosCloseRoleStats;window.iosCloseRoleStats=function(){relRoleId=null;if(typeof oldClose==='function')return oldClose();document.getElementById('ios-role-stats-page')?.classList.remove('open')};
+  window.iosRenderRolesPage=function(){
+    const list=document.getElementById('ios-role-page-list');if(!list||typeof appState==='undefined')return;const roles=appState.roles||[];if(!roles.length){list.innerHTML='<div class="ios-empty">还没有角色</div>';return}
+    list.innerHTML=roles.map(role=>{const w=weekStats(role),top=cardStats(role,'all').rows[0];return `<div class="ios-role-row" onclick="iosOpenRoleStats('${esc(role.id)}')">${avatar(role)}<div class="ios-row-main"><div class="ios-row-title">${esc(role.name||'Ta')}</div><div class="ios-row-preview">${w.total?`本周 ${w.total} 条 · ${w.active} 天活跃`:top?`最常出现：${esc(top.text)}`:'还没有关系数据'}</div></div><div class="ios-chevron"></div></div>`}).join('');
+  };
+  setTimeout(()=>{try{window.iosRenderRolesPage?.()}catch(e){}},80);
+})();
+</script>
+
+
+<!-- ===== iOS 提示 / 使用指南（v16） ===== -->
+<section id="ios-tips-page" aria-label="使用提示" aria-hidden="true">
+  <div class="ios-tips-scroll">
+    <header class="ios-tips-header">
+      <div class="ios-tips-nav"><span></span><button type="button" onclick="iosCloseTips()">完成</button></div>
+      <h1>提示</h1>
+      <label class="ios-tips-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+        <input id="ios-tips-search-input" type="search" placeholder="搜索" oninput="iosFilterTips(this.value)">
+        <svg class="ios-tips-mic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"></path></svg>
+      </label>
+    </header>
+
+    <main class="ios-tips-main">
+      <div class="ios-tips-hero" data-search="开始 使用指南 角色 字卡 聊天">
+        <div class="ios-tips-hero-copy">
+          <div class="ios-tips-hero-kicker">使用指南</div>
+          <div class="ios-tips-hero-title">从角色到纪念</div>
+          <div class="ios-tips-hero-sub">把角色、字卡、聊天和两个人的关系记录都放在同一个 iOS 风格空间里。</div>
+        </div>
+        <div class="ios-tips-hero-mark">♥</div>
+      </div>
+
+      <section class="ios-tip-section" data-tip-section>
+        <h2>开始使用</h2>
+        <div class="ios-tip-card">
+          <button class="ios-tip-row" data-search="创建角色 姓名 头像 角色页面" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#34c759"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.5"></circle><path d="M3.5 20a6.5 6.5 0 0 1 13 0M19 7v6M16 10h6"></path></svg></span>
+            <span class="ios-tip-copy"><strong>创建角色</strong><small>每个角色拥有独立聊天、字卡绑定和关系记录。</small><span class="ios-tip-detail">打开底部“角色”，点右上角＋，设置头像和姓名。角色建立后可以在角色管理里调整字卡组，聊天记录也会分别保存。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="绑定字卡 字卡组 角色 只使用绑定分组" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#5856d6"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"></path><circle cx="18" cy="12" r="2"></circle></svg></span>
+            <span class="ios-tip-copy"><strong>绑定字卡组</strong><small>角色只会从自己绑定的字卡组里回复。</small><span class="ios-tip-detail">进入角色管理，在“绑定字卡组”中勾选分组。不同角色可以绑定完全不同的词库，因此不会互相串字卡。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="拼字卡 最少 最多 一次回复 词库" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#ff9500"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="7" height="7" rx="2"></rect><rect x="13" y="12" width="7" height="7" rx="2"></rect><path d="m10 16 4-8"></path></svg></span>
+            <span class="ios-tip-copy"><strong>拼字卡</strong><small>把多张字卡组合进同一个回复气泡。</small><span class="ios-tip-detail">在“首选项 → 词库”打开拼字卡，再设置一次最少和最多拼几条。它控制的是一个气泡内部拼几张字卡，不等于一次连续发送几个气泡。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="ios-tip-section" data-tip-section>
+        <h2>信息与通话</h2>
+        <div class="ios-tip-card">
+          <button class="ios-tip-row" data-search="聊天 iMessage 气泡 时间戳 已读 输入" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#007aff"><svg viewBox="0 0 24 24"><path d="M20 11.5c0 4.1-3.8 7.4-8.5 7.4-1.2 0-2.4-.2-3.4-.6L4 20l1.3-3.1C3.9 15.5 3 13.6 3 11.5 3 7.4 6.8 4 11.5 4S20 7.4 20 11.5Z"></path></svg></span>
+            <span class="ios-tip-copy"><strong>iMessage 风格聊天</strong><small>蓝色/灰色气泡、输入状态、已读和可选时间戳。</small><span class="ios-tip-detail">聊天页默认尽量保持原生“信息”的简洁。时间戳默认隐藏，可在设置中打开；打开后时间会以小字放在气泡右下角。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="群聊 新建 多角色 绑定字卡组" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#30b0c7"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"></circle><circle cx="16.5" cy="9" r="2.5"></circle><path d="M2.5 20a5.5 5.5 0 0 1 11 0M13 15.5a4.5 4.5 0 0 1 7.5 3.5"></path></svg></span>
+            <span class="ios-tip-copy"><strong>群聊</strong><small>把两个或更多角色拉进同一个聊天窗口。</small><span class="ios-tip-detail">在“信息”页使用新建入口选择成员。群里的每个角色仍然只使用自己绑定的字卡组，因此同一个群里也会保留各自的回复风格。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="语音通话 视频通话 FaceTime 摄像头 最小化" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#34c759"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.7 19.7 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7"></path><path d="m15 8 6-3v8l-6-3Z"></path></svg></span>
+            <span class="ios-tip-copy"><strong>语音与视频通话</strong><small>通话窗口可以最小化，视频模式只做界面模拟。</small><span class="ios-tip-detail">点聊天右上角电话图标选择音频或视频。视频页面不会调用摄像头，也不会请求相机权限；最小化后可以继续浏览聊天。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="ios-tip-section" data-tip-section>
+        <h2>两个人的记录</h2>
+        <div class="ios-tip-card">
+          <button class="ios-tip-row" data-search="字卡趋势 排行榜 7天 30天 频率 健康" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#ff2d55"><svg viewBox="0 0 24 24"><path d="M4 18V9M10 18V5M16 18v-7M22 18V3"></path></svg></span>
+            <span class="ios-tip-copy"><strong>字卡趋势</strong><small>查看某个角色最常出现的字卡和出现频率。</small><span class="ios-tip-detail">进入“角色 → 角色详情 → 字卡趋势”。可以切换全部、30 天和 7 天，排行榜会统计私聊和该角色在群聊中的字卡使用。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="恋爱周报 本周 消息 活跃天数 高频字卡" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#af52de"><svg viewBox="0 0 24 24"><path d="M5 20V10M10 20V6M15 20v-8M20 20V4"></path><path d="M3 20h19"></path></svg></span>
+            <span class="ios-tip-copy"><strong>恋爱周报</strong><small>自动汇总本周消息、活跃天数和高频字卡。</small><span class="ios-tip-detail">周报按周一到周日统计，显示你们分别发了多少条、哪一天最热闹，以及本周最常出现的字卡。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="纪念 关系周历 日历 时间线 第一次聊天 通话 图片" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#ff3b30"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"></path></svg></span>
+            <span class="ios-tip-copy"><strong>纪念</strong><small>关系周历和纪念册已经合并在一起。</small><span class="ios-tip-detail">月历会按聊天量显示每天的互动深浅；下面的纪念时间线会自动记录第一次聊天、第一次通话和第一次分享图片，也可以手动添加想记住的小事。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="ios-tip-section" data-tip-section>
+        <h2>更多陪伴</h2>
+        <div class="ios-tip-card">
+          <button class="ios-tip-row" data-search="一起听 日记 慢信 专注 心愿 存钱 月经 功能" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#ff9500"><svg viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="16" cy="16" r="3"></circle></svg></span>
+            <span class="ios-tip-copy"><strong>功能页</strong><small>一起听、交换日记、陪伴专注、心愿和生活记录都在这里。</small><span class="ios-tip-detail">底部“功能”集中放置不适合常驻聊天页的互动。打开各模块后都可以独立滚动，并适配 iPhone 底部安全区。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="ios-tip-section" data-tip-section>
+        <h2>管理与恢复</h2>
+        <div class="ios-tip-card">
+          <button class="ios-tip-row" data-search="删除聊天 编辑 保留角色 信息" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#ff3b30"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"></path></svg></span>
+            <span class="ios-tip-copy"><strong>删除聊天</strong><small>“信息 → 编辑”只删除所选聊天记录，不会删除角色。</small><span class="ios-tip-detail">角色本体、头像和字卡绑定仍然会保留。如果要彻底删除某个角色，请到角色管理中操作。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="备份 导入 导出 本地 数据 浏览器 换设备" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#007aff"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4"></path><path d="M5 13v7h14v-7"></path></svg></span>
+            <span class="ios-tip-copy"><strong>备份与导入</strong><small>重要数据主要保存在当前浏览器本地，换设备前记得备份。</small><span class="ios-tip-detail">使用系统里的导出功能生成备份，再在新设备导入。清理浏览器网站数据、重装或更换设备前也建议先导出。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="侧边小球 提示 急救 拖动 状态表情 emoji" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#8e8e93"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 17h.01"></path></svg></span>
+            <span class="ios-tip-copy"><strong>侧边快捷球</strong><small>可以拖到顺手的位置；轻点展开“提示”和“急救”。</small><span class="ios-tip-detail">“提示”就是当前这份指南；“急救”只用于清空异常、过长或乱码的状态 Emoji。拖动快捷球的位置会被记住。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+        </div>
+      </section>
+
+      <div class="ios-tip-footnote">功能会随着版本继续调整。这里写的是当前版本的实际操作方式。</div>
+      <div class="ios-tips-no-results" id="ios-tips-no-results">没有找到相关提示</div>
+    </main>
+  </div>
+</section>
+
+<style id="ios-tips-v16-style">
+/* 浮动球展开后：两个短操作，避免横向占满屏幕 */
+body.ios-system-theme #rescue-sidebar .ios-rescue-action{width:auto!important;min-width:68px!important;height:40px!important;min-height:40px!important;padding:0 11px!important;border-radius:13px!important;display:none!important;align-items:center!important;justify-content:center!important;gap:5px!important;font-size:14px!important;font-weight:600!important;box-shadow:none!important}
+body.ios-system-theme #rescue-sidebar.open .ios-rescue-action{display:flex!important}
+body.ios-system-theme #rescue-sidebar .ios-rescue-action svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+body.ios-system-theme #rescue-sidebar .ios-rescue-tip-action{background:var(--ios-blue)!important;color:#fff!important}
+body.ios-system-theme #rescue-sidebar .ios-rescue-emergency-action{background:var(--ios-red)!important;color:#fff!important}
+
+#ios-tips-page{position:fixed;inset:0;z-index:1000000;background:var(--ios-bg,#f2f2f7);color:var(--ios-label,#000);display:none;pointer-events:auto;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif}
+#ios-tips-page.open{display:block}
+body.dark-mode #ios-tips-page{background:#000;color:#fff}
+body.ios-tips-open #rescue-sidebar{visibility:hidden!important;pointer-events:none!important}
+.ios-tips-scroll{height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(34px + max(env(safe-area-inset-bottom,0px),10px))}
+.ios-tips-header{position:sticky;top:0;z-index:3;padding:calc(max(env(safe-area-inset-top,0px),8px) + 4px) 16px 12px;background:color-mix(in srgb,var(--ios-bg,#f2f2f7) 90%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
+body.dark-mode .ios-tips-header{background:rgba(0,0,0,.86)}
+.ios-tips-nav{min-height:34px;display:flex;align-items:center;justify-content:space-between}.ios-tips-nav button{border:0;background:transparent;color:var(--ios-blue,#007aff);font:inherit;font-size:17px;padding:4px 0}
+.ios-tips-header h1{font-size:34px;line-height:1.12;letter-spacing:-.7px;margin:10px 0 16px;font-weight:700}
+.ios-tips-search{height:36px;border-radius:10px;background:rgba(118,118,128,.12);display:flex;align-items:center;padding:0 9px;gap:6px;color:#8e8e93}.ios-tips-search svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;flex:none}.ios-tips-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:inherit;font:inherit;font-size:17px}.ios-tips-search input::placeholder{color:#8e8e93}.ios-tips-search .ios-tips-mic{width:18px;height:18px}
+.ios-tips-main{padding:8px 16px 28px;max-width:760px;margin:0 auto}.ios-tips-hero{min-height:248px;border-radius:22px;overflow:hidden;position:relative;padding:28px 26px;color:#fff;margin-bottom:28px;background:linear-gradient(135deg,#ff9c9a 0 43%,#f6f4f2 43% 55%,#8a96a0 55% 72%,#53bdd4 72% 100%);box-shadow:0 .5px 0 rgba(0,0,0,.04)}
+.ios-tips-hero:after{content:"";position:absolute;right:-75px;bottom:-80px;width:240px;height:240px;background:rgba(0,122,255,.18);transform:rotate(35deg);border-radius:54px}.ios-tips-hero-copy{position:relative;z-index:1;max-width:72%}.ios-tips-hero-kicker{font-size:27px;font-weight:760;letter-spacing:-.5px}.ios-tips-hero-title{font-size:44px;line-height:1.02;font-weight:760;letter-spacing:-1.2px;margin-top:46px}.ios-tips-hero-sub{font-size:14px;line-height:1.45;margin-top:12px;text-shadow:0 1px 12px rgba(0,0,0,.18)}.ios-tips-hero-mark{position:absolute;right:28px;bottom:20px;font-size:72px;line-height:1;color:rgba(255,255,255,.9);z-index:1}
+.ios-tip-section{margin:0 0 28px}.ios-tip-section h2{font-size:22px;line-height:1.2;margin:0 0 10px 2px;font-weight:700;letter-spacing:-.35px}.ios-tip-card{border-radius:15px;background:var(--ios-card,#fff);overflow:hidden}body.dark-mode .ios-tip-card{background:#1c1c1e}
+.ios-tip-row{width:100%;border:0;background:transparent;color:inherit;font:inherit;text-align:left;display:flex;align-items:flex-start;gap:12px;padding:12px 13px;position:relative;cursor:pointer}.ios-tip-row+ .ios-tip-row:before{content:"";position:absolute;left:58px;right:0;top:0;height:.5px;background:rgba(60,60,67,.18)}body.dark-mode .ios-tip-row+ .ios-tip-row:before{background:rgba(84,84,88,.65)}
+.ios-tip-icon{width:32px;height:32px;min-width:32px;border-radius:8px;display:grid;place-items:center;color:var(--tip-color);background:color-mix(in srgb,var(--tip-color) 12%,transparent);margin-top:1px}.ios-tip-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.ios-tip-copy{flex:1;min-width:0;display:block;padding-right:2px}.ios-tip-copy strong{display:block;font-size:17px;line-height:1.25;font-weight:600}.ios-tip-copy small{display:block;font-size:13px;line-height:1.38;color:#8e8e93;margin-top:3px;font-weight:400}.ios-tip-detail{display:none;font-size:13px;line-height:1.5;color:#636366;margin-top:9px;padding:9px 11px;border-radius:10px;background:rgba(118,118,128,.09)}body.dark-mode .ios-tip-detail{color:#aeaeb2;background:rgba(118,118,128,.18)}.ios-tip-row.expanded .ios-tip-detail{display:block}.ios-tip-chevron{width:8px;height:8px;border-top:2px solid #c7c7cc;border-right:2px solid #c7c7cc;transform:rotate(45deg);margin:11px 3px 0 2px;transition:transform .2s ease}.ios-tip-row.expanded .ios-tip-chevron{transform:rotate(135deg);margin-top:8px}
+.ios-tip-footnote{font-size:12px;color:#8e8e93;text-align:center;line-height:1.45;padding:2px 20px 10px}.ios-tips-no-results{display:none;text-align:center;color:#8e8e93;font-size:15px;padding:56px 0}.ios-tips-no-results.show{display:block}.ios-tip-section.filtered-out,.ios-tips-hero.filtered-out{display:none!important}
+@media (max-width:430px){.ios-tips-hero{min-height:220px;padding:24px 22px}.ios-tips-hero-title{font-size:38px;margin-top:36px}.ios-tips-hero-sub{font-size:13px}.ios-tips-main{padding-left:16px;padding-right:16px}}
+</style>
+
+<script id="ios-tips-v16-script">
+(function(){
+  window.iosOpenTips=function(){
+    const page=document.getElementById('ios-tips-page'); if(!page)return;
+    document.getElementById('rescue-sidebar')?.classList.remove('open');
+    page.classList.add('open'); page.setAttribute('aria-hidden','false'); document.body.classList.add('ios-tips-open');
+    const sc=page.querySelector('.ios-tips-scroll'); if(sc)sc.scrollTop=0;
+  };
+  window.iosCloseTips=function(){
+    const page=document.getElementById('ios-tips-page'); if(!page)return;
+    page.classList.remove('open'); page.setAttribute('aria-hidden','true'); document.body.classList.remove('ios-tips-open');
+    const input=document.getElementById('ios-tips-search-input'); if(input){input.value='';window.iosFilterTips('')}
+  };
+  window.iosToggleTipRow=function(btn){ if(btn)btn.classList.toggle('expanded'); };
+  window.iosFilterTips=function(value){
+    const q=String(value||'').trim().toLowerCase(); let visible=0;
+    document.querySelectorAll('#ios-tips-page [data-tip-section]').forEach(section=>{
+      let sectionVisible=0;
+      section.querySelectorAll('.ios-tip-row').forEach(row=>{
+        const hay=(row.getAttribute('data-search')+' '+row.textContent).toLowerCase(); const show=!q||hay.includes(q); row.style.display=show?'flex':'none'; if(show){sectionVisible++;visible++}
+      });
+      section.classList.toggle('filtered-out',sectionVisible===0);
+    });
+    const hero=document.querySelector('#ios-tips-page .ios-tips-hero'); if(hero){const hay=(hero.getAttribute('data-search')+' '+hero.textContent).toLowerCase();hero.classList.toggle('filtered-out',!!q&&!hay.includes(q))}
+    document.getElementById('ios-tips-no-results')?.classList.toggle('show',!!q&&visible===0);
+  };
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&document.getElementById('ios-tips-page')?.classList.contains('open'))window.iosCloseTips(); });
+})();
+</script>
+
+
+<style id="ios-export-v17-style">
+#export-modal .ios-export-sheet{height:min(82dvh,760px)!important;max-height:min(82dvh,760px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:0!important;border-radius:24px 24px 0 0!important;}
+#export-modal .ios-export-header{flex:none!important;background:color-mix(in srgb,var(--bg) 92%,transparent)!important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);}
+#export-modal .ios-export-body{flex:1!important;min-height:0!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;padding:16px 16px 18px!important;}
+#export-modal .ios-export-note{font-size:13px;color:var(--text-sub);margin:2px 0 14px;line-height:1.45;}
+#export-modal .ios-export-list{display:flex;flex-direction:column;background:var(--bg);border-radius:14px;overflow:hidden;}
+#export-modal .ios-export-list label{min-height:46px;display:flex;align-items:center;gap:11px;padding:0 12px;font-size:15px;position:relative;}
+#export-modal .ios-export-list label+label:before{content:"";position:absolute;left:49px;right:0;top:0;height:.5px;background:rgba(60,60,67,.18);}
+#export-modal .ios-export-footer{flex:none;padding:10px 16px calc(max(env(safe-area-inset-bottom,0px),10px) + 10px);border-top:.5px solid rgba(60,60,67,.18);background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);}
+#export-modal .ios-export-primary{height:50px!important;border-radius:13px!important;font-size:17px!important;font-weight:600!important;}
+#export-modal .ios-export-copy{width:100%;height:38px;border:0;background:transparent;color:#007aff;font:inherit;font-size:14px;margin-top:4px;}
+@media (max-height:700px){#export-modal .ios-export-sheet{height:88dvh!important;max-height:88dvh!important;}}
+</style>
 </body>
 </html>
