@@ -8,7 +8,7 @@
     <!-- 苹果设备的图标支持 -->
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
     <!-- iOS PWA / Home Screen -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1594,10 +1594,25 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
                     </div>
 
                     <div class="card-group">
-                        <div class="setting-label">拟真延迟响应</div>
+                        <div class="setting-label">回复设置</div>
                         <div class="input-item" style="padding-top: 5px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>最快响应 (秒)</span><span id="min-delay-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-min-delay" min="0" max="120" step="1" oninput="updateDelayDisplay()" onchange="updateSettings()"></div>
                         <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>最慢响应 (秒)</span><span id="max-delay-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-max-delay" min="0" max="300" step="1" oninput="updateDelayDisplay()" onchange="updateSettings()"></div>
                         <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>单次最多回复 (条)</span><span id="max-reply-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-max-reply" min="1" max="10" step="1" oninput="updateReplyCountDisplay()" onchange="updateSettings()"></div>
+                        <div style="height:1px; background:var(--line-light); opacity:.55; margin:16px 0 12px;"></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0;">
+                            <div style="padding-right:12px;">
+                                <div style="font-size:13px; color:var(--text-main);">拼字卡</div>
+                                <div style="font-size:11px; color:var(--text-sub); margin-top:3px; line-height:1.4;">把多条文字字卡随机拼进同一个回复气泡</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="set-card-stitch-enable" onchange="updateSettings()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div id="card-stitch-range-wrap" style="display:none;">
+                            <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>一次最少拼 (条字卡)</span><span id="min-stitch-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-min-stitch" min="1" max="10" step="1" oninput="updateStitchCardDisplay('min')" onchange="updateSettings()"></div>
+                            <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>一次最多拼 (条字卡)</span><span id="max-stitch-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-max-stitch" min="1" max="10" step="1" oninput="updateStitchCardDisplay('max')" onchange="updateSettings()"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -1883,7 +1898,7 @@ async function setDBVal(key, val) {
 }
 
 let appState = {
-    settings: { meName: '我', avatarRadius: 0, fontSize: 15, minDelaySec: 2, maxDelaySec: 6, maxReplyCount: 1, customCSS: '', customFont: '', fontUrl: '', chatWallpaper: '', bubbleCSS: '', disableAnimations: false, meAvatar: '', bubblePresets: [], allowReadNoReply: false, customEmojis: '' },
+    settings: { meName: '我', avatarRadius: 0, fontSize: 15, minDelaySec: 2, maxDelaySec: 6, maxReplyCount: 1, enableCardStitch: false, minStitchCards: 2, maxStitchCards: 4, customCSS: '', customFont: '', fontUrl: '', chatWallpaper: '', bubbleCSS: '', disableAnimations: false, meAvatar: '', bubblePresets: [], allowReadNoReply: false, customEmojis: '', iosShowTimestamp: false },
     roles: [{ id: 'default', name: 'Ta', avatar: '', messages: [] }],
     currentRoleId: 'default',
     cards: [{ text: '收到', group: '日常' }], 
@@ -2049,6 +2064,24 @@ function updateFontSizeRealtime() { const val = document.getElementById('set-fon
 function updateFontWeightRealtime() { const val = document.getElementById('set-font-weight').value; document.getElementById('fontweight-val').innerText = val; document.documentElement.style.setProperty('--base-font-weight', val); }
 function updateDelayDisplay() { document.getElementById('min-delay-val').innerText = Number(document.getElementById('set-min-delay').value).toFixed(0); document.getElementById('max-delay-val').innerText = Number(document.getElementById('set-max-delay').value).toFixed(0); }
 function updateReplyCountDisplay() { document.getElementById('max-reply-val').innerText = document.getElementById('set-max-reply').value; }
+function updateStitchCardDisplay(changed) {
+    const enabledEl = document.getElementById('set-card-stitch-enable');
+    const minEl = document.getElementById('set-min-stitch');
+    const maxEl = document.getElementById('set-max-stitch');
+    const minValEl = document.getElementById('min-stitch-val');
+    const maxValEl = document.getElementById('max-stitch-val');
+    const wrap = document.getElementById('card-stitch-range-wrap');
+    if(!enabledEl || !minEl || !maxEl) return;
+    if(Number(minEl.value) > Number(maxEl.value)) {
+        if(changed === 'max') minEl.value = maxEl.value;
+        else maxEl.value = minEl.value;
+    }
+    if(minValEl) minValEl.innerText = minEl.value;
+    if(maxValEl) maxValEl.innerText = maxEl.value;
+    if(wrap) wrap.style.display = enabledEl.checked ? 'block' : 'none';
+    minEl.disabled = !enabledEl.checked;
+    maxEl.disabled = !enabledEl.checked;
+}
 
 function updateStatsDisplay() {
     const role = getCurrentRole();
@@ -2149,7 +2182,10 @@ applyDarkMode();
     document.getElementById('set-avatar-radius').value = appState.settings.avatarRadius || 0; document.documentElement.style.setProperty('--avatar-radius', (appState.settings.avatarRadius || 0) + '%');
 document.getElementById('set-font-size').value = appState.settings.fontSize || 15; document.documentElement.style.setProperty('--base-font-size', (appState.settings.fontSize || 15) + 'px');
 document.getElementById('set-font-weight').value = appState.settings.fontWeight || 300; document.documentElement.style.setProperty('--base-font-weight', appState.settings.fontWeight || 300);
-document.getElementById('set-min-delay').value = appState.settings.minDelaySec || 2; document.getElementById('set-max-delay').value = appState.settings.maxDelaySec || 6; document.getElementById('set-max-reply').value = appState.settings.maxReplyCount || 1;
+document.getElementById('set-min-delay').value = appState.settings.minDelaySec ?? 2; document.getElementById('set-max-delay').value = appState.settings.maxDelaySec ?? 6; document.getElementById('set-max-reply').value = appState.settings.maxReplyCount || 1;
+const stitchEnableEl = document.getElementById('set-card-stitch-enable'); if(stitchEnableEl) stitchEnableEl.checked = !!appState.settings.enableCardStitch;
+const minStitchEl = document.getElementById('set-min-stitch'); if(minStitchEl) minStitchEl.value = appState.settings.minStitchCards || 2;
+const maxStitchEl = document.getElementById('set-max-stitch'); if(maxStitchEl) maxStitchEl.value = appState.settings.maxStitchCards || 4;
 
     document.getElementById('font-url-input').value = appState.settings.fontUrl || ''; document.getElementById('set-custom-css').value = appState.settings.customCSS || '';
     document.getElementById('set-bubble-css').value = appState.settings.bubbleCSS || '';
@@ -2185,7 +2221,7 @@ if(appState.settings.timeStyle === 'time-top') document.body.classList.add('time
     if(appState.settings.meAvatar) document.getElementById('me-avatar').src = appState.settings.meAvatar;
     else document.getElementById('me-avatar').src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     
-    renderAllowedGroups(); renderCardList(); renderStickerManage(); updateDelayDisplay(); updateRadiusRealtime(); updateFontSizeRealtime(); updateFontWeightRealtime(); updateReplyCountDisplay();
+    renderAllowedGroups(); renderCardList(); renderStickerManage(); updateDelayDisplay(); updateRadiusRealtime(); updateFontSizeRealtime(); updateFontWeightRealtime(); updateReplyCountDisplay(); updateStitchCardDisplay();
         const toggleEmoji = document.getElementById('set-status-emoji-enable');
     if(toggleEmoji) toggleEmoji.checked = !!appState.settings.enableStatusEmoji;
     updateStatusEmoji();
@@ -2197,6 +2233,17 @@ function updateSettings() {
     appState.settings.meName = document.getElementById('set-me-name').value || '我';
     appState.settings.avatarRadius = Number(document.getElementById('set-avatar-radius').value); appState.settings.fontSize = Number(document.getElementById('set-font-size').value); appState.settings.fontWeight = Number(document.getElementById('set-font-weight').value);
 appState.settings.minDelaySec = Number(document.getElementById('set-min-delay').value); appState.settings.maxDelaySec = Number(document.getElementById('set-max-delay').value); appState.settings.maxReplyCount = Number(document.getElementById('set-max-reply').value);
+    const stitchEnable = document.getElementById('set-card-stitch-enable');
+    const minStitch = document.getElementById('set-min-stitch');
+    const maxStitch = document.getElementById('set-max-stitch');
+    if(stitchEnable && minStitch && maxStitch) {
+        let stitchMin = Math.max(1, Number(minStitch.value) || 2);
+        let stitchMax = Math.max(1, Number(maxStitch.value) || 4);
+        if(stitchMin > stitchMax) stitchMax = stitchMin;
+        appState.settings.enableCardStitch = stitchEnable.checked;
+        appState.settings.minStitchCards = stitchMin;
+        appState.settings.maxStitchCards = stitchMax;
+    }
     appState.settings.customCSS = document.getElementById('set-custom-css').value; appState.settings.bubbleCSS = document.getElementById('set-bubble-css').value;
     appState.settings.disableAnimations = document.getElementById('set-disable-anim').checked;
         appState.settings.hideAvatar = document.getElementById('set-hide-avatar').checked;
@@ -2798,7 +2845,7 @@ window.triggerPat = function(target) {
 // ✅ 渲染气泡节点，支持 text、img、以及 text+img 的 mix 混合类型
 function appendMessageDOM(msg, area) {
     const role = getCurrentRole();
-    const d = new Date(msg.time); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+    const d = new Date(msg.time); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; const fullTimeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`; const timeStr = document.body.classList.contains('ios-system-theme') ? `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : fullTimeStr;
     if (dateStr !== lastMsgDateStr) { const divider = document.createElement('div'); divider.className = 'date-divider'; divider.innerText = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; if (typingElement && typingElement.parentNode === area) area.insertBefore(divider, typingElement); else area.appendChild(divider); lastMsgDateStr = dateStr; }
 
     // ============================================
@@ -3110,6 +3157,22 @@ function markMyMessagesAsRead() {
     }
 }
 
+function buildStitchedCardText(validCards) {
+    if(!appState.settings.enableCardStitch || !Array.isArray(validCards) || validCards.length === 0) return null;
+    let minCount = Math.max(1, Number(appState.settings.minStitchCards) || 2);
+    let maxCount = Math.max(minCount, Number(appState.settings.maxStitchCards) || 4);
+    const availableCount = validCards.length;
+    minCount = Math.min(minCount, availableCount);
+    maxCount = Math.min(maxCount, availableCount);
+    const targetCount = minCount + Math.floor(Math.random() * (maxCount - minCount + 1));
+    const shuffled = validCards.slice();
+    for(let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, targetCount).map(c => String(c.text || '')).join('，');
+}
+
 let autoReplyTimer = null; // 【新增】防刷屏全局锁
 function triggerAutoReply() {
     if(autoReplyTimer) clearTimeout(autoReplyTimer); // 【新增】如果你连续发消息，就打断它上一次的思考，重新计时！
@@ -3210,6 +3273,10 @@ if (randomItem.type === 'sys_pat') {
                 // --- 抽到了普通字卡或表情 ---
                 else {
                     let itemToSent = { ...randomItem };
+                    if (itemToSent.type === 'text' && appState.settings.enableCardStitch) {
+                        const stitchedText = buildStitchedCardText(validCards);
+                        if (stitchedText) itemToSent.text = stitchedText;
+                    }
                     const customEmojisStr = appState.settings.customEmojis || "";
                     const emojis = customEmojisStr.split(/[\s\n]+/).filter(e => e.trim() !== "");
                     
@@ -7090,7 +7157,8 @@ function rescueEmoji() {
     --ios-separator: rgba(60, 60, 67, .19);
     --ios-fill: rgba(120, 120, 128, .12);
     --ios-safe-top: env(safe-area-inset-top, 0px);
-    --ios-safe-bottom: env(safe-area-inset-bottom, 0px);
+    /* iPhone 全屏/PWA：始终给 Home Indicator 留出呼吸区；viewport-fit=cover 后会自动读取真实安全区 */
+    --ios-safe-bottom: max(env(safe-area-inset-bottom, 0px), 10px);
 }
 body.ios-system-theme.dark-mode {
     --ios-bg: #000000;
@@ -7116,7 +7184,8 @@ body.ios-system-theme.dark-mode #splash-screen { background: #000 !important; }
 @keyframes iosSplashIn { from { opacity:0; transform:scale(.88); } to { opacity:1; transform:scale(1); } }
 
 /* ===== Root app pages ===== */
-#ios-system-shell { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+#ios-system-shell { position: fixed; inset: 0; z-index: 60; pointer-events: none; height:100dvh; }
+body.ios-system-theme { height:100dvh !important; min-height:100dvh !important; }
 .ios-root-page {
     position: absolute;
     inset: 0 0 calc(58px + var(--ios-safe-bottom)) 0;
@@ -7152,6 +7221,14 @@ body:not(.ios-root-active) #ios-system-shell .ios-root-page { display: none !imp
 .ios-section-label { margin:22px 16px 7px; color:var(--ios-secondary); font-size:13px; font-weight:400 !important; text-transform:none; }
 .ios-list-card { background:var(--ios-card); border-radius:12px; overflow:hidden; }
 .ios-list-card.edge { border-radius:0; margin:0 -16px; }
+/* 信息页跟随原生 Messages：整页是一张连续底色，不把每个会话做成白色卡片/白条 */
+#ios-page-messages { background:var(--ios-card) !important; }
+#ios-page-messages .ios-root-header { background:color-mix(in srgb, var(--ios-card) 92%, transparent) !important; }
+@supports not (background: color-mix(in srgb, white 50%, black)) { #ios-page-messages .ios-root-header { background:var(--ios-card) !important; } }
+#ios-page-messages .ios-page-content,
+#ios-page-messages #ios-conversation-list { background:transparent !important; }
+#ios-page-messages #ios-conversation-list { border-radius:0 !important; box-shadow:none !important; }
+#ios-page-messages .ios-conversation-row { background:transparent !important; }
 .ios-conversation-row, .ios-role-row, .ios-setting-row, .ios-function-row {
     position:relative; min-height:68px; display:flex; align-items:center; gap:12px; padding:9px 16px; background:var(--ios-card); cursor:pointer;
 }
@@ -7244,13 +7321,36 @@ body.ios-system-theme #chat-area .me .bubble { background:var(--ios-blue) !impor
 body.ios-system-theme #chat-area .them .bubble { background:#e9e9eb !important; color:#000 !important; border-radius:18px 18px 18px 4px !important; }
 body.ios-system-theme.dark-mode #chat-area .them .bubble { background:#2c2c2e !important; color:#fff !important; }
 body.ios-system-theme #chat-area .bubble::before, body.ios-system-theme #chat-area .bubble::after { display:none !important; }
-body.ios-system-theme #chat-area .bubble-time { color:var(--ios-secondary) !important; font-size:9px !important; opacity:.78 !important; margin-top:3px !important; }
-body.ios-system-theme #chat-area .me .bubble-time { color:rgba(255,255,255,.72) !important; }
+/* iMessage 默认气泡内不显示时间；用户可在“设置 → 聊天 → 时间戳”手动开启 */
+body.ios-system-theme #chat-area .bubble-time {
+    display:none !important;
+    position:absolute !important;
+    right:8px !important;
+    bottom:4px !important;
+    margin:0 !important;
+    padding:0 !important;
+    font-size:8px !important;
+    line-height:9px !important;
+    letter-spacing:0 !important;
+    opacity:.72 !important;
+    color:var(--ios-secondary) !important;
+    white-space:nowrap !important;
+    pointer-events:none !important;
+}
+body.ios-system-theme #chat-area .bubble-time .read-status { display:none !important; }
+body.ios-system-theme.ios-show-timestamp #chat-area .bubble-time { display:flex !important; }
+body.ios-system-theme.ios-show-timestamp #chat-area .bubble { padding:7px 34px 15px 11px !important; }
+body.ios-system-theme.ios-show-timestamp #chat-area .me .bubble-time { color:rgba(255,255,255,.72) !important; }
+body.ios-system-theme.ios-show-timestamp #chat-area .them .bubble-time { color:rgba(60,60,67,.58) !important; }
+body.ios-system-theme.dark-mode.ios-show-timestamp #chat-area .them .bubble-time { color:rgba(235,235,245,.55) !important; }
+/* 连续发送草稿仍保留“未发送”提示，不把它误当成时间戳 */
+body.ios-system-theme #chat-area .message-wrap.draft .bubble-time { display:flex !important; position:static !important; font-size:0 !important; margin-top:2px !important; }
+body.ios-system-theme #chat-area .message-wrap.draft .bubble-time::after { font-size:9px !important; }
 body.ios-system-theme #chat-area .date-divider { color:var(--ios-secondary) !important; font-size:11px !important; font-weight:600 !important; letter-spacing:0 !important; margin:10px 0 !important; }
 body.ios-system-theme #chat-area .load-more-btn { color:var(--ios-blue) !important; font-size:13px !important; letter-spacing:0 !important; }
 body.ios-system-theme #chat-area .quote-box { border-left:2px solid currentColor !important; opacity:.72; }
 
-body.ios-system-theme .bottom-bar { position:relative !important; flex:none !important; background:var(--ios-card) !important; border:0 !important; border-top:.5px solid var(--ios-separator) !important; box-shadow:none !important; padding:7px 10px calc(7px + var(--ios-safe-bottom)) !important; z-index:20 !important; }
+body.ios-system-theme .bottom-bar { position:relative !important; flex:none !important; background:var(--ios-card) !important; border:0 !important; border-top:.5px solid var(--ios-separator) !important; box-shadow:none !important; padding:7px 10px calc(9px + var(--ios-safe-bottom)) !important; z-index:20 !important; }
 body.ios-system-theme .bottom-bar .input-row { display:flex !important; align-items:flex-end !important; gap:7px !important; background:transparent !important; padding:0 !important; border-radius:0 !important; }
 body.ios-system-theme #stack-toggle-btn, body.ios-system-theme #ios-hidden-photo-btn, body.ios-system-theme #ios-hidden-sticker-btn { display:none !important; }
 body.ios-system-theme #msg-input { order:5; flex:1 !important; min-height:36px !important; max-height:104px !important; padding:7px 12px !important; background:var(--ios-card) !important; border:1px solid var(--ios-tertiary) !important; border-radius:18px !important; color:var(--ios-label) !important; box-shadow:none !important; font-size:16px !important; font-weight:400 !important; line-height:20px !important; }
@@ -7298,6 +7398,91 @@ body.ios-system-theme .call-avatar { border-radius:24px !important; border:0 !im
 body.ios-system-theme .call-name, body.ios-system-theme .call-status { color:#fff !important; }
 body.ios-system-theme .call-btn { border:0 !important; box-shadow:none !important; background:rgba(255,255,255,.18) !important; color:#fff !important; }
 body.ios-system-theme .call-btn.hangup { background:var(--ios-red) !important; color:#fff !important; }
+
+
+/* ===== iOS 通话选择与“纯界面”视频通话（不会请求摄像头/麦克风权限） ===== */
+.ios-call-picker {
+    position:fixed; inset:0; z-index:100500; display:none; align-items:flex-end; justify-content:center;
+    background:rgba(0,0,0,.28); padding:0 10px calc(10px + var(--ios-safe-bottom));
+    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+}
+.ios-call-picker.open { display:flex; }
+.ios-call-picker-stack { width:min(100%,520px); display:flex; flex-direction:column; gap:8px; }
+.ios-call-picker-group { overflow:hidden; border-radius:14px; background:rgba(248,248,248,.94); -webkit-backdrop-filter:saturate(180%) blur(24px); backdrop-filter:saturate(180%) blur(24px); }
+body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
+.ios-call-picker-title { padding:11px 18px 9px; text-align:center; color:var(--ios-secondary); font-size:12px; line-height:16px; border-bottom:.5px solid var(--ios-separator); }
+.ios-call-picker-btn { width:100%; min-height:56px; border:0; border-bottom:.5px solid var(--ios-separator); background:transparent; color:var(--ios-blue); font:inherit; font-size:20px; font-weight:400 !important; display:flex; align-items:center; justify-content:center; gap:8px; }
+.ios-call-picker-btn:last-child { border-bottom:0; }
+.ios-call-picker-btn svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.ios-call-picker-cancel { border-radius:14px; background:var(--ios-card); font-weight:600 !important; }
+
+.ios-video-call {
+    position:fixed; inset:0; z-index:100400; display:flex; flex-direction:column; overflow:hidden;
+    background:#0b0b0c; color:#fff; opacity:1; visibility:visible; transition:opacity .25s ease, visibility .25s ease;
+}
+.ios-video-call.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+.ios-video-stage { position:absolute; inset:0; overflow:hidden; background:linear-gradient(160deg,#353539 0%,#151517 50%,#050506 100%); }
+.ios-video-stage-bg { position:absolute; inset:-30px; background-position:center; background-size:cover; filter:blur(34px) brightness(.48) saturate(.85); transform:scale(1.12); opacity:.9; }
+.ios-video-stage-shade { position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.05) 45%,rgba(0,0,0,.52)); }
+.ios-video-remote { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:14px; padding-bottom:12vh; }
+.ios-video-remote-avatar { width:112px; height:112px; border-radius:50%; object-fit:cover; background:linear-gradient(145deg,#aaaeb8,#737782); box-shadow:0 12px 40px rgba(0,0,0,.3); display:grid; place-items:center; color:#fff; font-size:42px; font-weight:500 !important; overflow:hidden; }
+.ios-video-remote-avatar img { width:100%; height:100%; object-fit:cover; }
+.ios-video-name { font-size:28px; line-height:34px; font-weight:600 !important; text-shadow:0 1px 4px rgba(0,0,0,.35); }
+.ios-video-status { font-size:15px; color:rgba(255,255,255,.78); font-weight:400 !important; }
+.ios-video-topbar { position:relative; z-index:3; display:flex; justify-content:space-between; align-items:flex-start; padding:calc(var(--ios-safe-top) + 12px) 14px 0; }
+.ios-video-pill { border:0; border-radius:18px; min-height:36px; padding:0 13px; background:rgba(30,30,30,.46); color:#fff; -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); font:inherit; font-size:13px; }
+.ios-video-self { width:96px; height:142px; border-radius:17px; overflow:hidden; background:#252527; border:.5px solid rgba(255,255,255,.2); box-shadow:0 10px 28px rgba(0,0,0,.28); display:grid; place-items:center; color:#fff; font-size:30px; }
+.ios-video-self img { width:100%; height:100%; object-fit:cover; }
+.ios-video-self.camera-off::after { content:'摄像头关闭'; position:absolute; color:rgba(255,255,255,.72); font-size:10px; background:rgba(0,0,0,.42); border-radius:8px; padding:3px 6px; }
+.ios-video-controls { position:absolute; left:0; right:0; bottom:calc(24px + var(--ios-safe-bottom)); z-index:4; display:flex; justify-content:center; gap:16px; padding:0 16px; }
+.ios-video-control-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; font-size:10px; color:rgba(255,255,255,.82); }
+.ios-video-control { width:58px; height:58px; border-radius:50%; border:0; display:grid; place-items:center; color:#fff; background:rgba(118,118,128,.46); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); }
+.ios-video-control.active-off { background:#fff; color:#111; }
+.ios-video-control.hangup { background:var(--ios-red); color:#fff; }
+.ios-video-control svg { width:25px; height:25px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+
+/* 视频通话最小化：仿 iOS FaceTime 悬浮画中画 */
+.ios-video-call.minimized {
+    inset:auto 12px auto auto;
+    top:calc(var(--ios-safe-top) + 12px);
+    width:116px;
+    height:174px;
+    border-radius:22px;
+    box-shadow:0 14px 38px rgba(0,0,0,.38), 0 0 0 .5px rgba(255,255,255,.22);
+    overflow:hidden;
+    cursor:pointer;
+    transition:width .28s cubic-bezier(.2,.8,.2,1),height .28s cubic-bezier(.2,.8,.2,1),top .28s cubic-bezier(.2,.8,.2,1),right .28s cubic-bezier(.2,.8,.2,1),border-radius .28s ease,opacity .25s ease,visibility .25s ease;
+}
+.ios-video-call.minimized .ios-video-topbar,
+.ios-video-call.minimized .ios-video-controls,
+.ios-video-call.minimized .ios-video-self { display:none !important; }
+.ios-video-call.minimized .ios-video-stage { inset:0; }
+.ios-video-call.minimized .ios-video-stage-bg { inset:-18px; filter:blur(22px) brightness(.5) saturate(.85); }
+.ios-video-call.minimized .ios-video-remote {
+    inset:0;
+    padding:0 8px 10px;
+    justify-content:center;
+    gap:7px;
+}
+.ios-video-call.minimized .ios-video-remote-avatar {
+    width:58px;
+    height:58px;
+    font-size:24px;
+    box-shadow:0 8px 22px rgba(0,0,0,.3);
+}
+.ios-video-call.minimized .ios-video-name {
+    max-width:96px;
+    font-size:13px;
+    line-height:16px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.ios-video-call.minimized .ios-video-status {
+    font-size:11px;
+    line-height:14px;
+    color:rgba(255,255,255,.78);
+}
 
 @media (min-width: 700px) {
     .ios-root-page { left:50%; width:520px; transform:translateX(-50%); box-shadow:0 0 0 1px var(--ios-separator); }
@@ -7416,6 +7601,7 @@ body.ios-system-theme .call-btn.hangup { background:var(--ios-red) !important; c
         const root=document.getElementById('ios-settings-content'); if(!root) return;
         const dark=document.body.classList.contains('dark-mode');
         const keep=!!appState.settings?.keepAlive;
+        const showTimestamp=!!appState.settings?.iosShowTimestamp;
         const version=(typeof CURRENT_APP_VERSION!=='undefined'?CURRENT_APP_VERSION:'');
         root.innerHTML=`
             <div class="ios-section-label">外观</div><div class="ios-list-card">
@@ -7423,7 +7609,8 @@ body.ios-system-theme .call-btn.hangup { background:var(--ios-red) !important; c
                 <div class="ios-setting-row" onclick="openThemeModal()"><div class="ios-cell-icon" style="background:#af52de">${svg('paint')}</div><div class="ios-cell-title">外观与气泡</div><div class="ios-cell-detail">iOS 主题</div><div class="ios-chevron"></div></div>
             </div>
             <div class="ios-section-label">聊天</div><div class="ios-list-card">
-                <div class="ios-setting-row" onclick="openSettingsModal()"><div class="ios-cell-icon" style="background:#007aff">${svg('sliders')}</div><div class="ios-cell-title">聊天偏好</div><div class="ios-cell-detail">${esc(role?.name||'Ta')}</div><div class="ios-chevron"></div></div>
+                <div class="ios-setting-row" onclick="openSettingsModal()"><div class="ios-cell-icon" style="background:#007aff">${svg('sliders')}</div><div class="ios-cell-title">回复设置</div><div class="ios-cell-detail">${esc(role?.name||'Ta')}</div><div class="ios-chevron"></div></div>
+                <div class="ios-setting-row"><div class="ios-cell-icon" style="background:#5ac8fa">${svg('focus')}</div><div class="ios-cell-title">时间戳</div><div class="ios-cell-detail">气泡右下角</div><label class="ios-switch" onclick="event.stopPropagation()"><input type="checkbox" ${showTimestamp?'checked':''} onchange="iosToggleTimestamp(this.checked)"><span class="ios-switch-slider"></span></label></div>
                 <div class="ios-setting-row" onclick="openRoleModal()"><div class="ios-cell-icon" style="background:#34c759">${svg('diary')}</div><div class="ios-cell-title">角色与聊天</div><div class="ios-cell-detail">${(appState.roles||[]).length} 个角色</div><div class="ios-chevron"></div></div>
             </div>
             <div class="ios-section-label">通知与后台</div><div class="ios-list-card">
@@ -7446,6 +7633,121 @@ body.ios-system-theme .call-btn.hangup { background:var(--ios-red) !important; c
         if(typeof toggleKeepAlive==='function') toggleKeepAlive(checked);
         if(typeof saveState==='function') saveState();
         const el=document.getElementById('set-keep-alive'); if(el) el.checked=checked;
+    };
+    window.iosApplyTimestampSetting=function(){
+        const on=!!(typeof appState!=='undefined' && appState.settings && appState.settings.iosShowTimestamp);
+        document.body.classList.toggle('ios-show-timestamp',on);
+    };
+    window.iosToggleTimestamp=function(checked){
+        if(!appState.settings) appState.settings={};
+        appState.settings.iosShowTimestamp=!!checked;
+        iosApplyTimestampSetting();
+        if(typeof saveState==='function') saveState();
+        if(typeof renderMessages==='function') renderMessages(false,true);
+    };
+
+
+    window.iosCloseCallOptions=function(){ document.getElementById('ios-call-picker')?.classList.remove('open'); };
+    window.iosShowCallOptions=function(){
+        let picker=document.getElementById('ios-call-picker');
+        if(!picker){
+            picker=document.createElement('div'); picker.id='ios-call-picker'; picker.className='ios-call-picker';
+            picker.innerHTML=`<div class="ios-call-picker-stack" onclick="event.stopPropagation()"><div class="ios-call-picker-group"><div class="ios-call-picker-title">选择与 ${esc((getCurrentRole?.()||{}).name||'Ta')} 的通话方式</div><button class="ios-call-picker-btn" onclick="iosStartCallMode('voice')"><svg viewBox="0 0 24 24"><path d="M7 4h3l1.5 4-2 1.6a16 16 0 0 0 5 5l1.6-2 4 1.5v3a3 3 0 0 1-3.2 3A17 17 0 0 1 3.9 7.2 3 3 0 0 1 7 4Z"></path></svg>音频通话</button><button class="ios-call-picker-btn" onclick="iosStartCallMode('video')"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="3"></rect><path d="m16 10 5-3v10l-5-3"></path></svg>视频通话</button></div><button class="ios-call-picker-btn ios-call-picker-cancel" onclick="iosCloseCallOptions()">取消</button></div>`;
+            picker.onclick=iosCloseCallOptions; document.body.appendChild(picker);
+        } else {
+            const title=picker.querySelector('.ios-call-picker-title'); if(title) title.textContent=`选择与 ${(getCurrentRole?.()||{}).name||'Ta'} 的通话方式`;
+        }
+        picker.classList.add('open');
+    };
+    window.iosStartCallMode=function(mode){
+        iosCloseCallOptions();
+        if(mode==='voice'){
+            if(window.videoCallState?.active){ showToast?.('请先结束当前视频通话'); return; }
+            if(typeof startVoiceCall==='function') startVoiceCall();
+        }else if(mode==='video'){
+            if(typeof callState!=='undefined' && callState.active){ showToast?.('请先结束当前语音通话'); return; }
+            startVideoCall();
+        }
+    };
+
+    window.videoCallState={ active:false, connected:false, minimized:false, seconds:0, timer:null, ringTimer:null, muted:false, cameraOff:false, speaker:true, el:null };
+    function videoAvatarHTML(role){
+        if(role?.avatar) return `<img src="${esc(role.avatar)}" alt="">`;
+        return esc((role?.name||'Ta').trim().slice(0,1)||'T');
+    }
+    function createVideoCallUI(){
+        if(videoCallState.el) return videoCallState.el;
+        const el=document.createElement('div'); el.id='ios-video-call'; el.className='ios-video-call hidden';
+        el.innerHTML=`<div class="ios-video-stage"><div class="ios-video-stage-bg" id="ios-video-stage-bg"></div><div class="ios-video-stage-shade"></div></div><div class="ios-video-topbar"><button class="ios-video-pill" onclick="minimizeVideoCall(event)" aria-label="最小化视频通话"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:4px"><path d="M8 3H3v5"></path><path d="M3 3l6 6"></path><path d="M16 21h5v-5"></path><path d="m21 21-6-6"></path></svg>缩小</button><div class="ios-video-self" id="ios-video-self"></div></div><div class="ios-video-remote"><div class="ios-video-remote-avatar" id="ios-video-remote-avatar"></div><div class="ios-video-name" id="ios-video-name">Ta</div><div class="ios-video-status" id="ios-video-status">正在呼叫…</div></div><div class="ios-video-controls"><div class="ios-video-control-wrap"><button class="ios-video-control" id="ios-video-mute" onclick="toggleVideoControl('mute')"><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"></path><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"></path></svg></button><span>静音</span></div><div class="ios-video-control-wrap"><button class="ios-video-control" id="ios-video-camera" onclick="toggleVideoControl('camera')"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="3"></rect><path d="m16 10 5-3v10l-5-3"></path></svg></button><span>相机</span></div><div class="ios-video-control-wrap"><button class="ios-video-control" id="ios-video-speaker" onclick="toggleVideoControl('speaker')"><svg viewBox="0 0 24 24"><path d="M5 9v6h4l5 4V5L9 9H5Z"></path><path d="M17 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"></path></svg></button><span>扬声器</span></div><div class="ios-video-control-wrap"><button class="ios-video-control hangup" onclick="endVideoCall(true)"><svg viewBox="0 0 24 24"><path d="M5 15c4.5-4 9.5-4 14 0"></path><path d="M5 15v4M19 15v4"></path></svg></button><span>结束</span></div></div>`;
+        document.body.appendChild(el); videoCallState.el=el;
+        el.addEventListener('click',function(e){
+            if(videoCallState.minimized){
+                e.stopPropagation();
+                restoreVideoCall();
+            }
+        });
+        return el;
+    }
+    window.startVideoCall=function(){
+        if(videoCallState.active){ videoCallState.el?.classList.remove('hidden'); return; }
+        const role=getCurrentRole?.()||{}; const el=createVideoCallUI();
+        videoCallState.active=true; videoCallState.connected=false; videoCallState.minimized=false; videoCallState.seconds=0; videoCallState.muted=false; videoCallState.cameraOff=false; videoCallState.speaker=true;
+        clearInterval(videoCallState.timer); clearTimeout(videoCallState.ringTimer);
+        document.getElementById('ios-video-name').textContent=role.name||'Ta';
+        document.getElementById('ios-video-status').textContent='正在呼叫…';
+        document.getElementById('ios-video-remote-avatar').innerHTML=videoAvatarHTML(role);
+        const bg=document.getElementById('ios-video-stage-bg'); bg.style.backgroundImage=role.avatar?`url("${role.avatar.replace(/"/g,'%22')}")`:'none';
+        const meName=appState.settings?.meName||'我', self=document.getElementById('ios-video-self');
+        self.classList.remove('camera-off'); self.innerHTML=appState.settings?.meAvatar?`<img src="${esc(appState.settings.meAvatar)}" alt="">`:esc(meName.trim().slice(0,1)||'我');
+        ['ios-video-mute','ios-video-camera'].forEach(id=>document.getElementById(id)?.classList.remove('active-off'));
+        document.getElementById('ios-video-speaker')?.classList.add('active-off');
+        el.classList.remove('hidden','minimized');
+        videoCallState.ringTimer=setTimeout(()=>{
+            if(!videoCallState.active) return;
+            if(Math.random()<0.8) answerVideoCall(); else rejectVideoCall();
+        },1800+Math.random()*2200);
+    };
+    window.answerVideoCall=function(){
+        if(!videoCallState.active) return; videoCallState.connected=true;
+        document.getElementById('ios-video-status').textContent='00:00';
+        videoCallState.timer=setInterval(()=>{
+            videoCallState.seconds++; const m=String(Math.floor(videoCallState.seconds/60)).padStart(2,'0'), sec=String(videoCallState.seconds%60).padStart(2,'0');
+            const st=document.getElementById('ios-video-status'); if(st) st.textContent=`${m}:${sec}`;
+        },1000);
+    };
+    window.rejectVideoCall=function(){
+        if(!videoCallState.active) return; document.getElementById('ios-video-status').textContent='对方未接听';
+        pushVideoCallMessage('视频通话未接通'); setTimeout(()=>endVideoCall(false),1100);
+    };
+    window.endVideoCall=function(manual=true){
+        if(!videoCallState.active) return; clearInterval(videoCallState.timer); clearTimeout(videoCallState.ringTimer);
+        if(videoCallState.connected){
+            const m=String(Math.floor(videoCallState.seconds/60)).padStart(2,'0'), sec=String(videoCallState.seconds%60).padStart(2,'0'); pushVideoCallMessage(`视频通话 ${m}:${sec}`);
+        }else if(manual) pushVideoCallMessage('已取消视频通话');
+        videoCallState.active=false; videoCallState.connected=false; videoCallState.minimized=false; const el=videoCallState.el; if(el){ el.classList.remove('minimized'); el.classList.add('hidden'); }
+    };
+    window.minimizeVideoCall=function(e){
+        if(e){ e.preventDefault(); e.stopPropagation(); }
+        if(!videoCallState.active || !videoCallState.el) return;
+        videoCallState.minimized=true;
+        videoCallState.el.classList.add('minimized');
+    };
+    window.restoreVideoCall=function(){
+        if(!videoCallState.active || !videoCallState.el) return;
+        videoCallState.minimized=false;
+        videoCallState.el.classList.remove('minimized');
+    };
+    window.toggleVideoControl=function(kind){
+        if(kind==='mute'){ videoCallState.muted=!videoCallState.muted; document.getElementById('ios-video-mute')?.classList.toggle('active-off',videoCallState.muted); }
+        if(kind==='camera'){
+            videoCallState.cameraOff=!videoCallState.cameraOff; document.getElementById('ios-video-camera')?.classList.toggle('active-off',videoCallState.cameraOff);
+            document.getElementById('ios-video-self')?.classList.toggle('camera-off',videoCallState.cameraOff);
+        }
+        if(kind==='speaker'){ videoCallState.speaker=!videoCallState.speaker; document.getElementById('ios-video-speaker')?.classList.toggle('active-off',videoCallState.speaker); }
+    };
+    window.pushVideoCallMessage=function(text){
+        const icon=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="margin-bottom:-2px;margin-right:4px"><rect x="3" y="6" width="13" height="12" rx="3"></rect><path d="m16 10 5-3v10l-5-3"></path></svg>`;
+        if(typeof addMessage==='function') addMessage({id:Date.now(),text:icon+text,type:'text',sender:'system',time:Date.now(),quoteText:null,isRead:false});
     };
 
     window.iosShowPage=function(page){
@@ -7489,7 +7791,7 @@ body.ios-system-theme .call-btn.hangup { background:var(--ios-red) !important; c
         const top=document.getElementById('main-top-bar');
         if(top && !document.getElementById('ios-chat-back')){
             const back=document.createElement('button'); back.id='ios-chat-back'; back.className='ios-chat-back'; back.innerHTML='<svg viewBox="0 0 24 24"><path d="m15 4-8 8 8 8"></path></svg><span>信息</span>'; back.onclick=()=>iosShowPage('messages'); top.appendChild(back);
-            const call=document.createElement('button'); call.id='ios-chat-call'; call.className='ios-chat-call'; call.setAttribute('aria-label','通话'); call.innerHTML='<svg viewBox="0 0 24 24"><path d="M7 4h3l1.5 4-2 1.6a16 16 0 0 0 5 5l1.6-2 4 1.5v3a3 3 0 0 1-3.2 3A17 17 0 0 1 3.9 7.2 3 3 0 0 1 7 4Z"></path></svg>'; call.onclick=()=>{ if(typeof startVoiceCall==='function') startVoiceCall(); }; top.appendChild(call);
+            const call=document.createElement('button'); call.id='ios-chat-call'; call.className='ios-chat-call'; call.setAttribute('aria-label','通话'); call.innerHTML='<svg viewBox="0 0 24 24"><path d="M7 4h3l1.5 4-2 1.6a16 16 0 0 0 5 5l1.6-2 4 1.5v3a3 3 0 0 1-3.2 3A17 17 0 0 1 3.9 7.2 3 3 0 0 1 7 4Z"></path></svg>'; call.onclick=()=>iosShowCallOptions(); top.appendChild(call);
             const av=top.querySelector('.tb-avatar-wrap'); if(av) av.onclick=()=>openRoleModal();
         }
         const row=document.querySelector('.bottom-bar .input-row');
@@ -7511,6 +7813,7 @@ body.ios-system-theme .call-btn.hangup { background:var(--ios-red) !important; c
 
     window.iosRefreshAll=function(){
         installChatChrome();
+        iosApplyTimestampSetting();
         iosRenderConversations(document.getElementById('ios-message-search')?.value || '');
         iosRenderRolesPage(); iosRenderFunctions(); iosRenderSettings();
     };
