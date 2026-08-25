@@ -1920,9 +1920,21 @@ let cardDisplayCount = 30;
 let stickerDisplayCount = 30;
 let lastMsgDateStr = "";
 let chatDisplayCount = 60;
-let pendingRepliesCount = 0; 
+let pendingRepliesCount = 0; // 仅作为当前角色的兼容镜像，真正状态按角色隔离
 let typingElement = null;
+const rolePendingReplies = new Map();
+const roleAutoReplyTimers = new Map();
 let currentStickerGroup = '默认';
+
+function roleKey(id) { return String(id == null ? '' : id); }
+function getRolePendingCount(id) { return rolePendingReplies.get(roleKey(id)) || 0; }
+function setRolePendingCount(id, count) {
+    const key = roleKey(id);
+    const safe = Math.max(0, Number(count) || 0);
+    if (safe > 0) rolePendingReplies.set(key, safe); else rolePendingReplies.delete(key);
+    if (roleKey(appState?.currentRoleId) === key) pendingRepliesCount = safe;
+    return safe;
+}
 
 function initTypingElement() {
     typingElement = document.createElement('div');
@@ -1932,14 +1944,31 @@ function initTypingElement() {
     typingElement.innerHTML = `<div class="bubble-container ios-typing-container"><div class="ios-typing-bubble" aria-label="正在输入"><span></span><span></span><span></span></div></div>`;
 }
 
-function showTyping() {
+function showTyping(roleId = appState?.currentRoleId) {
+    const key = roleKey(roleId);
+    if (key !== roleKey(appState?.currentRoleId) || !document.body.classList.contains('ios-chat-open')) return;
     if (!typingElement) initTypingElement();
+    typingElement.dataset.roleId = key;
     typingElement.style.display = 'flex';
-    document.getElementById('chat-area').appendChild(typingElement);
-    scrollToBottom();
+    const area = document.getElementById('chat-area');
+    if (area && typingElement.parentNode !== area) area.appendChild(typingElement);
+    if (area) scrollToBottom();
 }
 
-function hideTyping() { if (typingElement) typingElement.style.display = 'none'; }
+function hideTyping(roleId = appState?.currentRoleId) {
+    const key = roleKey(roleId);
+    if (!typingElement) return;
+    if (typingElement.dataset.roleId && typingElement.dataset.roleId !== key) return;
+    typingElement.style.display = 'none';
+}
+
+function syncTypingForCurrentRole() {
+    const id = roleKey(appState?.currentRoleId);
+    const count = getRolePendingCount(id);
+    pendingRepliesCount = count;
+    if (count > 0 && document.body.classList.contains('ios-chat-open')) showTyping(id);
+    else if (typingElement) typingElement.style.display = 'none';
+}
 
 // ====== 新增：字体防卡顿核心引擎 ======
 window.activeFontBlobUrl = null; // 内存指针
@@ -2365,7 +2394,7 @@ function renderRoleList() {
         list.appendChild(card);
     });
 }
-function switchRole(id) { appState.currentRoleId = id; chatDisplayCount = 60; saveState(); applySettingsToUI(); renderMessages(); updateStatsDisplay(); closeRoleModal(); }
+function switchRole(id) { appState.currentRoleId = id; chatDisplayCount = 60; saveState(); applySettingsToUI(); renderMessages(); syncTypingForCurrentRole(); updateStatsDisplay(); closeRoleModal(); }
 async function deleteRole(id) { if(await uiConfirm("确定删除该角色及其所有聊天记录吗？")) { appState.roles = appState.roles.filter(r => r.id !== id); if(appState.currentRoleId === id) appState.currentRoleId = appState.roles[0].id; saveState(); if(document.getElementById('role-modal').classList.contains('open')) renderRoleList(); else { applySettingsToUI(); renderMessages(); updateStatsDisplay(); } } }
 async function uploadThemAvatar(e) { if(e.target.files[0]) { const role = getCurrentRole(); role.avatar = await compressImage(e.target.files[0], 200); applySettingsToUI(); saveState(); renderMessages(); } e.target.value = ''; }
 function clearBubbleCSS() { document.getElementById('set-bubble-css').value = ''; appState.settings.bubbleCSS = ''; updateSettings(); }
@@ -2882,7 +2911,23 @@ function sendMessage() {
 }
 document.getElementById('msg-input').addEventListener('keypress', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-function addMessage(msg) { if(msg && msg.sender === 'them' && document.body.classList.contains('ios-chat-open')) msg.isRead = true; getCurrentRole().messages.push(msg); saveState(); const area = document.getElementById('chat-area'); appendMessageDOM(msg, area); scrollToBottom(); updateStatusEmoji(); }
+function addMessage(msg, targetRoleId = null) {
+    const target = targetRoleId == null ? getCurrentRole() : (appState.roles || []).find(r => roleKey(r.id) === roleKey(targetRoleId));
+    if (!target) return;
+    const isCurrent = roleKey(target.id) === roleKey(appState.currentRoleId);
+    if (msg && msg.sender === 'them' && isCurrent && document.body.classList.contains('ios-chat-open')) msg.isRead = true;
+    target.messages = target.messages || [];
+    target.messages.push(msg);
+    saveState();
+    if (isCurrent) {
+        const area = document.getElementById('chat-area');
+        if (area) { appendMessageDOM(msg, area); scrollToBottom(); }
+        updateStatusEmoji();
+    } else if (typeof window.iosRenderConversations === 'function') {
+        window.iosRenderConversations(document.getElementById('ios-message-search')?.value || '');
+    }
+}
+
 
 function renderMessages(keepScroll = false, exactHold = false) { 
     const role = getCurrentRole();
@@ -2899,8 +2944,17 @@ function renderMessages(keepScroll = false, exactHold = false) {
         area.appendChild(loadMoreBtn); 
     }
     const recentMessages = role.messages.slice(-chatDisplayCount);
-    recentMessages.forEach(msg => appendMessageDOM(msg, area)); 
-    if (pendingRepliesCount > 0 && typingElement) area.appendChild(typingElement);
+    recentMessages.forEach(msg => appendMessageDOM(msg, area));
+    const currentPending = getRolePendingCount(role.id);
+    pendingRepliesCount = currentPending;
+    if (currentPending > 0) {
+        if (!typingElement) initTypingElement();
+        typingElement.dataset.roleId = roleKey(role.id);
+        typingElement.style.display = 'flex';
+        area.appendChild(typingElement);
+    } else if (typingElement) {
+        typingElement.style.display = 'none';
+    }
     
     // 关键判断：决定滚轮的位置
     if (exactHold) {
@@ -3238,8 +3292,8 @@ async function doMultiDelete() {
 }
 
 // 已读回执更新（顺手修复了触发已读也会乱跳视角的问题）
-function markMyMessagesAsRead() {
-    const role = getCurrentRole();
+function markMyMessagesAsRead(targetRoleId = appState.currentRoleId) {
+    const role = (appState.roles || []).find(r => roleKey(r.id) === roleKey(targetRoleId)) || getCurrentRole();
     let updated = false;
     for (let i = role.messages.length - 1; i >= 0; i--) {
         if (role.messages[i].sender === 'me' && !role.messages[i].isRead) {
@@ -3249,7 +3303,8 @@ function markMyMessagesAsRead() {
     }
     if(updated) {
         saveState();
-        renderMessages(false, true); // Ta看你消息时，不干扰你往上翻记录的视角
+        if (roleKey(role.id) === roleKey(appState.currentRoleId)) renderMessages(false, true); // 只刷新正在看的角色
+        else if (typeof window.iosRenderConversations === 'function') window.iosRenderConversations(document.getElementById('ios-message-search')?.value || '');
     }
 }
 
@@ -3272,11 +3327,12 @@ function buildStitchedCardText(validCards) {
     return selected.map(c => String(c.text || '')).join('，');
 }
 
-let autoReplyTimer = null; // 【新增】防刷屏全局锁
 function triggerAutoReply() {
-    if(autoReplyTimer) clearTimeout(autoReplyTimer); // 【新增】如果你连续发消息，就打断它上一次的思考，重新计时！
-
     const role = getCurrentRole();
+    const targetRoleId = roleKey(role.id);
+    const previousTimer = roleAutoReplyTimers.get(targetRoleId);
+    if(previousTimer) clearTimeout(previousTimer); // 只打断这个角色自己的思考，不影响其他角色
+
     if(!role.allowedCardGroups) role.allowedCardGroups = [...new Set(appState.cards.map(c => c.group))];
     if(!role.allowedStickerGroups) role.allowedStickerGroups = [...new Set(appState.stickers.map(s => s.group))];
 
@@ -3292,16 +3348,18 @@ if(pool.length === 0) pool = [{ text: "嗯嗯", type: 'text' }];
 
     const readDelay = Math.random() * 1500 + 500;
     
-    autoReplyTimer = setTimeout(() => { // 【修改】给这个定时器加上锁的名字
-        markMyMessagesAsRead(); 
+    const roleTimer = setTimeout(() => {
+        roleAutoReplyTimers.delete(targetRoleId);
+        markMyMessagesAsRead(targetRoleId); 
 
         if (appState.settings.allowReadNoReply && Math.random() < 0.20) {
             return; 
         }
 
         if (appState.settings.allowAutoCall && Math.random() < 0.03) {
-            triggerIncomingCall();
-            return; 
+            // 不在这个角色窗口时不要把别人的来电冒充成当前角色
+            if (roleKey(appState.currentRoleId) === targetRoleId && typeof triggerIncomingCall === 'function') triggerIncomingCall();
+            return;
         }
 
         const minMs = (appState.settings.minDelaySec || 2) * 1000; 
@@ -3326,8 +3384,8 @@ if(pool.length === 0) pool = [{ text: "嗯嗯", type: 'text' }];
         }
         
         let baseDelay = Math.max(minMs, Math.random() * (maxMs - minMs) + minMs);
-        pendingRepliesCount += count; 
-        showTyping(); 
+        setRolePendingCount(targetRoleId, getRolePendingCount(targetRoleId) + count);
+        showTyping(targetRoleId); 
 
         for(let i = 0; i < count; i++) {
             let currentDelay = baseDelay + i * (Math.random() * 1800 + 800); 
@@ -3353,7 +3411,7 @@ if (randomItem.type === 'sys_pat') {
     let suffix = randomItem.text.replace(/你|他|她|Ta/gi, '我'); 
     
     const html = `<div style="text-align:center; font-size:11px; color:var(--text-sub); margin: 8px 0; font-weight:300;">${taName} ${suffix}</div>`;
-    addMessage({ id: Date.now() + Math.random(), text: html, type: 'system', sender: 'system', time: Date.now(), quoteText: null, isRead: false });
+    addMessage({ id: Date.now() + Math.random(), text: html, type: 'system', sender: 'system', time: Date.now(), quoteText: null, isRead: false }, targetRoleId);
 }
                 // --- 抽到了【话题扭蛋】 ---
                 else if (randomItem.type === 'sys_gacha') {
@@ -3367,7 +3425,7 @@ if (randomItem.type === 'sys_pat') {
                             ${topic}
                         </div>
                     </div>`;
-                    addMessage({ id: Date.now() + Math.random(), text: html, type: 'tarot', sender: 'them', time: Date.now(), quoteText: null, isRead: false });
+                    addMessage({ id: Date.now() + Math.random(), text: html, type: 'tarot', sender: 'them', time: Date.now(), quoteText: null, isRead: false }, targetRoleId);
                 }
                 // --- 抽到了普通字卡或表情 ---
                 else {
@@ -3409,15 +3467,19 @@ if (randomItem.type === 'sys_pat') {
                         quoteText: null, 
                         isRead: false,
                         cardSources: cardSources
-                    }); 
+                    }, targetRoleId); 
                 }
                 
-                pendingRepliesCount--; 
-                if (pendingRepliesCount <= 0) { pendingRepliesCount = 0; hideTyping(); scrollToBottom(); }
+                const left = setRolePendingCount(targetRoleId, getRolePendingCount(targetRoleId) - 1);
+                if (roleKey(appState.currentRoleId) === targetRoleId) {
+                    if (left <= 0) hideTyping(targetRoleId); else showTyping(targetRoleId);
+                    if (document.body.classList.contains('ios-chat-open')) scrollToBottom();
+                }
             }, currentDelay);
         }
 
     }, readDelay);
+    roleAutoReplyTimers.set(targetRoleId, roleTimer);
 }
 
 function openExportModal() { document.getElementById('export-modal').classList.add('open'); }
@@ -9168,5 +9230,49 @@ body.dark-mode .ios-tips-header{background:rgba(0,0,0,.86)}
 #export-modal .ios-export-copy{width:100%;height:38px;border:0;background:transparent;color:#007aff;font:inherit;font-size:14px;margin-top:4px;}
 @media (max-height:700px){#export-modal .ios-export-sheet{height:88dvh!important;max-height:88dvh!important;}}
 </style>
+
+
+<style id="ios-chat-mode-v21-style">
+/* v21: root list and chat are mutually exclusive. Fixed glass chrome must never float over the Messages list. */
+body.ios-system-theme.ios-root-active #main-top-bar,
+body.ios-system-theme.ios-root-active #chat-area,
+body.ios-system-theme.ios-root-active .bottom-bar{
+  display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
+body.ios-system-theme.ios-chat-open #ios-system-shell .ios-root-page{display:none!important;}
+body.ios-system-theme.ios-chat-open #ios-tab-bar{display:none!important;}
+body.ios-system-theme.ios-chat-open #main-top-bar{
+  display:flex!important;visibility:visible!important;pointer-events:auto!important;
+  position:fixed!important;top:0!important;left:0!important;right:0!important;width:100%!important;
+  background:rgba(248,248,248,.72)!important;
+  -webkit-backdrop-filter:saturate(180%) blur(24px)!important;backdrop-filter:saturate(180%) blur(24px)!important;
+}
+body.ios-system-theme.dark-mode.ios-chat-open #main-top-bar{background:rgba(28,28,30,.72)!important;}
+body.ios-system-theme.ios-chat-open #chat-area{display:flex!important;visibility:visible!important;pointer-events:auto!important;background:#fff!important;}
+body.ios-system-theme.dark-mode.ios-chat-open #chat-area{background:#000!important;}
+body.ios-system-theme.ios-chat-open .bottom-bar{display:flex!important;visibility:visible!important;pointer-events:auto!important;}
+@media (min-width:700px){body.ios-system-theme.ios-chat-open #main-top-bar{left:50%!important;right:auto!important;width:520px!important;transform:translateX(-50%)!important;}}
+</style>
+
+<script id="ios-chat-mode-v21-script">
+(function(){
+  const oldShowPage = window.iosShowPage;
+  if(typeof oldShowPage === 'function') window.iosShowPage = function(page){
+    document.body.classList.remove('ios-chat-open');
+    document.body.classList.add('ios-root-active');
+    if(typingElement) typingElement.style.display='none';
+    return oldShowPage(page);
+  };
+  const oldOpenChat = window.iosOpenChat;
+  if(typeof oldOpenChat === 'function') window.iosOpenChat = function(id){
+    document.body.classList.remove('ios-root-active');
+    document.body.classList.add('ios-chat-open');
+    const out = oldOpenChat(id);
+    requestAnimationFrame(()=>syncTypingForCurrentRole());
+    return out;
+  };
+})();
+</script>
+
 </body>
 </html>
