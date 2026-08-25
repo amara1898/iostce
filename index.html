@@ -7418,10 +7418,22 @@ body:not(.ios-root-active) #ios-system-shell .ios-root-page { display: none !imp
 /* ===== Bottom tab bar ===== */
 #ios-tab-bar {
     position:absolute; left:0; right:0; bottom:0; height:calc(58px + var(--ios-safe-bottom)); padding:4px 8px var(--ios-safe-bottom);
-    display:flex; align-items:flex-start; justify-content:space-around; background:color-mix(in srgb, var(--ios-card) 88%, transparent); border-top:.5px solid var(--ios-separator);
-    -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px); pointer-events:auto;
+    display:flex; align-items:flex-start; justify-content:space-around;
+    /* iOS tab bar is not pure white: it sits on a light gray translucent material. */
+    background:rgba(242,242,247,.90);
+    border-top:.5px solid rgba(60,60,67,.18);
+    -webkit-backdrop-filter:saturate(180%) blur(22px);
+    backdrop-filter:saturate(180%) blur(22px);
+    pointer-events:auto;
 }
-@supports not (background: color-mix(in srgb, white 50%, black)) { #ios-tab-bar { background:var(--ios-card); } }
+body.dark-mode #ios-tab-bar {
+    background:rgba(28,28,30,.90);
+    border-top-color:rgba(84,84,88,.65);
+}
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    #ios-tab-bar { background:#f2f2f7; }
+    body.dark-mode #ios-tab-bar { background:#1c1c1e; }
+}
 body:not(.ios-root-active) #ios-tab-bar { display:none !important; }
 .ios-tab { width:25%; border:0; background:transparent; color:var(--ios-secondary); display:flex; flex-direction:column; align-items:center; gap:1px; padding:2px 0 0; font-family:inherit; cursor:pointer; }
 .ios-tab svg { width:25px; height:25px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
