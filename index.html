@@ -7219,7 +7219,7 @@ body:not(.ios-root-active) #ios-system-shell .ios-root-page { display: none !imp
 .ios-search-box input::placeholder { color:var(--ios-secondary); opacity:1; }
 .ios-page-content { padding: 0 16px 28px; }
 .ios-section-label { margin:22px 16px 7px; color:var(--ios-secondary); font-size:13px; font-weight:400 !important; text-transform:none; }
-.ios-list-card { background:var(--ios-card); border-radius:12px; overflow:hidden; }
+.ios-list-card { width:100%; background:var(--ios-card); border-radius:12px; overflow:hidden; }
 .ios-list-card.edge { border-radius:0; margin:0 -16px; }
 /* 信息页跟随原生 Messages：整页是一张连续底色，不把每个会话做成白色卡片/白条 */
 #ios-page-messages { background:var(--ios-card) !important; }
@@ -7229,16 +7229,24 @@ body:not(.ios-root-active) #ios-system-shell .ios-root-page { display: none !imp
 #ios-page-messages #ios-conversation-list { background:transparent !important; }
 #ios-page-messages #ios-conversation-list { border-radius:0 !important; box-shadow:none !important; }
 #ios-page-messages .ios-conversation-row { background:transparent !important; }
+/* 不同列表的密度按 iOS 分开处理：会话列表较高，系统分组行更紧凑。
+   之前四种行统一 68px，会让“设置/功能”卡片显得又宽又松。 */
 .ios-conversation-row, .ios-role-row, .ios-setting-row, .ios-function-row {
-    position:relative; min-height:68px; display:flex; align-items:center; gap:12px; padding:9px 16px; background:var(--ios-card); cursor:pointer;
+    position:relative; display:flex; align-items:center; background:var(--ios-card); cursor:pointer;
 }
+.ios-conversation-row { min-height:72px; gap:12px; padding:9px 16px; }
+.ios-role-row { min-height:64px; gap:12px; padding:7px 14px; }
+.ios-setting-row, .ios-function-row { min-height:48px; gap:11px; padding:7px 12px; }
 .ios-conversation-row::after, .ios-role-row::after, .ios-setting-row::after, .ios-function-row::after {
     content:""; position:absolute; left:78px; right:0; bottom:0; height:.5px; background:var(--ios-separator); transform:scaleY(.7); transform-origin:bottom;
 }
-.ios-setting-row::after, .ios-function-row::after { left:58px; }
+.ios-setting-row::after, .ios-function-row::after { left:53px; }
 .ios-conversation-row:last-child::after, .ios-role-row:last-child::after, .ios-setting-row:last-child::after, .ios-function-row:last-child::after { display:none; }
 .ios-avatar { width:52px; height:52px; border-radius:50% !important; object-fit:cover; background:linear-gradient(145deg,#d1d1d6,#8e8e93); flex:none; }
 .ios-avatar-fallback { display:flex; align-items:center; justify-content:center; color:#fff; font-size:21px; font-weight:500 !important; }
+.ios-role-row .ios-avatar { width:46px; height:46px; }
+.ios-setting-row .ios-cell-icon, .ios-function-row .ios-cell-icon { width:29px; height:29px; border-radius:7px; }
+.ios-setting-row .ios-cell-title, .ios-function-row .ios-cell-title { font-size:17px; }
 .ios-row-main { flex:1; min-width:0; }
 .ios-row-top { display:flex; align-items:baseline; gap:8px; }
 .ios-row-title { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:17px; font-weight:600 !important; color:var(--ios-label); }
@@ -7513,9 +7521,13 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
         sliders:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path><circle cx="16" cy="7" r="2"></circle><circle cx="8" cy="17" r="2"></circle>',
         bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path>',
         box:'<path d="M4 7h16v13H4zM3 4h18v3H3z"></path><path d="M9 11h6"></path>',
-        info:'<circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7h.01"></path>'
+        info:'<circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7h.01"></path>',
+        moon:'<path d="M20.4 14.6A8.2 8.2 0 0 1 9.4 3.6 8.6 8.6 0 1 0 20.4 14.6Z"></path>',
+        clock:'<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path>',
+        people:'<circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="9" r="2.4"></circle><path d="M3.5 20a5.5 5.5 0 0 1 11 0"></path><path d="M14 15.3a4.5 4.5 0 0 1 6.5 4"></path>',
+        gear:'<circle cx="12" cy="12" r="3"></circle><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.4 1a7 7 0 0 0-2.1-1.2L14 3h-4l-.4 2.7a7 7 0 0 0-2.1 1.2l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 2.1 1.2L10 21h4l.4-2.7a7 7 0 0 0 2.1-1.2l2.4 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"></path>'
     };
-    function svg(kind){ return '<svg viewBox="0 0 24 24">'+(iconPaths[kind]||iconPaths.info)+'</svg>'; }
+    function svg(kind){ return '<svg class="ios-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+(iconPaths[kind]||iconPaths.info)+'</svg>'; }
     function esc(v){ return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
     function plainMessage(msg){
         if(!msg) return '开始一段新对话';
@@ -7605,13 +7617,13 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
         const version=(typeof CURRENT_APP_VERSION!=='undefined'?CURRENT_APP_VERSION:'');
         root.innerHTML=`
             <div class="ios-section-label">外观</div><div class="ios-list-card">
-                <div class="ios-setting-row"><div class="ios-cell-icon" style="background:#5856d6">${svg('spark')}</div><div class="ios-cell-title">深色模式</div><label class="ios-switch" onclick="event.stopPropagation()"><input type="checkbox" ${dark?'checked':''} onchange="iosToggleDark(this.checked)"><span class="ios-switch-slider"></span></label></div>
+                <div class="ios-setting-row"><div class="ios-cell-icon" style="background:#5856d6">${svg('moon')}</div><div class="ios-cell-title">深色模式</div><label class="ios-switch" onclick="event.stopPropagation()"><input type="checkbox" ${dark?'checked':''} onchange="iosToggleDark(this.checked)"><span class="ios-switch-slider"></span></label></div>
                 <div class="ios-setting-row" onclick="openThemeModal()"><div class="ios-cell-icon" style="background:#af52de">${svg('paint')}</div><div class="ios-cell-title">外观与气泡</div><div class="ios-cell-detail">iOS 主题</div><div class="ios-chevron"></div></div>
             </div>
             <div class="ios-section-label">聊天</div><div class="ios-list-card">
                 <div class="ios-setting-row" onclick="openSettingsModal()"><div class="ios-cell-icon" style="background:#007aff">${svg('sliders')}</div><div class="ios-cell-title">回复设置</div><div class="ios-cell-detail">${esc(role?.name||'Ta')}</div><div class="ios-chevron"></div></div>
-                <div class="ios-setting-row"><div class="ios-cell-icon" style="background:#5ac8fa">${svg('focus')}</div><div class="ios-cell-title">时间戳</div><div class="ios-cell-detail">气泡右下角</div><label class="ios-switch" onclick="event.stopPropagation()"><input type="checkbox" ${showTimestamp?'checked':''} onchange="iosToggleTimestamp(this.checked)"><span class="ios-switch-slider"></span></label></div>
-                <div class="ios-setting-row" onclick="openRoleModal()"><div class="ios-cell-icon" style="background:#34c759">${svg('diary')}</div><div class="ios-cell-title">角色与聊天</div><div class="ios-cell-detail">${(appState.roles||[]).length} 个角色</div><div class="ios-chevron"></div></div>
+                <div class="ios-setting-row"><div class="ios-cell-icon" style="background:#5ac8fa">${svg('clock')}</div><div class="ios-cell-title">时间戳</div><div class="ios-cell-detail">气泡右下角</div><label class="ios-switch" onclick="event.stopPropagation()"><input type="checkbox" ${showTimestamp?'checked':''} onchange="iosToggleTimestamp(this.checked)"><span class="ios-switch-slider"></span></label></div>
+                <div class="ios-setting-row" onclick="openRoleModal()"><div class="ios-cell-icon" style="background:#34c759">${svg('people')}</div><div class="ios-cell-title">角色与聊天</div><div class="ios-cell-detail">${(appState.roles||[]).length} 个角色</div><div class="ios-chevron"></div></div>
             </div>
             <div class="ios-section-label">通知与后台</div><div class="ios-list-card">
                 <div class="ios-setting-row"><div class="ios-cell-icon" style="background:#ff3b30">${svg('bell')}</div><div class="ios-cell-title">后台保活</div><label class="ios-switch" onclick="event.stopPropagation()"><input type="checkbox" ${keep?'checked':''} onchange="iosToggleKeepAlive(this.checked)"><span class="ios-switch-slider"></span></label></div>
@@ -7619,7 +7631,7 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
             </div>
             <div class="ios-section-label">数据</div><div class="ios-list-card">
                 <div class="ios-setting-row" onclick="openExportModal()"><div class="ios-cell-icon" style="background:#30b0c7">${svg('box')}</div><div class="ios-cell-title">导出与备份</div><div class="ios-chevron"></div></div>
-                <div class="ios-setting-row" onclick="openSettingsModal()"><div class="ios-cell-icon" style="background:#8e8e93">${svg('sliders')}</div><div class="ios-cell-title">高级设置</div><div class="ios-chevron"></div></div>
+                <div class="ios-setting-row" onclick="openSettingsModal()"><div class="ios-cell-icon" style="background:#8e8e93">${svg('gear')}</div><div class="ios-cell-title">高级设置</div><div class="ios-chevron"></div></div>
             </div>
             <div class="ios-section-label">关于</div><div class="ios-list-card"><div class="ios-setting-row"><div class="ios-cell-icon" style="background:#8e8e93">${svg('info')}</div><div class="ios-cell-title">Trace</div><div class="ios-cell-detail">${esc(version)}</div></div></div>`;
     };
@@ -7839,6 +7851,127 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
     document.addEventListener('click', e=>{ if(!e.target.closest('.ios-compose-sheet') && !e.target.closest('#ios-compose-plus')) iosCloseComposeSheet(); });
     document.addEventListener('DOMContentLoaded', ()=>{ document.body.classList.add('ios-system-theme','ios-root-active'); installChatChrome(); iosRenderFunctions(); });
     window.addEventListener('load', ()=>{ installChatChrome(); iosShowPage('messages'); setTimeout(iosRefreshAll,120); setTimeout(iosRefreshAll,900); });
+})();
+</script>
+
+
+<style id="ios-symbol-polish-v6">
+/* v6 — 统一成 iOS / SF Symbols 观感。图形为网页内自绘的 SF-like SVG，不加载外部图标库。 */
+body.ios-system-theme .ios-symbol,
+body.ios-system-theme .ios-cell-icon svg,
+body.ios-system-theme .ios-nav-action svg,
+body.ios-system-theme .ios-round-add svg,
+body.ios-system-theme .ios-tab svg,
+body.ios-system-theme .ios-compose-plus svg,
+body.ios-system-theme .ios-compose-action svg,
+body.ios-system-theme #main-top-bar svg,
+body.ios-system-theme .bottom-bar svg,
+body.ios-system-theme .icon-btn svg,
+body.ios-system-theme .game-icon-btn svg,
+body.ios-system-theme .mf-btn svg {
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+}
+/* 设置/功能页：接近 iOS Settings 的彩色圆角方块 + 白色系统 glyph */
+body.ios-system-theme .ios-cell-icon {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 7px !important;
+    color: #fff !important;
+    box-shadow: inset 0 0 0 .35px rgba(0,0,0,.08) !important;
+}
+body.ios-system-theme .ios-cell-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: currentColor !important;
+    stroke-width: 1.9 !important;
+    fill: none !important;
+}
+/* 顶部/底部导航：蓝色、无边框、轻量 SF Symbols 线条 */
+body.ios-system-theme .ios-nav-action,
+body.ios-system-theme .ios-round-add,
+body.ios-system-theme #main-top-bar .icon-btn,
+body.ios-system-theme .bottom-bar .icon-btn {
+    -webkit-tap-highlight-color: transparent !important;
+}
+body.ios-system-theme #main-top-bar .icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+    padding: 6px !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: var(--ios-blue) !important;
+    box-shadow: none !important;
+}
+body.ios-system-theme #main-top-bar .icon-btn svg {
+    width: 22px !important;
+    height: 22px !important;
+    stroke-width: 1.9 !important;
+}
+body.ios-system-theme #main-top-bar .icon-btn:active { background: var(--ios-fill) !important; transform:none !important; }
+
+body.ios-system-theme .ios-tab svg {
+    width: 25px !important;
+    height: 25px !important;
+    stroke-width: 1.75 !important;
+}
+body.ios-system-theme .ios-tab.active svg { stroke-width: 2.05 !important; }
+body.ios-system-theme .ios-tab.active .ios-fillable { fill: currentColor !important; stroke: currentColor !important; }
+
+/* 旧功能弹窗里的小图标也去掉“网页按钮感”，统一成 iOS 圆角/线条 */
+body.ios-system-theme .game-icon-btn {
+    border: 0 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    background: var(--ios-card) !important;
+    color: var(--ios-label) !important;
+}
+body.ios-system-theme .game-icon-btn svg {
+    width: 27px !important;
+    height: 27px !important;
+    stroke-width: 1.8 !important;
+    color: var(--ios-blue) !important;
+}
+body.ios-system-theme .modal-body .icon-btn:not(.btn-noshadow),
+body.ios-system-theme .mf-btn {
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 50% !important;
+    background: var(--ios-fill) !important;
+    color: var(--ios-blue) !important;
+}
+body.ios-system-theme .ios-chevron-svg {
+    width: 18px !important; height: 18px !important; display:block;
+    stroke: currentColor; fill:none; stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round;
+}
+body.ios-system-theme .ios-xmark-svg {
+    width: 16px !important; height: 16px !important; display:block;
+    stroke: currentColor; fill:none; stroke-width:2; stroke-linecap:round;
+}
+</style>
+<script id="ios-symbol-polish-script-v6">
+(function(){
+  const chevL='<svg class="ios-chevron-svg" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>';
+  const chevR='<svg class="ios-chevron-svg" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>';
+  const xmark='<svg class="ios-xmark-svg" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>';
+  function polish(root=document){
+    root.querySelectorAll('button').forEach(btn=>{
+      if(btn.dataset.iosSymbolPolished) return;
+      const t=(btn.textContent||'').trim();
+      if(t==='◀'){btn.innerHTML=chevL; btn.setAttribute('aria-label','上一个'); btn.dataset.iosSymbolPolished='1';}
+      else if(t==='▶'){btn.innerHTML=chevR; btn.setAttribute('aria-label','下一个'); btn.dataset.iosSymbolPolished='1';}
+      else if(t==='✕' || t==='×'){btn.innerHTML=xmark; btn.setAttribute('aria-label','关闭'); btn.dataset.iosSymbolPolished='1';}
+    });
+    root.querySelectorAll('svg').forEach(svg=>{
+      if(!svg.hasAttribute('stroke-linecap')) svg.setAttribute('stroke-linecap','round');
+      if(!svg.hasAttribute('stroke-linejoin')) svg.setAttribute('stroke-linejoin','round');
+    });
+  }
+  window.iosPolishSymbols=polish;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>polish()); else polish();
+  const mo=new MutationObserver(muts=>{ for(const m of muts){ for(const n of m.addedNodes){ if(n.nodeType===1) polish(n); } } });
+  if(document.documentElement) mo.observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
 
