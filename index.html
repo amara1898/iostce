@@ -8768,23 +8768,45 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
 
 
 <style id="ios-relationship-v14-style">
-/* ===== v14 · Relationship dashboard + closer iMessage surface ===== */
-:root{--ios-chat-surface:#f7f7f9}
-body.ios-system-theme.dark-mode{--ios-chat-surface:#0b0b0d}
+/* ===== v19 · Relationship dashboard + real iMessage glass chrome ===== */
+/* Messages itself stays essentially white. Only the chrome floats above it as translucent material. */
+:root{--ios-chat-surface:#ffffff;--ios-chat-glass:rgba(248,248,248,.72)}
+body.ios-system-theme.dark-mode{--ios-chat-surface:#000000;--ios-chat-glass:rgba(28,28,30,.72)}
 body.ios-system-theme #chat-area{
   background:var(--ios-chat-surface)!important;
+  /* The top bar is now an overlay, so messages can actually pass underneath and be blurred. */
+  padding-top:calc(86px + var(--ios-safe-top))!important;
 }
-body.ios-system-theme #main-top-bar,
+body.ios-system-theme #main-top-bar{
+  position:fixed!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  width:100%!important;
+  background:var(--ios-chat-glass)!important;
+  -webkit-backdrop-filter:saturate(180%) blur(24px)!important;
+  backdrop-filter:saturate(180%) blur(24px)!important;
+  border-bottom:.5px solid rgba(60,60,67,.18)!important;
+  z-index:80!important;
+}
+body.ios-system-theme.dark-mode #main-top-bar{border-bottom-color:rgba(84,84,88,.55)!important}
 body.ios-system-theme .bottom-bar{
-  background:color-mix(in srgb,var(--ios-chat-surface) 84%,transparent)!important;
+  background:rgba(248,248,248,.78)!important;
   -webkit-backdrop-filter:saturate(180%) blur(22px)!important;
   backdrop-filter:saturate(180%) blur(22px)!important;
 }
-@supports not (background:color-mix(in srgb,white 50%,black)){
-  body.ios-system-theme #main-top-bar,body.ios-system-theme .bottom-bar{background:var(--ios-chat-surface)!important}
+body.ios-system-theme.dark-mode .bottom-bar{background:rgba(28,28,30,.78)!important}
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  body.ios-system-theme #main-top-bar{background:rgba(248,248,248,.96)!important}
+  body.ios-system-theme.dark-mode #main-top-bar{background:rgba(28,28,30,.96)!important}
+  body.ios-system-theme .bottom-bar{background:rgba(248,248,248,.96)!important}
+  body.ios-system-theme.dark-mode .bottom-bar{background:rgba(28,28,30,.96)!important}
 }
 body.ios-system-theme #msg-input{background:rgba(255,255,255,.72)!important}
 body.ios-system-theme.dark-mode #msg-input{background:rgba(44,44,46,.78)!important}
+@media (min-width:700px){
+  body.ios-system-theme #main-top-bar{left:50%!important;right:auto!important;width:520px!important;transform:translateX(-50%)!important}
+}
 
 /* iMessage-like curved tail. The second pseudo element cuts the tail with the chat surface. */
 body.ios-system-theme #chat-area .bubble{overflow:visible!important;isolation:isolate}
