@@ -1040,9 +1040,11 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
 .ios-mail-recipient-check{width:24px;height:24px;flex:0 0 24px;border-radius:50%;border:1.5px solid #c7c7cc;display:grid;place-items:center}.ios-mail-recipient-row.selected .ios-mail-recipient-check{background:#007aff;border-color:#007aff}.ios-mail-recipient-row.selected .ios-mail-recipient-check::after{content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(0,-1px)}
 #mail-recipient-next-btn:disabled,#mail-send-btn:disabled{opacity:.38;pointer-events:none}
 body.dark-mode .ios-mail-recipient-list{background:#1c1c1e;border-color:#38383a}
-.ios-mail-flow-sheet{height:88vh!important;max-height:88vh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
-.ios-mail-flow-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 22px!important}
-.ios-mail-flow-footer{flex:0 0 auto;padding:10px 16px calc(10px + var(--ios-safe-bottom, env(safe-area-inset-bottom)));border-top:.5px solid var(--ios-separator,rgba(60,60,67,.18));background:color-mix(in srgb,var(--ios-card,#fff) 94%,transparent);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%)}
+/* 慢信两步页必须以 iOS 当前“可见视口”为准；不能再用 100vh/88vh，否则主屏幕 Web App 会把底部算到 Home Indicator 下面。 */
+body.ios-system-theme #mail-recipient-modal,body.ios-system-theme #write-mail-modal{height:var(--trace-mail-vh,100dvh)!important;min-height:var(--trace-mail-vh,100dvh)!important;max-height:var(--trace-mail-vh,100dvh)!important;inset:0!important}
+.ios-mail-flow-sheet{height:var(--trace-mail-sheet-h,88dvh)!important;max-height:var(--trace-mail-sheet-h,88dvh)!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+.ios-mail-flow-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:16px 16px 22px!important}
+.ios-mail-flow-footer{position:relative;z-index:5;flex:0 0 auto;padding:10px 16px calc(10px + max(env(safe-area-inset-bottom,0px),34px));border-top:.5px solid var(--ios-separator,rgba(60,60,67,.18));background:color-mix(in srgb,var(--ios-card,#fff) 94%,transparent);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%)}
 .ios-mail-flow-footer .btn-full{margin:0!important;border:0!important;border-radius:13px!important;box-shadow:none!important;min-height:48px!important;font-size:17px!important;font-weight:600!important}
 .ios-mail-write-head{display:grid!important;grid-template-columns:72px 1fr 72px;align-items:center}.ios-mail-write-head h3{text-align:center;margin:0}.ios-mail-write-head .ios-mail-head-left{text-align:left}.ios-mail-write-head .ios-mail-head-right{text-align:right}
 .ios-mail-write-head button{border:0!important;background:transparent!important;color:#007aff!important;font:inherit!important;font-size:16px!important;padding:8px 0!important;box-shadow:none!important}
@@ -3711,17 +3713,13 @@ if(pool.length === 0) pool = [{ text: "嗯嗯", type: 'text' }];
             let currentDelay = baseDelay + i * (Math.random() * 1800 + 800); 
             setTimeout(() => {
 let randomItem;
-const randChance = Math.random();
 const patChance = Math.random(); // 拍一拍独立概率骰子
 
-if (randChance < 0.03) {
-    // 3% 扭蛋彩蛋
-    randomItem = { type: 'sys_gacha' };
-} else if (patChance < 0.03 && pats.length > 0) {
-    // 3% 的独立概率，从你填写的拍一拍里抽一句！
+if (patChance < 0.03 && pats.length > 0) {
+    // 3% 的独立概率，从你填写的拍一拍里抽一句。
     randomItem = { text: pats[Math.floor(Math.random() * pats.length)], type: 'sys_pat' };
 } else {
-    // 剩下的正常抽字卡或表情
+    // 正常抽字卡或表情。话题扭蛋只保留为用户主动打开的功能，不再混进自动回复。
     randomItem = pool[Math.floor(Math.random() * pool.length)];
 }
 
@@ -3733,20 +3731,6 @@ if (randomItem.type === 'sys_pat') {
     const html = `<div style="text-align:center; font-size:11px; color:var(--text-sub); margin: 8px 0; font-weight:300;">${taName} ${suffix}</div>`;
     addMessage({ id: Date.now() + Math.random(), text: html, type: 'system', sender: 'system', time: Date.now(), quoteText: null, isRead: false }, targetRoleId);
 }
-                // --- 抽到了【话题扭蛋】 ---
-                else if (randomItem.type === 'sys_gacha') {
-                    const topic = gachaTopics[Math.floor(Math.random() * gachaTopics.length)];
-                    const html = `<div class="tarot-share-card" style="width: 220px;">
-                        <div class="tarot-share-header" style="background:#333;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="18" height="14" rx="2"></rect><path d="M12 5a3 3 0 1 0-3 3"></path><path d="M12 5a3 3 0 1 1 3 3"></path></svg>
-                            <span>话题扭蛋</span>
-                        </div>
-                        <div class="tarot-share-content" style="padding: 16px 12px; font-size: 13px; font-weight: bold; text-align: center; color: var(--text-main); line-height: 1.5;">
-                            ${topic}
-                        </div>
-                    </div>`;
-                    addMessage({ id: Date.now() + Math.random(), text: html, type: 'tarot', sender: 'them', time: Date.now(), quoteText: null, isRead: false }, targetRoleId);
-                }
                 // --- 抽到了普通字卡或表情 ---
                 else {
                     let itemToSent = { ...randomItem };
@@ -5999,7 +5983,22 @@ window.toggleMailRecipientByIndex = function(index) {
     renderMailRecipientPicker();
 };
 
+function syncMailFlowViewport() {
+    // iOS 主屏幕 Web App 的 100vh 可能比真正可见区域更高；visualViewport 才是用户此刻真正看得到的高度。
+    const h = Math.max(320, Math.round(Number(window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || 0)));
+    if (!h) return;
+    document.documentElement.style.setProperty('--trace-mail-vh', `${h}px`);
+    document.documentElement.style.setProperty('--trace-mail-sheet-h', `${Math.max(360, Math.floor(h * 0.88))}px`);
+}
+if (!window.__traceMailViewportV11) {
+    window.__traceMailViewportV11 = true;
+    window.visualViewport?.addEventListener('resize', syncMailFlowViewport);
+    window.visualViewport?.addEventListener('scroll', syncMailFlowViewport);
+    window.addEventListener('resize', syncMailFlowViewport);
+}
+
 function openWriteMailModal() {
+    syncMailFlowViewport();
     initDiaryData();
     const input = document.getElementById('mail-content-input');
     if (input) input.value = '';
@@ -6011,6 +6010,7 @@ function openWriteMailModal() {
 }
 function closeMailRecipientModal() { document.getElementById('mail-recipient-modal')?.classList.remove('open'); }
 function nextMailRecipientStep() {
+    syncMailFlowViewport();
     const count = mailSelectedRoleIdsV10.size;
     if (!count) { showToast('先选择至少一位收件人'); return; }
     const note = document.getElementById('mail-write-recipient-summary');
@@ -6020,6 +6020,7 @@ function nextMailRecipientStep() {
     setTimeout(()=>document.getElementById('mail-content-input')?.focus(),80);
 }
 function backToMailRecipients() {
+    syncMailFlowViewport();
     document.getElementById('write-mail-modal')?.classList.remove('open');
     renderMailRecipientPicker();
     document.getElementById('mail-recipient-modal')?.classList.add('open');
