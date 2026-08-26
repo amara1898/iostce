@@ -941,6 +941,11 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
             <button class="tab-btn" id="tab-btn-mail" onclick="switchDiaryTab('mail')">慢信邮筒</button>
         </div>
         <div class="modal-body" style="padding: 16px;">
+            <button type="button" class="ios-diary-limit-row" onclick="openDiaryCardSettings()" aria-label="设置日记与回信的字卡条数">
+                <span class="ios-diary-limit-copy"><strong>Ta 的字卡条数</strong><small>日记与回信分别设置</small></span>
+                <span class="ios-diary-limit-value" id="ios-diary-card-limit-summary">日记 4 · 回信 2</span>
+                <span class="ios-diary-limit-chevron"></span>
+            </button>
             <!-- 日记面板 -->
             <div id="diary-tab-diary" class="tarot-pane active">
                 <button class="btn-full primary" onclick="openWriteDiaryModal()" style="margin-bottom: 16px;">+ 写今天的日记</button>
@@ -957,6 +962,39 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
                 <div class="setting-label">信件收纳盒</div>
                 <div class="mail-list" id="mail-list-area"></div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- 日记与慢信 · 字卡条数设置 -->
+<div class="ios-diary-settings-overlay" id="ios-diary-card-settings" aria-hidden="true" onclick="if(event.target===this)closeDiaryCardSettings()">
+    <div class="ios-diary-settings-sheet" role="dialog" aria-modal="true" aria-label="Ta 的字卡条数">
+        <div class="ios-diary-settings-head">
+            <button type="button" onclick="closeDiaryCardSettings()">取消</button>
+            <strong>字卡条数</strong>
+            <button type="button" class="done" onclick="saveDiaryCardSettings()">完成</button>
+        </div>
+        <div class="ios-diary-settings-body">
+            <div class="ios-diary-settings-label">每次最多使用</div>
+            <div class="ios-diary-settings-card">
+                <div class="ios-diary-settings-row">
+                    <div><strong>Ta 的日记</strong><small>从当前角色已绑定字卡中随机抽取</small></div>
+                    <div class="ios-diary-stepper">
+                        <button type="button" onclick="stepDiaryCardLimit('diary',-1)" aria-label="减少日记字卡条数">−</button>
+                        <input id="ios-diary-max-cards" type="number" min="1" max="100" step="1" inputmode="numeric" aria-label="日记最多字卡条数">
+                        <button type="button" onclick="stepDiaryCardLimit('diary',1)" aria-label="增加日记字卡条数">+</button>
+                    </div>
+                </div>
+                <div class="ios-diary-settings-row">
+                    <div><strong>Ta 的回信</strong><small>从当前角色已绑定字卡中随机抽取</small></div>
+                    <div class="ios-diary-stepper">
+                        <button type="button" onclick="stepDiaryCardLimit('letter',-1)" aria-label="减少回信字卡条数">−</button>
+                        <input id="ios-letter-max-cards" type="number" min="1" max="100" step="1" inputmode="numeric" aria-label="回信最多字卡条数">
+                        <button type="button" onclick="stepDiaryCardLimit('letter',1)" aria-label="增加回信字卡条数">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="ios-diary-settings-foot">可设置 1–100 条；实际不会超过当前角色可用字卡数量。</div>
         </div>
     </div>
 </div>
@@ -1252,7 +1290,7 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
     <button class="close-btn" onclick="closeGameModal()">收起</button>
     </div><div class="modal-body"><div class="game-grid"><div class="game-icon-btn" onclick="openMusicModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg><span>一起听</span></div>
     <div class="game-icon-btn" onclick="openTarotModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="2" width="16" height="20" rx="2"></rect><circle cx="12" cy="12" r="4"></circle><path d="M12 8v8"></path><path d="M8 12h8"></path></svg><span>塔罗牌</span></div>
-    <div class="game-icon-btn" onclick="openDiaryModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M10 8h6M10 12h6"></path></svg><span>日记与信</span></div>
+    <div class="game-icon-btn" id="legacy-diary-entry" data-diary-entry="1" onclick="openDiaryModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M10 8h6M10 12h6"></path></svg><span>日记与信</span></div>
     <div class="game-icon-btn" onclick="openPeriodModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg><span>月经记录</span></div>
     <div class="game-icon-btn" onclick="openGomokuModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="M3 15h18"></path><path d="M9 3v18"></path><path d="M15 3v18"></path><circle cx="9" cy="9" r="2" fill="currentColor"></circle><circle cx="15" cy="15" r="2"></circle></svg><span>五子棋</span></div>
 <div class="game-icon-btn" onclick="openDecisionModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line><circle cx="12" cy="12" r="3" fill="#fff"></circle><text x="12" y="14.5" font-size="8" text-anchor="middle" font-weight="bold" fill="currentColor">?</text></svg><span>抉择盲盒</span></div>
@@ -2046,6 +2084,9 @@ window.onload = async () => {
             appState = { ...appState, ...savedState, settings: { ...appState.settings, ...savedState.settings } };
         }
         migrateStrictRoleBindingsV8();
+        initDiaryData();
+        checkAllRoleDiaries();
+        syncDiaryBadge();
         
         // 开机时静默把数据库的庞大Base64转化成短指针
         if (appState.settings.customFont) {
@@ -3004,7 +3045,8 @@ function addMessage(msg, targetRoleId = null) {
     const target = targetRoleId == null ? getCurrentRole() : (appState.roles || []).find(r => roleKey(r.id) === roleKey(targetRoleId));
     if (!target) return;
     const isCurrent = roleKey(target.id) === roleKey(appState.currentRoleId);
-    if (msg && msg.sender === 'them' && isCurrent && document.body.classList.contains('ios-chat-open')) msg.isRead = true;
+    const chatActuallyVisible = isCurrent && document.body.classList.contains('ios-chat-open') && document.visibilityState === 'visible';
+    if (msg && msg.sender === 'them' && chatActuallyVisible) msg.isRead = true;
     target.messages = target.messages || [];
     target.messages.push(msg);
     saveState();
@@ -3014,6 +3056,14 @@ function addMessage(msg, targetRoleId = null) {
         updateStatusEmoji();
     } else if (typeof window.iosRenderConversations === 'function') {
         window.iosRenderConversations(document.getElementById('ios-message-search')?.value || '');
+    }
+    // 真正收到 Ta 的消息时再通知；聊天正在前台打开时不打扰。
+    if (msg && msg.sender === 'them' && !chatActuallyVisible && typeof window.traceNotifyIncoming === 'function') {
+        window.traceNotifyIncoming({
+            title: String(target.remark || '').trim() || target.name || 'Ta',
+            body: window.traceIncomingPreview ? window.traceIncomingPreview(msg) : '发来了一条新消息',
+            tag: 'trace-role-' + roleKey(target.id)
+        });
     }
 }
 
@@ -5366,20 +5416,273 @@ async function clearAllMusic() {
 /* ================= 日记与慢信系统核心逻辑 ================= */
 
 function initDiaryData() {
-    if (!appState.diaryData) {
+    if (!appState.diaryData || typeof appState.diaryData !== 'object') {
         appState.diaryData = { records: [], letters: [] };
+    }
+    if (!Array.isArray(appState.diaryData.records)) appState.diaryData.records = [];
+    if (!Array.isArray(appState.diaryData.letters)) appState.diaryData.letters = [];
+    if (!appState.diaryData.rolePlans || typeof appState.diaryData.rolePlans !== 'object' || Array.isArray(appState.diaryData.rolePlans)) {
+        appState.diaryData.rolePlans = {};
+    }
+
+    // v10：旧日记原本是所有角色共用一份，首次升级时把无法识别归属的旧记录归到当前角色。
+    if (!appState.diaryData.roleScopedV10) {
+        const fallbackRoleId = String(appState.currentRoleId || appState.roles?.[0]?.id || 'default');
+        appState.diaryData.records.forEach(r => {
+            if (!r.roleId) r.roleId = fallbackRoleId;
+            // 旧记录已经展示过，不拿旧数据冒充“新日记”。
+            if (r.author === 'them' && r.isNew === undefined) r.isNew = false;
+        });
+        appState.diaryData.roleScopedV10 = true;
+    }
+}
+
+function clampDiaryCardLimit(value, fallback) {
+    const n = Math.floor(Number(value));
+    if (!Number.isFinite(n)) return fallback;
+    return Math.max(1, Math.min(100, n));
+}
+
+function ensureDiaryCardLimits() {
+    if (!appState.settings || typeof appState.settings !== 'object') appState.settings = {};
+    appState.settings.diaryMaxCards = clampDiaryCardLimit(appState.settings.diaryMaxCards, 4);
+    appState.settings.letterMaxCards = clampDiaryCardLimit(appState.settings.letterMaxCards, 2);
+    return { diary: appState.settings.diaryMaxCards, letter: appState.settings.letterMaxCards };
+}
+
+function updateDiaryCardLimitSummary() {
+    const limits = ensureDiaryCardLimits();
+    const el = document.getElementById('ios-diary-card-limit-summary');
+    if (el) el.textContent = `日记 ${limits.diary} · 回信 ${limits.letter}`;
+}
+
+window.openDiaryCardSettings = function() {
+    const limits = ensureDiaryCardLimits();
+    const diaryInput = document.getElementById('ios-diary-max-cards');
+    const letterInput = document.getElementById('ios-letter-max-cards');
+    if (diaryInput) diaryInput.value = limits.diary;
+    if (letterInput) letterInput.value = limits.letter;
+    const overlay = document.getElementById('ios-diary-card-settings');
+    overlay?.classList.add('open');
+    overlay?.setAttribute('aria-hidden','false');
+};
+
+window.closeDiaryCardSettings = function() {
+    const overlay = document.getElementById('ios-diary-card-settings');
+    overlay?.classList.remove('open');
+    overlay?.setAttribute('aria-hidden','true');
+};
+
+window.stepDiaryCardLimit = function(kind, delta) {
+    const id = kind === 'letter' ? 'ios-letter-max-cards' : 'ios-diary-max-cards';
+    const input = document.getElementById(id);
+    if (!input) return;
+    const fallback = kind === 'letter' ? 2 : 4;
+    input.value = clampDiaryCardLimit((Number(input.value) || fallback) + Number(delta || 0), fallback);
+};
+
+window.saveDiaryCardSettings = async function() {
+    const diaryInput = document.getElementById('ios-diary-max-cards');
+    const letterInput = document.getElementById('ios-letter-max-cards');
+    if (!appState.settings || typeof appState.settings !== 'object') appState.settings = {};
+    appState.settings.diaryMaxCards = clampDiaryCardLimit(diaryInput?.value, 4);
+    appState.settings.letterMaxCards = clampDiaryCardLimit(letterInput?.value, 2);
+    if (diaryInput) diaryInput.value = appState.settings.diaryMaxCards;
+    if (letterInput) letterInput.value = appState.settings.letterMaxCards;
+    updateDiaryCardLimitSummary();
+    try { await saveState(); } catch(e) {}
+    closeDiaryCardSettings();
+    if (typeof showToast === 'function') showToast('字卡条数已保存');
+};
+
+function pickDiaryCardsForRole(role, maxCards) {
+    let cards = [];
+    try { cards = getBoundWordcardsForRole(role) || []; } catch(e) { cards = []; }
+    const seen = new Set();
+    const unique = cards.filter(c => {
+        const text = String(c?.text || '').trim();
+        const key = `${text}\u0000${String(c?.group || '')}`;
+        if (!text || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+    if (!unique.length) return [];
+    const shuffled = unique.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const cap = Math.min(clampDiaryCardLimit(maxCards, 1), shuffled.length);
+    const count = cap <= 1 ? cap : 1 + Math.floor(Math.random() * cap);
+    return shuffled.slice(0, count);
+}
+
+function diaryRoleId(roleOrId) {
+    if (roleOrId && typeof roleOrId === 'object') return String(roleOrId.id || '');
+    return String(roleOrId ?? '');
+}
+
+function diaryRecordsForRole(roleOrId) {
+    initDiaryData();
+    const id = diaryRoleId(roleOrId || appState.currentRoleId);
+    return appState.diaryData.records.filter(r => String(r.roleId || '') === id);
+}
+
+function hasUnreadDiaryForRole(roleOrId) {
+    const id = diaryRoleId(roleOrId);
+    if (!id) return false;
+    return diaryRecordsForRole(id).some(r => r.author === 'them' && r.isNew === true);
+}
+
+function hasAnyUnreadDiary() {
+    initDiaryData();
+    return appState.diaryData.records.some(r => r.author === 'them' && r.isNew === true);
+}
+
+function syncDiaryBadge() {
+    const unread = hasAnyUnreadDiary();
+    document.body.classList.toggle('ios-has-new-diary', unread);
+    document.querySelectorAll('.ios-diary-dot').forEach(el => { el.hidden = !unread; });
+}
+
+function markDiarySeenForRole(roleOrId) {
+    const id = diaryRoleId(roleOrId);
+    if (!id) return;
+    let changed = false;
+    appState.diaryData.records.forEach(r => {
+        if (String(r.roleId || '') === id && r.author === 'them' && r.isNew === true) {
+            r.isNew = false;
+            changed = true;
+        }
+    });
+    if (changed) saveState();
+    syncDiaryBadge();
+    try { window.iosRenderRolesPage?.(); } catch(e) {}
+}
+
+function diaryPlanKey(roleId, date) { return `${String(roleId)}@@${date}`; }
+
+function ensureRoleDiaryPlan(role, now = new Date()) {
+    initDiaryData();
+    const roleId = diaryRoleId(role);
+    const date = getLocalYMD(now);
+    const key = diaryPlanKey(roleId, date);
+    let plan = appState.diaryData.rolePlans[key];
+    let created = false;
+    if (!plan) {
+        // 保留原本“大约一半的日子会写”的感觉，但一旦当天决定，就不会每次打开都重新掷骰子。
+        const willWrite = Math.random() < 0.5;
+        const hour = 9 + Math.floor(Math.random() * 14); // 09:00 ~ 22:59
+        const minute = Math.floor(Math.random() * 60);
+        const dueAt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0).getTime();
+        plan = { roleId, date, willWrite, dueAt, done: !willWrite };
+        appState.diaryData.rolePlans[key] = plan;
+        created = true;
+
+        // 只保留最近 21 天的计划，避免本地数据一直膨胀。
+        const cutoff = Date.now() - 21 * 86400000;
+        Object.keys(appState.diaryData.rolePlans).forEach(k => {
+            const x = appState.diaryData.rolePlans[k];
+            if (x && Number(x.dueAt || 0) < cutoff) delete appState.diaryData.rolePlans[k];
+        });
+    }
+    return { plan, created };
+}
+
+function buildThemDiaryContent(role) {
+    const limits = ensureDiaryCardLimits();
+    const selected = pickDiaryCardsForRole(role, limits.diary);
+
+    if (selected.length) {
+        const joiner = selected.length > 6 ? '\n' : (Math.random() < 0.58 ? '\n' : '，');
+        return {
+            content: selected.map(c => String(c.text || '').trim()).join(joiner),
+            sources: selected.map(c => ({ text:String(c.text || '').trim(), group:String(c.group || '日常') }))
+        };
+    }
+
+    const fallbacks = [
+        '今天没发生什么特别的事，不过还是想记下来。',
+        '今天有点安静，脑子里乱七八糟想了很多。',
+        '忙完以后突然觉得一天过得好快。',
+        '今天心情还算平稳，没什么大事。',
+        '本来没想写，最后还是想留一句。',
+        '今天有一点累，想早点休息。',
+        '不知道该写什么，就当给今天留个标记。',
+        '今天忽然想起了很多小事。'
+    ];
+    return { content: fallbacks[Math.floor(Math.random() * fallbacks.length)], sources: [] };
+}
+
+function maybeGenerateRoleDiary(role, now = new Date()) {
+    if (!role) return { generated:false, changed:false };
+    initDiaryData();
+    const roleId = diaryRoleId(role);
+    const today = getLocalYMD(now);
+    const existing = appState.diaryData.records.some(r => r.date === today && r.author === 'them' && String(r.roleId || '') === roleId);
+    const { plan, created } = ensureRoleDiaryPlan(role, now);
+    if (existing) {
+        const planChanged = !plan.done;
+        if (planChanged) plan.done = true;
+        return { generated:false, changed:created || planChanged };
+    }
+    if (!plan.willWrite || plan.done || now.getTime() < Number(plan.dueAt || 0)) {
+        return { generated:false, changed:created };
+    }
+
+    const built = buildThemDiaryContent(role);
+    const moods = ['☀️ 晴朗', '☁️ 平静', '🌧️ 低落', '⚡ 烦躁', '✨ 惊喜'];
+    const randomMood = moods[Math.floor(Math.random() * moods.length)];
+    const writeTime = Math.min(now.getTime(), Number(plan.dueAt || now.getTime()));
+    appState.diaryData.records.unshift({
+        id: Date.now() + Math.floor(Math.random() * 10000),
+        roleId,
+        date: today,
+        author: 'them',
+        mood: randomMood,
+        content: built.content,
+        cardSources: built.sources,
+        time: writeTime,
+        isNew: true
+    });
+    plan.done = true;
+    return { generated:true, changed:true };
+}
+
+function checkAllRoleDiaries() {
+    initDiaryData();
+    let changed = false;
+    let generated = false;
+    const now = new Date();
+    (appState.roles || []).forEach(role => {
+        const res = maybeGenerateRoleDiary(role, now);
+        changed = changed || !!res.changed;
+        generated = generated || !!res.generated;
+    });
+    if (changed) saveState();
+    if (generated) {
+        syncDiaryBadge();
+        try { window.iosRenderRolesPage?.(); } catch(e) {}
+        try { window.iosRenderFunctions?.(); } catch(e) {}
+    } else {
+        syncDiaryBadge();
     }
 }
 
 function openDiaryModal() {
     closeGameModal();
     initDiaryData();
+    const role = getCurrentRole();
+    const res = maybeGenerateRoleDiary(role, new Date());
+    if (res.changed) saveState();
     document.getElementById('diary-modal').classList.add('open');
+    updateDiaryCardLimitSummary();
     switchDiaryTab('diary');
-    checkAndGenerateThemDiary(); // 检查Ta是否要写日记
     renderDiary();
-    checkArrivedLetters(); // 检查信箱状态
+    checkArrivedLetters();
     renderMailList();
+    // 真正打开当前角色的日记后才清除这个角色的“新日记”状态。
+    markDiarySeenForRole(role);
 }
 function closeDiaryModal() { document.getElementById('diary-modal').classList.remove('open'); }
 
@@ -5394,39 +5697,28 @@ function switchDiaryTab(tab) {
 
 // --- 日记功能 ---
 function openWriteDiaryModal() {
-    document.getElementById('diary-content-input').value = "";
-    
-    // 每次打开恢复默认选中第一个状态
+    document.getElementById('diary-content-input').value = '';
     document.querySelectorAll('.mood-tag').forEach(t => t.classList.remove('active'));
     const firstTag = document.querySelector('.mood-tag');
     if(firstTag) firstTag.classList.add('active');
-    document.getElementById('diary-mood-value').value = "☀️ 晴朗";
-    
-    // 恢复自定义按钮的原始文字
+    document.getElementById('diary-mood-value').value = '☀️ 晴朗';
     const customBtn = document.getElementById('custom-mood-btn');
-    if(customBtn) customBtn.innerText = "+ 自定义";
-
+    if(customBtn) customBtn.innerText = '+ 自定义';
     document.getElementById('write-diary-modal').classList.add('open');
 }
 
-function closeWriteDiaryModal() { 
-    document.getElementById('write-diary-modal').classList.remove('open'); 
-}
+function closeWriteDiaryModal() { document.getElementById('write-diary-modal').classList.remove('open'); }
 
-// 点击普通预设标签
 function selectMood(el, val) {
     document.querySelectorAll('.mood-tag').forEach(tag => tag.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('diary-mood-value').value = val;
-    
-    // 如果点的不是自定义按钮，把自定义按钮的字恢复原状
     const customBtn = document.getElementById('custom-mood-btn');
-    if(el !== customBtn) customBtn.innerText = "+ 自定义";
+    if(el !== customBtn) customBtn.innerText = '+ 自定义';
 }
 
-// 点击自定义标签
 async function customMood(el) {
-    const customVal = await uiPrompt("给自己贴个心情标签吧 (推荐带个Emoji)", "自定义心情", "例如: 🍉 嘴馋");
+    const customVal = await uiPrompt('给自己贴个心情标签吧 (推荐带个Emoji)', '自定义心情', '例如: 🍉 嘴馋');
     if (customVal && customVal.trim()) {
         document.querySelectorAll('.mood-tag').forEach(tag => tag.classList.remove('active'));
         el.classList.add('active');
@@ -5436,77 +5728,60 @@ async function customMood(el) {
 }
 
 function saveDiary() {
-    // 这里改成读取 hidden 里的值
+    initDiaryData();
+    const role = getCurrentRole();
     const mood = document.getElementById('diary-mood-value').value;
     const content = document.getElementById('diary-content-input').value.trim();
-    if (!content) { showToast("总得写点什么吧~"); return; }
-    
+    if (!content) { showToast('总得写点什么吧~'); return; }
     appState.diaryData.records.unshift({
         id: Date.now(),
+        roleId: diaryRoleId(role),
         date: getLocalYMD(new Date()),
         author: 'me',
-        mood: mood,
-        content: content,
-        time: Date.now()
+        mood,
+        content,
+        time: Date.now(),
+        isNew: false
     });
     saveState();
     closeWriteDiaryModal();
     renderDiary();
-    showToast("✅ 日记已合上");
+    showToast('✅ 日记已合上');
 }
 
 function deleteDiary(id) {
-    uiConfirm("撕掉这页日记，就再也找不回了哦。确定吗？").then(res => {
+    uiConfirm('撕掉这页日记，就再也找不回了哦。确定吗？').then(res => {
         if(res) {
             appState.diaryData.records = appState.diaryData.records.filter(r => r.id !== id);
-            saveState(); renderDiary();
+            saveState(); renderDiary(); syncDiaryBadge();
         }
     });
 }
 
-function checkAndGenerateThemDiary() {
-    const today = getLocalYMD(new Date());
-    // 检查 Ta 今天有没有写过
-    const hasWritten = appState.diaryData.records.some(r => r.date === today && r.author === 'them');
-    if (!hasWritten) {
-        // 50%的概率 Ta 今天会写日记
-        if (Math.random() < 0.5) {
-            // 从字卡库里随机抽1-2句话当做日记内容
-            let content = "今天又是普普通通的一天。";
-            const role = getCurrentRole();
-            const validCards = getBoundWordcardsForRole(role);
-            if(validCards.length > 0) {
-                content = validCards[Math.floor(Math.random() * validCards.length)].text;
-                if(Math.random() < 0.5 && validCards.length > 1) {
-                    content += "\n" + validCards[Math.floor(Math.random() * validCards.length)].text;
-                }
-            }
-            const moods = ["☀️ 晴朗", "☁️ 平静", "🌧️ 低落", "⚡ 烦躁", "✨ 惊喜"];
-            const randomMood = moods[Math.floor(Math.random() * moods.length)];
-            
-            let pastTime = Date.now() - Math.floor(Math.random()*3600000);
-appState.diaryData.records.unshift({
-    id: Date.now() + 1,
-    date: getLocalYMD(new Date(pastTime)),
-    author: 'them',
-    mood: randomMood,
-    content: content,
-    time: pastTime
-});
-            saveState();
-        }
-    }
+function checkAndGenerateThemDiary(role = getCurrentRole()) {
+    const res = maybeGenerateRoleDiary(role, new Date());
+    if (res.changed) saveState();
+    if (res.generated) syncDiaryBadge();
+    return res.generated;
+}
+
+function escapeDiaryHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function renderDiary() {
+    initDiaryData();
     const list = document.getElementById('diary-list-area');
-    list.innerHTML = "";
-    if (!appState.diaryData.records || appState.diaryData.records.length === 0) {
+    if (!list) return;
+    list.innerHTML = '';
+    const role = getCurrentRole();
+    const records = diaryRecordsForRole(role).slice().sort((a,b) => Number(b.time||0) - Number(a.time||0));
+    if (!records.length) {
         list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:12px; margin-top:30px;">还没有人写过日记</div>';
         return;
     }
-    const roleName = getCurrentRole().name || 'Ta';
-    appState.diaryData.records.forEach(r => {
+    const roleName = role.name || 'Ta';
+    records.forEach(r => {
         const d = new Date(r.time);
         const timeStr = `${r.date} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         const isMe = r.author === 'me';
@@ -5514,31 +5789,30 @@ function renderDiary() {
         card.className = `diary-card ${isMe ? 'me' : 'them'}`;
         card.innerHTML = `
             <div class="diary-header">
-                <span style="font-weight:bold; color:var(--text-main);">${isMe ? appState.settings.meName : roleName}的日记</span>
-                <span>${timeStr}</span>
+                <span style="font-weight:bold; color:var(--text-main);">${escapeDiaryHtml(isMe ? appState.settings.meName : roleName)}的日记</span>
+                <span>${escapeDiaryHtml(timeStr)}</span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                <div class="diary-mood">${r.mood}</div>
-                ${isMe ? `<button class="btn-noshadow icon-btn" style="border:none; box-shadow:none; padding:2px; font-size:12px; color:var(--text-sub);" onclick="deleteDiary(${r.id})">✕</button>` : ''}
+                <div class="diary-mood">${escapeDiaryHtml(r.mood)}</div>
+                ${isMe ? `<button class="btn-noshadow icon-btn" style="border:none; box-shadow:none; padding:2px; font-size:12px; color:var(--text-sub);" onclick="deleteDiary(${Number(r.id)})">✕</button>` : ''}
             </div>
-            <div class="diary-content">${r.content}</div>
+            <div class="diary-content">${escapeDiaryHtml(r.content)}</div>
         `;
         list.appendChild(card);
     });
 }
 
-// 简单的心情统计
 function showMoodStats() {
+    const records = diaryRecordsForRole(getCurrentRole());
     const counts = {};
-    appState.diaryData.records.forEach(r => {
-        const emj = r.mood.split(' ')[0]; // 只取图形部分
-        counts[emj] = (counts[emj] || 0) + 1;
+    records.forEach(r => {
+        const emj = String(r.mood || '').split(' ')[0];
+        if (emj) counts[emj] = (counts[emj] || 0) + 1;
     });
     const keys = Object.keys(counts);
-    if(keys.length === 0) { uiAlert("还没有足够的心情数据哦"); return; }
-    
+    if(keys.length === 0) { uiAlert('还没有足够的心情数据哦'); return; }
     let html = "<div style='display:flex; flex-direction:column; gap:8px;'>";
-    let total = appState.diaryData.records.length;
+    const total = records.length || 1;
     keys.sort((a,b)=>counts[b]-counts[a]).forEach(k => {
         const pct = Math.round((counts[k]/total)*100);
         html += `<div style="display:flex; align-items:center; gap:10px; font-size:13px;">
@@ -5549,8 +5823,19 @@ function showMoodStats() {
             <span style="width:30px; text-align:right; font-family:monospace; font-size:11px;">${counts[k]}次</span>
         </div>`;
     });
-    html += "</div>";
-    uiAlert(html, "近期心情统计");
+    html += '</div>';
+    uiAlert(html, '近期心情统计');
+}
+
+// v10：只要网页进程仍活着，就定时检查所有角色；被 iOS 杀掉后，下次重新打开会补生成已经到时间的日记。
+if (!window.__traceDiaryWatcherV10) {
+    window.__traceDiaryWatcherV10 = true;
+    setInterval(() => { try { checkAllRoleDiaries(); } catch(e) { console.warn('diary watcher', e); } }, 60000);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) { try { checkAllRoleDiaries(); } catch(e) {} }
+    });
+    window.addEventListener('focus', () => { try { checkAllRoleDiaries(); } catch(e) {} });
+    window.addEventListener('load', () => setTimeout(() => { try { checkAllRoleDiaries(); syncDiaryBadge(); } catch(e) {} }, 1200));
 }
 
 // --- 慢信功能 ---
@@ -5581,18 +5866,19 @@ function sendMail() {
 
     let taContent = "见字如面。\n\n你的来信我已收到。";
     const role = getCurrentRole();
-    const validCards = getBoundWordcardsForRole(role);
-    if(validCards.length >= 2) {
-        taContent += "\n" + validCards[Math.floor(Math.random() * validCards.length)].text;
-        taContent += "\n\n" + validCards[Math.floor(Math.random() * validCards.length)].text;
+    const limits = ensureDiaryCardLimits();
+    const selectedCards = pickDiaryCardsForRole(role, limits.letter);
+    if(selectedCards.length) {
+        taContent += "\n\n" + selectedCards.map(c => String(c.text || '').trim()).join("\n\n");
     } else {
-        taContent += "\n愿你今天一切顺利。";
+        taContent += "\n\n愿你今天一切顺利。";
     }
 
     appState.diaryData.letters.unshift({
         id: Date.now() + 1,
         author: 'them',
         content: taContent,
+        cardSources: selectedCards.map(c => ({ text:String(c.text || '').trim(), group:String(c.group || '日常') })),
         sendTime: Date.now(),
         arriveTime: Date.now() + delayMs, 
         isRead: false
@@ -7087,6 +7373,39 @@ function fallbackNotify() {
     }
 }
 
+// 所有“真正到达”的私聊 / 群聊消息统一从这里发系统通知。
+window.traceIncomingPreview = function(msg) {
+    if (!msg) return '发来了一条新消息';
+    if (msg.type === 'img' || msg.type === 'mix') return '发来了一张图片';
+    let text = String(msg.text ?? msg.content ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!text) return '发来了一条新消息';
+    return text.length > 96 ? text.slice(0, 96) + '…' : text;
+};
+
+window.traceNotifyIncoming = async function({title='Trace', body='发来了一条新消息', tag='trace-message'} = {}) {
+    // 前台正在使用 Trace 时不弹系统横幅；离开 / 锁屏后才发。
+    if (document.visibilityState === 'visible') return false;
+    if (!window.Notification || Notification.permission !== 'granted') return false;
+    const options = { body, tag };
+    if (appState.settings.allowVibrate !== false) options.vibrate = [100, 50, 100];
+    if (appState.settings.allowSound === false) options.silent = true;
+    try {
+        if (navigator.serviceWorker) {
+            const reg = await navigator.serviceWorker.ready;
+            await reg.showNotification(title, options);
+            return true;
+        }
+    } catch (e) {
+        console.warn('Trace notification failed', e);
+    }
+    try {
+        new Notification(title, options);
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
 // 4. TA主动找你的后台监听循环 (每60秒检查一次) - 极致混乱真人版
 setInterval(() => {
     // 如果没开功能，直接退出
@@ -7159,17 +7478,7 @@ setInterval(() => {
             // 触发自动回复 (完全遵守几连发、延迟、字卡抽取等设置！)
             triggerAutoReply();
             
-            // 顺便弹出系统横幅通知告诉你
-            if (window.Notification && Notification.permission === "granted") {
-                if (navigator.serviceWorker) {
-                    navigator.serviceWorker.ready.then(reg => {
-                        let notifOptions = { body: "发来了一条新消息，快看看吧..." };
-                     if (appState.settings.allowVibrate !== false) notifOptions.vibrate = [100, 50, 100, 50, 100];
-                     if (appState.settings.allowSound === false) notifOptions.silent = true;
-                     reg.showNotification(role.name || "TA", notifOptions);
-                    });
-                }
-            }
+            // 通知不在这里提前发；等真正的回复气泡落地后，由 addMessage 统一触发，避免“通知到了但消息还没到”和重复通知。
         }
     }
 }, 60000); // 60000 毫秒 = 1 分钟检测一次
@@ -7958,7 +8267,8 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
     ];
     window.iosRenderFunctions = function(){
         const root=document.getElementById('ios-functions-content'); if(!root) return;
-        root.innerHTML=functionSections.map(([label,items])=>`<div class="ios-section-label">${label}</div><div class="ios-list-card">${items.map(([title,sub,fn,kind,color])=>`<div class="ios-function-row" onclick="iosCall('${fn}')"><div class="ios-cell-icon" style="background:${color}">${svg(kind)}</div><div class="ios-row-main"><div class="ios-cell-title">${title}</div><div class="ios-row-preview">${sub}</div></div><div class="ios-chevron"></div></div>`).join('')}</div>`).join('');
+        root.innerHTML=functionSections.map(([label,items])=>`<div class="ios-section-label">${label}</div><div class="ios-list-card">${items.map(([title,sub,fn,kind,color])=>`<div class="ios-function-row" ${fn==='openDiaryModal'?'data-diary-entry="1"':''} onclick="iosCall('${fn}')"><div class="ios-cell-icon" style="background:${color}">${svg(kind)}</div><div class="ios-row-main"><div class="ios-cell-title">${title}</div><div class="ios-row-preview">${sub}</div></div>${fn==='openDiaryModal'?'<span class="ios-diary-dot" aria-label="有新日记"></span>':''}<div class="ios-chevron"></div></div>`).join('')}</div>`).join('');
+        if(typeof syncDiaryBadge==='function') syncDiaryBadge();
     };
     window.iosCall=function(name){
         window.iosCloseComposeSheet();
@@ -8876,7 +9186,7 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
     const members=(g.memberIds||[]).map(roleById).filter(Boolean); if(!members.length)return; const shuffled=members.slice().sort(()=>Math.random()-.5); const n=Math.min(shuffled.length,Math.random()<.35?2:1);
     for(let i=0;i<n;i++){
       const role=shuffled[i]; setTimeout(()=>setGroupTyping(role,true),350+i*1100);
-      setTimeout(()=>{ const still=currentGroup(); const target=ensureGroups().find(x=>String(x.id)===String(g.id)); if(!target)return; setGroupTyping(role,false); const open=still&&String(still.id)===String(g.id)&&document.getElementById('ios-group-chat-page')?.classList.contains('open'); target.messages.push({id:'gm_'+Date.now()+'_'+i,senderId:String(role.id),content:groupReplyText(role),time:Date.now(),isRead:!!open}); target.lastMessageTime=Date.now(); if(open)renderGroupMessages(target); if(typeof saveState==='function')saveState(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); },900+i*1250+Math.random()*500);
+      setTimeout(()=>{ const still=currentGroup(); const target=ensureGroups().find(x=>String(x.id)===String(g.id)); if(!target)return; setGroupTyping(role,false); const open=still&&String(still.id)===String(g.id)&&document.getElementById('ios-group-chat-page')?.classList.contains('open'); const actuallyVisible=!!open&&document.visibilityState==='visible'; const reply=groupReplyText(role); target.messages.push({id:'gm_'+Date.now()+'_'+i,senderId:String(role.id),content:reply,time:Date.now(),isRead:actuallyVisible}); target.lastMessageTime=Date.now(); if(open)renderGroupMessages(target); if(typeof saveState==='function')saveState(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); if(!actuallyVisible&&typeof window.traceNotifyIncoming==='function'){ const who=String(role?.remark||'').trim()||role?.name||'成员'; window.traceNotifyIncoming({title:target.name||'群聊',body:`${who}：${reply}`,tag:'trace-group-'+String(target.id)}); } },900+i*1250+Math.random()*500);
     }
   };
 
@@ -9235,7 +9545,7 @@ body.ios-system-theme #chat-area .message-wrap.system .bubble::after{display:non
   const oldClose=window.iosCloseRoleStats;window.iosCloseRoleStats=function(){relRoleId=null;if(typeof oldClose==='function')return oldClose();document.getElementById('ios-role-stats-page')?.classList.remove('open')};
   window.iosRenderRolesPage=function(){
     const list=document.getElementById('ios-role-page-list');if(!list||typeof appState==='undefined')return;const roles=appState.roles||[];if(!roles.length){list.innerHTML='<div class="ios-empty">还没有角色</div>';return}
-    list.innerHTML=roles.map(role=>{const w=weekStats(role),top=cardStats(role,'all').rows[0];return `<div class="ios-role-row" onclick="iosOpenRoleStats('${esc(role.id)}')">${avatar(role)}<div class="ios-row-main"><div class="ios-row-title">${esc(role.name||'Ta')}</div><div class="ios-row-preview">${w.total?`本周 ${w.total} 条 · ${w.active} 天活跃`:top?`最常出现：${esc(top.text)}`:'还没有关系数据'}</div></div><div class="ios-chevron"></div></div>`}).join('');
+    list.innerHTML=roles.map(role=>{const w=weekStats(role),top=cardStats(role,'all').rows[0],newDiary=typeof hasUnreadDiaryForRole==='function'&&hasUnreadDiaryForRole(role.id);return `<div class="ios-role-row" onclick="iosOpenRoleStats('${esc(role.id)}')">${avatar(role)}<div class="ios-row-main"><div class="ios-row-title">${esc(role.name||'Ta')}</div><div class="ios-row-preview">${w.total?`本周 ${w.total} 条 · ${w.active} 天活跃`:top?`最常出现：${esc(top.text)}`:'还没有关系数据'}</div></div>${newDiary?'<span class="ios-role-diary-dot" aria-label="有新日记"></span>':''}<div class="ios-chevron"></div></div>`}).join('');
   };
   setTimeout(()=>{try{window.iosRenderRolesPage?.()}catch(e){}},80);
 })();
@@ -9490,7 +9800,32 @@ body.ios-system-theme.ios-chat-open .bottom-bar{display:flex!important;visibilit
 
 
 
-<!-- v8 · Settings version notes / release history -->
+<style id="ios-diary-card-limit-v10-style">
+.ios-diary-limit-row{width:100%;min-height:54px;margin:0 0 14px;padding:10px 12px;border:0;border-radius:14px;background:var(--ios-card,#fff);color:var(--ios-label,#000);display:flex;align-items:center;gap:10px;text-align:left;font:inherit;box-shadow:none}
+body.dark-mode .ios-diary-limit-row{background:#1c1c1e;color:#fff}
+.ios-diary-limit-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.ios-diary-limit-copy strong{font-size:15px;font-weight:600}.ios-diary-limit-copy small{font-size:11px;color:var(--ios-secondary,#8e8e93);font-weight:400}
+.ios-diary-limit-value{font-size:13px;color:var(--ios-secondary,#8e8e93);white-space:nowrap}.ios-diary-limit-chevron{width:7px;height:7px;border-top:1.5px solid #c7c7cc;border-right:1.5px solid #c7c7cc;transform:rotate(45deg);margin-right:2px}
+.ios-diary-settings-overlay{position:fixed;inset:0;z-index:1000800;display:none;align-items:flex-end;background:rgba(0,0,0,.24);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}.ios-diary-settings-overlay.open{display:flex}
+.ios-diary-settings-sheet{width:100%;max-width:620px;margin:0 auto;background:var(--ios-bg,#f2f2f7);color:var(--ios-label,#000);border-radius:22px 22px 0 0;overflow:hidden;padding-bottom:max(env(safe-area-inset-bottom,0px),10px);box-shadow:0 -8px 30px rgba(0,0,0,.16)}body.dark-mode .ios-diary-settings-sheet{background:#000;color:#fff}
+.ios-diary-settings-head{height:54px;display:grid;grid-template-columns:80px 1fr 80px;align-items:center;background:var(--ios-card,#fff);border-bottom:.5px solid rgba(60,60,67,.18);padding:0 8px}.ios-diary-settings-head strong{text-align:center;font-size:17px}.ios-diary-settings-head button{border:0;background:transparent;color:#007aff;font:inherit;font-size:16px;padding:8px}.ios-diary-settings-head button:first-child{text-align:left}.ios-diary-settings-head button.done{text-align:right;font-weight:600}body.dark-mode .ios-diary-settings-head{background:#1c1c1e;border-bottom-color:rgba(84,84,88,.65)}
+.ios-diary-settings-body{padding:18px 16px 12px}.ios-diary-settings-label{font-size:12px;color:var(--ios-secondary,#8e8e93);margin:0 4px 7px}.ios-diary-settings-card{background:var(--ios-card,#fff);border-radius:14px;overflow:hidden}body.dark-mode .ios-diary-settings-card{background:#1c1c1e}
+.ios-diary-settings-row{min-height:70px;padding:10px 12px;display:flex;align-items:center;gap:12px;position:relative}.ios-diary-settings-row+.ios-diary-settings-row:before{content:"";position:absolute;left:12px;right:0;top:0;height:.5px;background:rgba(60,60,67,.18)}body.dark-mode .ios-diary-settings-row+.ios-diary-settings-row:before{background:rgba(84,84,88,.65)}
+.ios-diary-settings-row>div:first-child{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}.ios-diary-settings-row strong{font-size:15px;font-weight:600}.ios-diary-settings-row small{font-size:11px;line-height:1.35;color:var(--ios-secondary,#8e8e93)}
+.ios-diary-stepper{display:grid;grid-template-columns:32px 50px 32px;align-items:center;border-radius:10px;background:rgba(120,120,128,.12);overflow:hidden;flex:none}.ios-diary-stepper button{width:32px;height:34px;border:0;background:transparent;color:#007aff;font-size:21px;line-height:34px;padding:0}.ios-diary-stepper input{width:50px;height:34px;border:0;border-left:.5px solid rgba(60,60,67,.16);border-right:.5px solid rgba(60,60,67,.16);background:transparent;color:inherit;text-align:center;font:600 15px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;outline:none;-moz-appearance:textfield}.ios-diary-stepper input::-webkit-inner-spin-button,.ios-diary-stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.ios-diary-settings-foot{font-size:11px;line-height:1.4;color:var(--ios-secondary,#8e8e93);padding:8px 5px 2px}
+</style>
+
+<style id="ios-diary-badge-v10-style">
+#ios-tab-bar .ios-tab[data-page="more"]{position:relative}
+body.ios-has-new-diary #ios-tab-bar .ios-tab[data-page="more"]::after{content:"";position:absolute;top:1px;left:calc(50% + 10px);width:7px;height:7px;border-radius:50%;background:var(--ios-blue,#007aff);box-shadow:0 0 0 2px rgba(242,242,247,.95)}
+body.dark-mode.ios-has-new-diary #ios-tab-bar .ios-tab[data-page="more"]::after{box-shadow:0 0 0 2px rgba(28,28,30,.95)}
+.ios-diary-dot,.ios-role-diary-dot{width:8px;height:8px;min-width:8px;border-radius:50%;background:var(--ios-blue,#007aff);display:inline-block;flex:none;margin-right:2px}
+.ios-diary-dot[hidden]{display:none!important}
+#legacy-diary-entry{position:relative}
+body.ios-has-new-diary #legacy-diary-entry::after{content:"";position:absolute;top:10px;right:10px;width:8px;height:8px;border-radius:50%;background:#007aff;box-shadow:0 0 0 2px var(--ios-card,#fff)}
+</style>
+
+<!-- v10 · Settings version notes / release history -->
 <section id="ios-release-notes-page" aria-hidden="true">
   <div class="ios-release-notes-scroll">
     <header class="ios-release-notes-header">
@@ -9503,7 +9838,7 @@ body.ios-system-theme.ios-chat-open .bottom-bar{display:flex!important;visibilit
   </div>
 </section>
 
-<style id="ios-release-notes-v9-style">
+<style id="ios-release-notes-v10-style">
 /* Old floating update-log ball is retired; release notices now live in Settings. */
 #update-float-ball{display:none!important}
 #ios-release-notes-page{position:fixed;inset:0;z-index:1000010;display:none;background:var(--ios-bg,#f2f2f7);color:var(--ios-label,#000);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif}
@@ -9529,11 +9864,12 @@ body.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:after{conte
 body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:after{box-shadow:0 0 0 2px rgba(28,28,30,.95)}
 </style>
 
-<script id="ios-release-notes-v9-script">
+<script id="ios-release-notes-v10-script">
 (function(){
-  const CURRENT_RELEASE_VERSION='v9';
+  const CURRENT_RELEASE_VERSION='v10';
   const RELEASE_HISTORY=[
-    {version:'v9',tag:'当前版本',items:['备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
+    {version:'v10',tag:'当前版本',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
+    {version:'v9',items:['修复后台来信通知：普通回复、主动消息与群聊消息都会在真正到达时触发系统横幅；前台正在查看时不重复打扰。','备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
     {version:'v8',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。','修复多角色字卡串用：角色回复严格只读取自己已绑定的字卡组，不再在缺少绑定信息时自动回退到全部分组。','旧版多角色中若仍处于自动全选全部字卡组，首次载入会清理这类全选绑定；已经手动选成子集的绑定会保留。','新建角色默认不再自动绑定所有现有字卡组，需要在角色详情中选择要使用的字卡组。','修复拼字卡上限失效：开启拼字卡后每轮固定只发 1 个拼接气泡，最多使用的字卡条数严格受“最多拼”限制。']},
     {version:'v7',items:['侧边快捷球改成接近 iOS AssistiveTouch 的半透明样式，可拖动并记住位置，内含「提示」与「急救」。','聊天页顶部改为覆盖内容的毛玻璃，聊天主体恢复白色；底部导航改为 iOS 浅灰半透明材质。','修复聊天顶栏覆盖信息列表的问题；正在输入与延迟回复按角色独立，不再串到其他角色。']},
     {version:'v6',items:['新增「提示」使用指南页，集中说明角色、字卡、拼字卡、群聊、通话、关系页、备份等操作。','重做 iPhone 备份导出流程：支持原生分享/存储到文件，并补齐群聊、照片、心愿单与完整设置数据。','关系页将关系日历与纪念内容合并到「纪念」标签。']},
