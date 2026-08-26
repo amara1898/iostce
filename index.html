@@ -1029,19 +1029,34 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
     </div>
 </div>
 
+<style id="ios-mail-recipient-v10-style">
+.ios-mail-recipient-head{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 8px;font-size:13px;color:var(--text-main)}
+.ios-mail-recipient-summary{font-size:12px;color:var(--text-sub);font-weight:400}
+.ios-mail-recipient-list{overflow:hidden;border-radius:14px;background:var(--ios-card,#fff);border:.5px solid var(--ios-separator,rgba(60,60,67,.18));margin-bottom:16px}
+.ios-mail-recipient-row{width:100%;min-height:58px;border:0;border-bottom:.5px solid var(--ios-separator,rgba(60,60,67,.18));background:transparent;color:inherit;display:flex;align-items:center;gap:11px;padding:8px 12px;text-align:left;font:inherit;-webkit-tap-highlight-color:transparent}
+.ios-mail-recipient-row:last-child{border-bottom:0}.ios-mail-recipient-row:active:not(:disabled){background:var(--ios-fill,rgba(120,120,128,.12))}
+.ios-mail-recipient-row:disabled{opacity:.48}.ios-mail-recipient-avatar{width:40px;height:40px;flex:0 0 40px;border-radius:50%;overflow:hidden;background:#aeb3bc;color:#fff;display:grid;place-items:center;font-size:16px;font-weight:600}.ios-mail-recipient-avatar img{width:100%;height:100%;object-fit:cover}
+.ios-mail-recipient-copy{min-width:0;flex:1}.ios-mail-recipient-name{font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ios-mail-recipient-sub{font-size:12px;color:var(--text-sub);margin-top:2px}
+.ios-mail-recipient-check{width:24px;height:24px;flex:0 0 24px;border-radius:50%;border:1.5px solid #c7c7cc;display:grid;place-items:center}.ios-mail-recipient-row.selected .ios-mail-recipient-check{background:#007aff;border-color:#007aff}.ios-mail-recipient-row.selected .ios-mail-recipient-check::after{content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(0,-1px)}
+#mail-send-btn:disabled{opacity:.38;pointer-events:none}
+body.dark-mode .ios-mail-recipient-list{background:#1c1c1e;border-color:#38383a}
+</style>
+
 <!-- 写信弹窗 -->
 <div class="modal-overlay" id="write-mail-modal" style="z-index: 100000;">
-    <div class="modal-content" style="height: auto; max-height: 80vh;">
+    <div class="modal-content" style="height: auto; max-height: 88vh;">
         <div class="modal-header">
-            <h3>寄信给 Ta</h3>
+            <h3>写信</h3>
             <button class="close-btn" onclick="closeWriteMailModal()">取消</button>
         </div>
-        <div class="modal-body" style="padding: 16px;">
-            <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.5; font-weight:300;">寄出后信件需要时间跋涉，Ta 收到后阅读并回信，一般在明后天才能送达。</div>
-            <div class="input-item" style="margin-bottom: 24px;">
-                <textarea class="textarea-box" id="mail-content-input" placeholder="见字如面..." style="height: 180px; background: repeating-linear-gradient(0deg, transparent, transparent 24px, var(--line-light) 24px, var(--line-light) 25px); line-height: 25px; padding-top: 4px; border-style:dashed;"></textarea>
+        <div class="modal-body" style="padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+            <div style="font-size:11px;color:var(--text-sub);margin-bottom:14px;line-height:1.5;font-weight:300;">可以同时寄给多个角色。每个人会收到同一封信，再按照自己的字卡和自己的时间分别回信。</div>
+            <div class="ios-mail-recipient-head"><span>收件人</span><span class="ios-mail-recipient-summary" id="mail-recipient-summary">请选择</span></div>
+            <div class="ios-mail-recipient-list" id="mail-recipient-list"></div>
+            <div class="input-item" style="margin-bottom:24px;">
+                <textarea class="textarea-box" id="mail-content-input" placeholder="见字如面..." style="height:180px;background:repeating-linear-gradient(0deg,transparent,transparent 24px,var(--line-light) 24px,var(--line-light) 25px);line-height:25px;padding-top:4px;border-style:dashed;"></textarea>
             </div>
-            <button class="btn-full primary" onclick="sendMail()" style="border-style: double; border-width: 3px;">贴上邮票，投入邮筒</button>
+            <button class="btn-full primary" id="mail-send-btn" onclick="sendMail()" style="border-style:double;border-width:3px;">贴上邮票，投入邮筒</button>
         </div>
     </div>
 </div>
@@ -5435,6 +5450,15 @@ function initDiaryData() {
         });
         appState.diaryData.roleScopedV10 = true;
     }
+
+    // v10 修订：旧慢信同样没有角色归属。首次升级时归到当前角色，之后所有寄出与回信都按 roleId 分开。
+    if (!appState.diaryData.letterRoleScopedV10) {
+        const fallbackRoleId = String(appState.currentRoleId || appState.roles?.[0]?.id || 'default');
+        appState.diaryData.letters.forEach(letter => {
+            if (!letter.roleId) letter.roleId = fallbackRoleId;
+        });
+        appState.diaryData.letterRoleScopedV10 = true;
+    }
 }
 
 function clampDiaryCardLimit(value, fallback) {
@@ -5839,142 +5863,223 @@ if (!window.__traceDiaryWatcherV10) {
 }
 
 // --- 慢信功能 ---
+let mailSelectedRoleIdsV10 = new Set();
+
+function mailRoleById(roleId) {
+    const id = String(roleId ?? '');
+    return (appState.roles || []).find(r => String(r.id) === id) || null;
+}
+
+function mailLettersForRole(roleOrId) {
+    initDiaryData();
+    const id = diaryRoleId(roleOrId || appState.currentRoleId);
+    return appState.diaryData.letters.filter(l => String(l.roleId || '') === id);
+}
+
+function mailHasPendingReplyForRole(roleOrId) {
+    const id = diaryRoleId(roleOrId);
+    if (!id) return false;
+    const now = Date.now();
+    return appState.diaryData.letters.some(l => String(l.roleId || '') === id && l.author === 'them' && Number(l.arriveTime || 0) > now);
+}
+
+function renderMailRecipientPicker() {
+    const list = document.getElementById('mail-recipient-list');
+    const summary = document.getElementById('mail-recipient-summary');
+    const sendBtn = document.getElementById('mail-send-btn');
+    if (!list) return;
+    initDiaryData();
+    const roles = appState.roles || [];
+    if (!roles.length) {
+        list.innerHTML = '<div style="padding:18px;text-align:center;color:var(--text-sub);font-size:13px">还没有可寄信的角色</div>';
+        if (summary) summary.textContent = '0 人';
+        if (sendBtn) sendBtn.disabled = true;
+        return;
+    }
+
+    list.innerHTML = roles.map((role, index) => {
+        const id = String(role.id);
+        const selected = mailSelectedRoleIdsV10.has(id);
+        const pending = mailHasPendingReplyForRole(id);
+        const displayName = String(role.remark || '').trim() || role.name || 'Ta';
+        const avatar = role.avatar ? `<img src="${escapeDiaryHtml(role.avatar)}" alt="">` : escapeDiaryHtml(displayName.slice(0,1) || 'T');
+        return `<button type="button" class="ios-mail-recipient-row${selected ? ' selected' : ''}" ${pending ? 'disabled' : ''} onclick="toggleMailRecipientByIndex(${index})">
+            <span class="ios-mail-recipient-avatar">${avatar}</span>
+            <span class="ios-mail-recipient-copy"><span class="ios-mail-recipient-name">${escapeDiaryHtml(displayName)}</span><span class="ios-mail-recipient-sub">${pending ? '回信正在路上' : (selected ? '已选择' : '轻点选择')}</span></span>
+            <span class="ios-mail-recipient-check" aria-hidden="true"></span>
+        </button>`;
+    }).join('');
+
+    const count = mailSelectedRoleIdsV10.size;
+    if (summary) summary.textContent = count ? `已选择 ${count} 人` : '请选择';
+    if (sendBtn) {
+        sendBtn.disabled = count === 0;
+        sendBtn.textContent = count > 1 ? `贴上邮票，寄给 ${count} 人` : '贴上邮票，投入邮筒';
+    }
+}
+
+window.toggleMailRecipientByIndex = function(index) {
+    const role = (appState.roles || [])[Number(index)];
+    if (!role) return;
+    const id = String(role.id);
+    if (mailHasPendingReplyForRole(id)) return;
+    if (mailSelectedRoleIdsV10.has(id)) mailSelectedRoleIdsV10.delete(id);
+    else mailSelectedRoleIdsV10.add(id);
+    renderMailRecipientPicker();
+};
+
 function openWriteMailModal() {
-    document.getElementById('mail-content-input').value = "";
+    initDiaryData();
+    document.getElementById('mail-content-input').value = '';
+    mailSelectedRoleIdsV10 = new Set();
+    const current = getCurrentRole();
+    if (current && !mailHasPendingReplyForRole(current.id)) mailSelectedRoleIdsV10.add(String(current.id));
+    renderMailRecipientPicker();
     document.getElementById('write-mail-modal').classList.add('open');
 }
 function closeWriteMailModal() { document.getElementById('write-mail-modal').classList.remove('open'); }
 
+function nextMailId(seed = 0) {
+    window.__traceMailIdSeqV10 = (Number(window.__traceMailIdSeqV10 || 0) + 1) % 900;
+    return Date.now() * 1000 + window.__traceMailIdSeqV10 + (Number(seed || 0) % 50);
+}
+
 function sendMail() {
+    initDiaryData();
     const content = document.getElementById('mail-content-input').value.trim();
-    if (!content) { showToast("信件内容不能为空哦"); return; }
-    
-    // 保存我的信
-    appState.diaryData.letters.unshift({
-        id: Date.now(),
-        author: 'me',
-        content: content,
-        sendTime: Date.now(),
-        arriveTime: Date.now() // 我的信立刻放入收纳盒
-    });
-    
-    // 生成 Ta 的回信，模拟延迟，时间设置为 12~36 小时后抵达
-    const delayHours = 12 + Math.random() * 24; 
-    const delayMs = delayHours * 60 * 60 * 1000;
-    
-    // 测试专用：如果你想马上看到回信，可以把上一行改成 const delayMs = 60 * 1000; （1分钟后到）
+    if (!content) { showToast('信件内容不能为空哦'); return; }
 
-    let taContent = "见字如面。\n\n你的来信我已收到。";
-    const role = getCurrentRole();
+    const selectedRoles = (appState.roles || []).filter(role => mailSelectedRoleIdsV10.has(String(role.id)) && !mailHasPendingReplyForRole(role.id));
+    if (!selectedRoles.length) { showToast('先选择至少一位可以收信的角色'); renderMailRecipientPicker(); return; }
+
+    const now = Date.now();
+    const batchId = `mail-${now}-${Math.random().toString(36).slice(2,8)}`;
     const limits = ensureDiaryCardLimits();
-    const selectedCards = pickDiaryCardsForRole(role, limits.letter);
-    if(selectedCards.length) {
-        taContent += "\n\n" + selectedCards.map(c => String(c.text || '').trim()).join("\n\n");
-    } else {
-        taContent += "\n\n愿你今天一切顺利。";
-    }
 
-    appState.diaryData.letters.unshift({
-        id: Date.now() + 1,
-        author: 'them',
-        content: taContent,
-        cardSources: selectedCards.map(c => ({ text:String(c.text || '').trim(), group:String(c.group || '日常') })),
-        sendTime: Date.now(),
-        arriveTime: Date.now() + delayMs, 
-        isRead: false
+    selectedRoles.forEach((role, index) => {
+        const roleId = String(role.id);
+        appState.diaryData.letters.unshift({
+            id: nextMailId(index * 2),
+            batchId,
+            roleId,
+            author: 'me',
+            content,
+            sendTime: now,
+            arriveTime: now
+        });
+
+        // 每位角色独立抽取自己的绑定字卡，并拥有独立的回信送达时间。
+        const selectedCards = pickDiaryCardsForRole(role, limits.letter);
+        let taContent = '见字如面。\n\n你的来信我已收到。';
+        if (selectedCards.length) {
+            taContent += '\n\n' + selectedCards.map(c => String(c.text || '').trim()).join('\n\n');
+        } else {
+            taContent += '\n\n愿你今天一切顺利。';
+        }
+        const delayHours = 12 + Math.random() * 24;
+        appState.diaryData.letters.unshift({
+            id: nextMailId(index * 2 + 1),
+            batchId,
+            roleId,
+            author: 'them',
+            content: taContent,
+            cardSources: selectedCards.map(c => ({ text:String(c.text || '').trim(), group:String(c.group || '日常') })),
+            sendTime: now,
+            arriveTime: now + delayHours * 60 * 60 * 1000,
+            isRead: false
+        });
     });
-    
+
     saveState();
     closeWriteMailModal();
     checkArrivedLetters();
     renderMailList();
-    showToast("✅ 信件已交给邮递员");
+    const names = selectedRoles.map(r => String(r.remark || '').trim() || r.name || 'Ta');
+    const label = names.length <= 3 ? names.join('、') : `${names.slice(0,3).join('、')} 等 ${names.length} 人`;
+    showToast(`✅ 已寄给 ${label}`);
 }
 
 function checkArrivedLetters() {
+    initDiaryData();
     const now = Date.now();
-    let hasLettersOnTheWay = false;
-    let expectedArriveStr = "";
-    
-    appState.diaryData.letters.forEach(letter => {
-        if (letter.author === 'them' && letter.arriveTime > now) {
-            hasLettersOnTheWay = true;
-            // 算一下明天还是后天
-            const d = new Date(letter.arriveTime);
-            expectedArriveStr = `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        }
-    });
+    const role = getCurrentRole();
+    const pending = mailLettersForRole(role)
+        .filter(letter => letter.author === 'them' && Number(letter.arriveTime || 0) > now)
+        .sort((a,b) => Number(a.arriveTime||0) - Number(b.arriveTime||0));
 
     const statusEl = document.getElementById('mail-transit-status');
     const writeBtn = document.getElementById('write-mail-btn');
-    
-    if (hasLettersOnTheWay) {
+    if (!statusEl || !writeBtn) return;
+
+    if (pending.length) {
+        const d = new Date(pending[0].arriveTime);
+        const expectedArriveStr = `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         statusEl.style.display = 'block';
-        statusEl.innerHTML = `📮 <b>提示</b><br>有一封回信正在翻山越岭<br>预计在 ${expectedArriveStr} 送达...`;
-        writeBtn.style.display = 'none'; // 等信期间不能再狂轰乱炸
+        statusEl.innerHTML = `📮 <b>${escapeDiaryHtml(role.name || 'Ta')} 的回信正在路上</b><br>预计最早在 ${expectedArriveStr} 送达`;
     } else {
         statusEl.style.display = 'none';
-        writeBtn.style.display = 'block';
     }
+    // 即使当前角色正在回信，也仍然可以打开写信页并选择其他角色。
+    writeBtn.style.display = 'block';
 }
 
 function renderMailList() {
+    initDiaryData();
     const list = document.getElementById('mail-list-area');
-    list.innerHTML = "";
-    
+    if (!list) return;
+    list.innerHTML = '';
+
+    const role = getCurrentRole();
+    const roleName = String(role.remark || '').trim() || role.name || 'Ta';
     const now = Date.now();
-    // 只渲染已经送达的信件
-    const arrivedLetters = appState.diaryData.letters.filter(l => l.arriveTime <= now);
-    
-    if (arrivedLetters.length === 0) {
-        list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:12px; margin-top:30px;">收纳盒空空如也</div>';
+    const arrivedLetters = mailLettersForRole(role)
+        .filter(l => Number(l.arriveTime || 0) <= now)
+        .sort((a,b) => Number(b.sendTime||0) - Number(a.sendTime||0));
+
+    if (!arrivedLetters.length) {
+        list.innerHTML = '<div style="text-align:center;color:var(--text-sub);font-size:12px;margin-top:30px">收纳盒空空如也</div>';
         return;
     }
-    
-    const roleName = getCurrentRole().name || 'Ta';
-    
+
     arrivedLetters.forEach(l => {
         const isMe = l.author === 'me';
         const d = new Date(l.sendTime);
         const timeStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
         const isUnread = (!isMe && l.isRead === false);
-        
         const card = document.createElement('div');
-        card.className = "mail-card";
+        card.className = 'mail-card';
         card.onclick = () => readMail(l.id);
-        
         card.innerHTML = `
             <div class="mail-stamp">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             </div>
             <div class="mail-author">
-                ${isUnread ? '<span style="color:#d32f2f; margin-right:4px;">[未读]</span>' : ''}
-                ${isMe ? '我 寄出的信' : `来自 ${roleName} 的信`}
+                ${isUnread ? '<span style="color:#d32f2f;margin-right:4px">[未读]</span>' : ''}
+                ${isMe ? `我 寄给 ${escapeDiaryHtml(roleName)} 的信` : `来自 ${escapeDiaryHtml(roleName)} 的信`}
             </div>
-            <div class="mail-preview">${timeStr} - ${l.content.substring(0, 15).replace(/\n/g, ' ')}...</div>
-        `;
+            <div class="mail-preview">${timeStr} - ${escapeDiaryHtml(String(l.content || '').substring(0,15).replace(/\n/g,' '))}...</div>`;
         list.appendChild(card);
     });
 }
 
 function readMail(id) {
+    initDiaryData();
     const letter = appState.diaryData.letters.find(l => l.id === id);
     if (!letter) return;
-    
+
     if (letter.author === 'them' && letter.isRead === false) {
         letter.isRead = true;
         saveState();
         renderMailList();
     }
-    
-    const roleName = getCurrentRole().name || 'Ta';
+
+    const role = mailRoleById(letter.roleId) || getCurrentRole();
+    const roleName = String(role?.remark || '').trim() || role?.name || 'Ta';
     const isMe = letter.author === 'me';
     const d = new Date(letter.sendTime);
-    
-    document.getElementById('read-mail-title').innerText = isMe ? '我的底稿' : `来自 ${roleName} 的回信`;
+    document.getElementById('read-mail-title').innerText = isMe ? `寄给 ${roleName} 的信` : `来自 ${roleName} 的回信`;
     document.getElementById('read-mail-content').innerText = letter.content;
     document.getElementById('read-mail-time').innerText = `写于 ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-    
     document.getElementById('read-mail-modal').classList.add('open');
 }
 function closeReadMailModal() { document.getElementById('read-mail-modal').classList.remove('open'); }
@@ -9868,7 +9973,7 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
 (function(){
   const CURRENT_RELEASE_VERSION='v10';
   const RELEASE_HISTORY=[
-    {version:'v10',tag:'当前版本',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
+    {version:'v10',tag:'当前版本',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','写信页新增多角色收件人选择：可一次勾选多个角色，同一封信分别进入每个角色的独立信箱，每个人使用自己的绑定字卡并在自己的随机时间回信；已有回信在途的角色会暂时不可重复寄送。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
     {version:'v9',items:['修复后台来信通知：普通回复、主动消息与群聊消息都会在真正到达时触发系统横幅；前台正在查看时不重复打扰。','备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
     {version:'v8',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。','修复多角色字卡串用：角色回复严格只读取自己已绑定的字卡组，不再在缺少绑定信息时自动回退到全部分组。','旧版多角色中若仍处于自动全选全部字卡组，首次载入会清理这类全选绑定；已经手动选成子集的绑定会保留。','新建角色默认不再自动绑定所有现有字卡组，需要在角色详情中选择要使用的字卡组。','修复拼字卡上限失效：开启拼字卡后每轮固定只发 1 个拼接气泡，最多使用的字卡条数严格受“最多拼”限制。']},
     {version:'v7',items:['侧边快捷球改成接近 iOS AssistiveTouch 的半透明样式，可拖动并记住位置，内含「提示」与「急救」。','聊天页顶部改为覆盖内容的毛玻璃，聊天主体恢复白色；底部导航改为 iOS 浅灰半透明材质。','修复聊天顶栏覆盖信息列表的问题；正在输入与延迟回复按角色独立，不再串到其他角色。']},
