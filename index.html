@@ -1629,7 +1629,7 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
                         <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">
                             <div style="padding-right:12px;">
                                 <div style="font-size:13px;color:var(--text-main);">在一个气泡里组合多条字卡</div>
-                                <div style="font-size:11px;color:var(--text-sub);margin-top:3px;line-height:1.45;">只会从当前角色已绑定的字卡组里抽取。</div>
+                                <div style="font-size:11px;color:var(--text-sub);margin-top:3px;line-height:1.45;">只会从当前角色已绑定的字卡组里抽取；开启后每轮只发送 1 个拼接气泡，最少/最多就是这个气泡使用的字卡条数。</div>
                             </div>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="set-card-stitch-enable" onchange="updateSettings()">
@@ -1909,7 +1909,7 @@ let appState = {
 
 function getCurrentRole() { 
     let r = appState.roles.find(r => r.id === appState.currentRoleId) || appState.roles[0]; 
-    if(!r.allowedCardGroups) r.allowedCardGroups = [...new Set(appState.cards.map(c => c.group))];
+    ensureRoleCardBindings(r);
     if(!r.allowedStickerGroups) r.allowedStickerGroups = [...new Set(appState.stickers.map(s => s.group))];
     return r;
 }
@@ -2031,6 +2031,7 @@ window.onload = async () => {
             
             appState = { ...appState, ...savedState, settings: { ...appState.settings, ...savedState.settings } };
         }
+        migrateStrictRoleBindingsV8();
         
         // 开机时静默把数据库的庞大Base64转化成短指针
         if (appState.settings.customFont) {
@@ -2320,16 +2321,43 @@ function getAllWordcardGroups() {
 function escapeRolePanelText(value) {
     return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
+function sanitizeRoleCardGroups(groups) {
+    const available = new Set(getAllWordcardGroups());
+    return [...new Set((Array.isArray(groups) ? groups : []).map(g => String(g ?? '').trim()).filter(g => g && available.has(g)))];
+}
 function ensureRoleCardBindings(role) {
     if(!role) return [];
-    if(!Array.isArray(role.allowedCardGroups)) role.allowedCardGroups = [...getAllWordcardGroups()];
+    // v8 修订：严格按角色绑定，不再在缺少绑定信息时偷偷回退成“全部字卡组”。
+    role.allowedCardGroups = sanitizeRoleCardGroups(role.allowedCardGroups);
     return role.allowedCardGroups;
+}
+function migrateStrictRoleBindingsV8() {
+    if(!appState || !appState.settings || appState.settings.strictRoleBindingsV8) return;
+    const roles = Array.isArray(appState.roles) ? appState.roles : [];
+    const allGroups = getAllWordcardGroups();
+    const fullBoundRoles = roles.filter(role => {
+        const list = sanitizeRoleCardGroups(role.allowedCardGroups);
+        return allGroups.length > 1 && list.length === allGroups.length && allGroups.every(g => list.includes(g));
+    });
+    // 旧版会给多个角色自动全选所有现有字卡组，这是最容易串角色的来源。
+    // 只要是多角色环境，旧角色仍处于“全选全部分组”就做一次安全清理；已经手动选成子集的绑定全部保留。
+    const shouldClearLegacyAutoAll = roles.length > 1 && fullBoundRoles.length > 0;
+    let clearedCount = 0;
+    roles.forEach(role => {
+        const cleaned = sanitizeRoleCardGroups(role.allowedCardGroups);
+        const clearThis = shouldClearLegacyAutoAll && fullBoundRoles.includes(role);
+        role.allowedCardGroups = clearThis ? [] : cleaned;
+        if(clearThis) clearedCount++;
+    });
+    appState.settings.strictRoleBindingsV8 = true;
+    try { saveState(); } catch(e) {}
+    if(clearedCount > 0) setTimeout(() => { try { showToast(`已清理 ${clearedCount} 个旧角色的自动全选字卡，请重新绑定各自词库`); } catch(e) {} }, 900);
 }
 async function saveNewRole() {
     const name = document.getElementById('new-role-name').value.trim();
     if(!name) { await uiAlert('请输入角色姓名'); return; }
     const id = 'role_' + Date.now();
-    appState.roles.push({ id, name, avatar: tempNewRoleAvatar, messages: [], allowedCardGroups: [...getAllWordcardGroups()], allowedStickerGroups: [...new Set(appState.stickers.map(s=>s.group))] });
+    appState.roles.push({ id, name, avatar: tempNewRoleAvatar, messages: [], allowedCardGroups: [], allowedStickerGroups: [...new Set(appState.stickers.map(s=>s.group))] });
     tempNewRoleAvatar = '';
     const newRolePreview = document.getElementById('new-role-avatar-preview');
     const newRolePlaceholder = document.getElementById('new-role-avatar-placeholder');
@@ -2791,12 +2819,13 @@ async function sendInstantImage(e) {
 function getBoundWordcardsForRole(role) {
     if(!role) return [];
     ensureRoleCardBindings(role);
-    return (appState.cards || []).filter(c => role.allowedCardGroups.includes(c.group));
+    const allowed = new Set(ensureRoleCardBindings(role));
+    return (appState.cards || []).filter(c => allowed.has(String(c.group || '日常').trim() || '日常'));
 }
 
 function renderAllowedGroups() {
     const role = getCurrentRole();
-    const cardGroups = [...new Set(appState.cards.map(c => c.group))]; if(!cardGroups.includes('日常')) cardGroups.unshift('日常'); if(!role.allowedCardGroups) role.allowedCardGroups = [...cardGroups];
+    const cardGroups = [...new Set(appState.cards.map(c => c.group || '日常'))]; if(!cardGroups.includes('日常')) cardGroups.unshift('日常'); ensureRoleCardBindings(role);
     const cContainer = document.getElementById('card-allowed-groups');
     if(cContainer) cContainer.innerHTML = cardGroups.map(g => `<label style="display:flex; align-items:center; font-size:12px; gap:4px; cursor:pointer;"><input type="checkbox" class="card-checkbox" style="margin-right:0;" value="${g}" ${role.allowedCardGroups.includes(g) ? 'checked' : ''} onchange="updateAllowedGroups()">${g}</label>`).join('');
     
@@ -3311,8 +3340,8 @@ function markMyMessagesAsRead(targetRoleId = appState.currentRoleId) {
 function buildStitchedCardText(validCards) {
     buildStitchedCardText.lastSources = [];
     if(!appState.settings.enableCardStitch || !Array.isArray(validCards) || validCards.length === 0) return null;
-    let minCount = Math.max(1, Number(appState.settings.minStitchCards) || 2);
-    let maxCount = Math.max(minCount, Number(appState.settings.maxStitchCards) || 4);
+    let minCount = Math.min(10, Math.max(1, Number(appState.settings.minStitchCards) || 2));
+    let maxCount = Math.min(10, Math.max(minCount, Number(appState.settings.maxStitchCards) || 4));
     const availableCount = validCards.length;
     minCount = Math.min(minCount, availableCount);
     maxCount = Math.min(maxCount, availableCount);
@@ -3333,7 +3362,7 @@ function triggerAutoReply() {
     const previousTimer = roleAutoReplyTimers.get(targetRoleId);
     if(previousTimer) clearTimeout(previousTimer); // 只打断这个角色自己的思考，不影响其他角色
 
-    if(!role.allowedCardGroups) role.allowedCardGroups = [...new Set(appState.cards.map(c => c.group))];
+    ensureRoleCardBindings(role);
     if(!role.allowedStickerGroups) role.allowedStickerGroups = [...new Set(appState.stickers.map(s => s.group))];
 
     let validCards = getBoundWordcardsForRole(role).map(c => ({ text: c.text, group: c.group || '日常', type: 'text', isWordcard: true }));
@@ -3343,7 +3372,7 @@ const customPatsStr = appState.settings.customPats || "";
 let pats = customPatsStr.split('\n').map(s=>s.trim()).filter(s=>s!=="");
 
 // 不再把拍一拍放进普通词库池，单独保留 pats 供下面做 3% 的独立判定
-let pool = [...validCards, ...validStickers];
+let pool = (appState.settings.enableCardStitch && validCards.length > 0) ? [...validCards] : [...validCards, ...validStickers];
 if(pool.length === 0) pool = [{ text: "嗯嗯", type: 'text' }];
 
     const readDelay = Math.random() * 1500 + 500;
@@ -3366,7 +3395,9 @@ if(pool.length === 0) pool = [{ text: "嗯嗯", type: 'text' }];
         const maxMs = (appState.settings.maxDelaySec || 6) * 1000;
         let maxCount = appState.settings.maxReplyCount || 1; 
         let count = 1;
-        if (maxCount > 1) {
+        // 拼字卡本身就是“一个气泡组合多条字卡”。开启后不再叠加“单次最多回复”产生多个拼接气泡，
+        // 否则设置最多 5 条时，一轮可能出现 2×5、3×5 条，看起来突破上限。
+        if (!appState.settings.enableCardStitch && maxCount > 1) {
             let weights = [];
             for (let i = 1; i <= maxCount; i++) {
                 if (i === 1) weights.push(50);       // 回 1 条的权重极高 (最常见)
@@ -8713,10 +8744,9 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
 
   function groupReplyText(role){
     let cards=[]; try{ cards=typeof getBoundWordcardsForRole==='function'?getBoundWordcardsForRole(role):[]; }catch(e){}
-    if(!cards.length) cards=(appState.cards||[]).filter(c=>!role?.allowedCardGroups || role.allowedCardGroups.includes(c.group));
     if(!cards.length) return '嗯嗯';
     if(appState.settings?.enableCardStitch && typeof buildStitchedCardText==='function'){
-      const t=buildStitchedCardText(cards.map(c=>({text:c.text,type:'text'}))); if(t)return t;
+      const t=buildStitchedCardText(cards.map(c=>({text:c.text,group:c.group||'日常',type:'text'}))); if(t)return t;
     }
     return String(cards[Math.floor(Math.random()*cards.length)]?.text||'嗯嗯');
   }
@@ -9364,7 +9394,7 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
 (function(){
   const CURRENT_RELEASE_VERSION='v8';
   const RELEASE_HISTORY=[
-    {version:'v8',tag:'当前版本',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。']},
+    {version:'v8',tag:'当前版本',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。','修复多角色字卡串用：角色回复严格只读取自己已绑定的字卡组，不再在缺少绑定信息时自动回退到全部分组。','旧版多角色中若仍处于自动全选全部字卡组，首次载入会清理这类全选绑定；已经手动选成子集的绑定会保留。','新建角色默认不再自动绑定所有现有字卡组，需要在角色详情中选择要使用的字卡组。','修复拼字卡上限失效：开启拼字卡后每轮固定只发 1 个拼接气泡，最多使用的字卡条数严格受“最多拼”限制。']},
     {version:'v7',items:['侧边快捷球改成接近 iOS AssistiveTouch 的半透明样式，可拖动并记住位置，内含「提示」与「急救」。','聊天页顶部改为覆盖内容的毛玻璃，聊天主体恢复白色；底部导航改为 iOS 浅灰半透明材质。','修复聊天顶栏覆盖信息列表的问题；正在输入与延迟回复按角色独立，不再串到其他角色。']},
     {version:'v6',items:['新增「提示」使用指南页，集中说明角色、字卡、拼字卡、群聊、通话、关系页、备份等操作。','重做 iPhone 备份导出流程：支持原生分享/存储到文件，并补齐群聊、照片、心愿单与完整设置数据。','关系页将关系日历与纪念内容合并到「纪念」标签。']},
     {version:'v5',items:['角色详情新增字卡趋势统计，可查看常用字卡、出现次数与时间范围。','新增恋爱周报与关系日历，用聊天数据整理每周互动趋势。','角色详情顶部整理为「字卡趋势 / 恋爱周报 / 纪念」三个分类。']},
