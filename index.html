@@ -725,12 +725,12 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
     <div class="bottom-bar">
         <div class="reply-preview" id="reply-preview"><span id="reply-text">引用内容</span><span class="close" onclick="cancelReply()">✕</span></div>
         <div class="input-row">
-            <button class="icon-btn" id="stack-toggle-btn" onclick="toggleStackMode()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="4" y="4" width="12" height="12"></rect><path d="M8 20h12V8"></path></svg></button>
+            <button class="icon-btn" id="stack-toggle-btn" onclick="toggleStackMode()" style="display:none!important" aria-hidden="true" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="4" y="4" width="12" height="12"></rect><path d="M8 20h12V8"></path></svg></button>
             <button class="icon-btn" onclick="document.getElementById('instant-img-upload').click()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18"></rect><path d="M3 15l5-5 5 5"></path><path d="M13 17l3-3 5 5"></path><circle cx="8" cy="8" r="1.5"></circle></svg></button>
             <input type="file" id="instant-img-upload" accept="image/*" onchange="sendInstantImage(event)">
             <button class="icon-btn" onclick="toggleStickers()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></button>
-            <div class="input-box" id="msg-input" contenteditable="true"></div>
-            <button class="icon-btn" onclick="sendMessage()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg></button>
+            <textarea class="input-box" id="msg-input" rows="1" placeholder="单击发送 · 双击完成并回复" aria-label="消息输入框"></textarea>
+            <button class="icon-btn" onclick="iosSmartSendTap(event)" aria-label="发送；双击完成并让对方回复"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg></button>
         </div>
         
         <div class="sticker-drawer" id="sticker-drawer">
@@ -1646,11 +1646,12 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
                         <div class="group-select-row"><select id="card-group-select"></select><button class="btn-noshadow icon-btn" style="width:auto; padding: 0 10px; font-size: 12px;" onclick="createNewGroup()">+ 新增分组</button></div>
                         <textarea class="textarea-box" id="card-text-input" placeholder="每行一句文本，回车换行分割&#10;在吗&#10;怎么啦&#10;摸摸头"></textarea>
                         <button class="btn-full primary" onclick="importTextCards()">注入词库</button>
-<div style="display:flex; gap:8px; margin-top:8px;">
-    <button class="btn-full" onclick="exportCards()" style="border-style:dashed;">导出字卡</button>
-    <button class="btn-full" onclick="document.getElementById('import-cards-upload').click()" style="border-style:dashed;">导入字卡</button>
-    <input type="file" id="import-cards-upload" accept=".json" style="display:none;" onchange="importCards(event)">
+<div class="ios-card-json-tools">
+    <button class="btn-full" onclick="document.getElementById('import-cards-upload').click()">导入字卡</button>
+    <button class="btn-full" onclick="openWordcardExportSheet()">导出字卡</button>
+    <input type="file" id="import-cards-upload" accept=".json,application/json" style="display:none;" onchange="importCards(event)">
 </div>
+<div class="ios-card-json-note">兼容 Trace 原字卡 JSON、整站备份里的 cards / wordCards，以及 reply-groups 的 customReplyGroups 格式。</div>
                     </div>
                     <div class="card-group" id="card-list-container">
                         <div class="setting-label">已装载内存</div>
@@ -1784,11 +1785,11 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
 <div class="modal-overlay" id="export-modal" style="z-index: 100000;">
     <div class="modal-content ios-export-sheet">
         <div class="modal-header ios-export-header">
-            <h3>选择要备份的数据</h3>
+            <h3>备份与恢复</h3>
             <button class="close-btn" onclick="closeExportModal()">取消</button>
         </div>
         <div class="modal-body ios-export-body">
-            <div class="ios-export-note">勾选你想包含在备份文件中的数据模块：</div>
+            <div class="ios-export-note">勾选要写入导出 JSON 的数据模块；导入备份不受这里的勾选项影响。</div>
             <div class="ios-export-list">
                 <label><input type="checkbox" class="card-checkbox export-cb" value="settings" checked><span>基础设置（字体 / 壁纸 / UI）</span></label>
                 <label><input type="checkbox" class="card-checkbox export-cb" value="roles" checked><span>角色、单聊与纪念册</span></label>
@@ -1806,9 +1807,22 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
             </div>
         </div>
         <div class="ios-export-footer">
-            <button class="btn-full primary ios-export-primary" onclick="confirmExportData()">导出备份</button>
-            <button class="ios-export-copy" onclick="copyExportData()">复制备份数据</button>
+            <div class="ios-export-main-actions">
+                <button class="btn-full primary ios-export-primary" onclick="confirmExportData()">导出 JSON 备份</button>
+                <button class="btn-full ios-export-import" onclick="closeExportModal();document.getElementById('import-data-file').click()">导入 JSON 备份</button>
+            </div>
         </div>
+    </div>
+</div>
+
+<!-- 字卡导出：iOS 风格操作表 -->
+<div class="ios-wordcard-action-overlay" id="ios-wordcard-export-sheet" aria-hidden="true" onclick="if(event.target===this)closeWordcardExportSheet()">
+    <div class="ios-wordcard-action-wrap" role="dialog" aria-label="导出字卡">
+        <div class="ios-wordcard-action-group">
+            <button type="button" onclick="wordcardExportJSONOption()">导出 JSON</button>
+            <button type="button" onclick="wordcardCopyTextOption()">复制到剪贴板</button>
+        </div>
+        <button type="button" class="ios-wordcard-action-cancel" onclick="closeWordcardExportSheet()">取消</button>
     </div>
 </div>
 
@@ -2775,39 +2789,20 @@ function switchTab(tabId) { document.querySelectorAll('#settings-modal .tab-btn'
 
 /* ================= 交互核心区域 ================= */
 
-function toggleStackMode() { 
-    isStackMode = !isStackMode; 
-    const btn = document.getElementById('stack-toggle-btn'); 
+function toggleStackMode() {
+    // v9: 连发开关已取消。保留空壳只为兼容旧主题/旧按钮引用。
+    isStackMode = false;
+    const btn = document.getElementById('stack-toggle-btn');
+    if(btn) btn.classList.remove('active');
     const input = document.getElementById('msg-input');
-
-    if (isStackMode) { 
-        btn.classList.add('active'); 
-        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-        input.setAttribute('data-placeholder', '[连发模式] 虚线暂存，发完点左侧✅发送');
-    } else { 
-        btn.classList.remove('active'); 
-        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="4" y="4" width="12" height="12"></rect><path d="M8 20h12V8"></path></svg>`;
-        input.removeAttribute('data-placeholder');
-
-        const role = getCurrentRole();
-        let hasDrafts = false;
-        role.messages.forEach(m => {
-            if (m.isDraft) { m.isDraft = false; hasDrafts = true; }
-        });
-
-        if (hasDrafts) {
-            saveState();
-            renderMessages(false, true); 
-            triggerAutoReply(); 
-        }
-    } 
+    if(input) input.placeholder = '单击发送 · 双击完成并回复';
 }
 
 async function sendInstantImage(e) { 
     if(!e.target.files[0]) return; 
     try { 
         const b64 = await compressImage(e.target.files[0]); 
-        addMessage({ id: Date.now(), text: b64, type: 'img', sender: 'me', time: Date.now(), quoteText: currentQuote, isRead: false, isDraft: isStackMode }); 
+        addMessage({ id: Date.now(), text: b64, type: 'img', sender: 'me', time: Date.now(), quoteText: currentQuote, isRead: false, isDraft: false }); 
         cancelReply(); 
         if (!isStackMode) triggerAutoReply(); 
     } catch(err) { 
@@ -2922,23 +2917,88 @@ function renderStickers() {
     grid.innerHTML = `<div class="sticker-add" onclick="document.getElementById('sticker-upload').click()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>`;
     appState.stickers.filter(s => s.group === currentStickerGroup).forEach(sticker => {
         const img = document.createElement('img'); img.src = sticker.url; img.className = 'sticker-item';
-        img.onclick = () => { addMessage({ id: Date.now(), text: sticker.url, type: 'img', sender: 'me', time: Date.now(), quoteText: currentQuote, isRead: false, isDraft: isStackMode }); cancelReply(); document.getElementById('sticker-drawer').classList.remove('active'); if (!isStackMode) triggerAutoReply(); };
+        img.onclick = () => { addMessage({ id: Date.now(), text: sticker.url, type: 'img', sender: 'me', time: Date.now(), quoteText: currentQuote, isRead: false, isDraft: false }); cancelReply(); document.getElementById('sticker-drawer').classList.remove('active'); if (!isStackMode) triggerAutoReply(); };
         grid.appendChild(img);
     });
 }
 
-function sendMessage() { 
-    const input = document.getElementById('msg-input'); 
-    const text = input.innerText.trim(); 
-    if (!text) return; 
-    
-    addMessage({ id: Date.now(), text: text, type: 'text', sender: 'me', time: Date.now(), quoteText: currentQuote, isRead: false, isDraft: isStackMode }); 
-    input.innerText = ''; 
-    cancelReply(); 
-    
-    if (!isStackMode) triggerAutoReply(); 
+const smartReplyPendingRoles = new Set();
+let smartSendLastTapAt = 0;
+let smartSendLastTapRole = null;
+
+function getMessageInputText(input) {
+    if(!input) return '';
+    return ('value' in input ? input.value : input.innerText || '').trim();
 }
-document.getElementById('msg-input').addEventListener('keypress', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+function clearMessageInput(input) {
+    if(!input) return;
+    if('value' in input) input.value = ''; else input.innerText = '';
+    if(input.style) input.style.height = '';
+}
+function autoSizeMessageInput() {
+    const input = document.getElementById('msg-input');
+    if(!input || !('scrollHeight' in input)) return;
+    input.style.height = 'auto';
+    input.style.height = Math.min(104, Math.max(36, input.scrollHeight)) + 'px';
+}
+
+function sendMessage(triggerReply = true) {
+    const input = document.getElementById('msg-input');
+    const text = getMessageInputText(input);
+    if (!text) return false;
+    const role = getCurrentRole();
+    const rid = roleKey(role.id);
+
+    addMessage({ id: Date.now(), text: text, type: 'text', sender: 'me', time: Date.now(), quoteText: currentQuote, isRead: false, isDraft: false });
+    clearMessageInput(input);
+    cancelReply();
+
+    if (triggerReply) {
+        smartReplyPendingRoles.delete(rid);
+        triggerAutoReply();
+    } else {
+        smartReplyPendingRoles.add(rid);
+    }
+    return true;
+}
+
+function iosSmartSendTap(e) {
+    if(e) { e.preventDefault(); e.stopPropagation(); }
+    const role = getCurrentRole();
+    if(!role) return;
+    const rid = roleKey(role.id);
+    const now = Date.now();
+    const isSecondTap = smartSendLastTapRole === rid && (now - smartSendLastTapAt) <= 430;
+
+    if(isSecondTap) {
+        smartSendLastTapAt = 0;
+        smartSendLastTapRole = null;
+        if(smartReplyPendingRoles.has(rid)) {
+            smartReplyPendingRoles.delete(rid);
+            triggerAutoReply();
+        } else {
+            showToast('先发送一条消息');
+        }
+        return;
+    }
+
+    smartSendLastTapAt = now;
+    smartSendLastTapRole = rid;
+    // 第一下只把消息送出去，不视为这一轮“发送完成”。第二下才触发 Ta 回复。
+    sendMessage(false);
+}
+window.iosSmartSendTap = iosSmartSendTap;
+
+const msgInputForSend = document.getElementById('msg-input');
+if(msgInputForSend) {
+    msgInputForSend.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(false);
+        }
+    });
+    msgInputForSend.addEventListener('input', autoSizeMessageInput);
+}
 
 function addMessage(msg, targetRoleId = null) {
     const target = targetRoleId == null ? getCurrentRole() : (appState.roles || []).find(r => roleKey(r.id) === roleKey(targetRoleId));
@@ -3224,73 +3284,166 @@ async function doMultiShare() {
     cancelMultiSelect();
 }
 
-/* ================= 新增：字卡导出导入逻辑 ================= */
-function exportCards() {
-    const jsonStr = JSON.stringify(appState.cards, null, 2);
-    try {
-        const blob = new Blob([jsonStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = "cards_backup_" + Date.now() + ".json"; 
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        showToast("✅ 字卡导出成功");
-    } catch(e) {
-        // 如果浏览器拦截下载，强制复制到剪贴板
-        const textArea = document.createElement("textarea"); textArea.value = jsonStr; document.body.appendChild(textArea); textArea.select(); document.execCommand('copy'); document.body.removeChild(textArea);
-        uiAlert("已复制到剪贴板，请新建文本文件保存为 .json");
-    }
+/* ================= v9：字卡 JSON 兼容导入 / 导出 ================= */
+function buildCardsExportObject() {
+    const cards = (appState.cards || []).map(c => ({ text:String(c.text || '').trim(), group:String(c.group || '日常').trim() || '日常' })).filter(c => c.text);
+    const groups = new Map();
+    cards.forEach(c => { if(!groups.has(c.group)) groups.set(c.group, []); groups.get(c.group).push(c.text); });
+    const now = Date.now();
+    return {
+        _traceWordcards: { version: 2, exportedAt: new Date().toISOString() },
+        cards,
+        customReplies: cards.map(c => c.text),
+        customReplyGroups: [...groups.entries()].map(([name, items], i) => ({ id: now + i, name, color:'#212529', disabled:false, items })),
+        _groupExport: true,
+        _groupExportType: 'replies'
+    };
 }
 
+function cardsExportJSON() { return JSON.stringify(buildCardsExportObject(), null, 2); }
+
+async function exportCards() {
+    const jsonStr = cardsExportJSON();
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const filename = `Trace-wordcards-${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}.json`;
+    const blob = new Blob([jsonStr], {type:'application/json;charset=utf-8'});
+    let file = null;
+    try { file = new File([blob], filename, {type:'application/json'}); } catch(e) {}
+    if(file && navigator.share) {
+        try {
+            const shareData={files:[file],title:'Trace 字卡 JSON'};
+            if(!navigator.canShare || navigator.canShare(shareData)) { await navigator.share(shareData); return; }
+        } catch(e) { if(e?.name==='AbortError') return; }
+    }
+    try {
+        const url=URL.createObjectURL(blob), a=document.createElement('a');
+        a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),60000); showToast('字卡 JSON 已导出');
+    } catch(e) { await copyCardsJSON(); }
+}
+
+async function copyCardsText() {
+    const text = (appState.cards || []).map(c => String(c?.text || '').trim()).filter(Boolean).join('\n');
+    if(!text) { showToast('还没有字卡'); return false; }
+    try {
+        if(navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); showToast('字卡已复制（每条一行）'); return true; }
+    } catch(e) {}
+    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.focus(); ta.select();
+    let ok=false; try{ok=document.execCommand('copy')}catch(e){} ta.remove();
+    if(ok) showToast('字卡已复制（每条一行）'); else await uiAlert('复制失败，请改用“导出 JSON”。');
+    return ok;
+}
+window.copyCardsText = copyCardsText;
+
+function openWordcardExportSheet() {
+    const el = document.getElementById('ios-wordcard-export-sheet');
+    if(!el) return;
+    el.classList.add('open');
+    el.setAttribute('aria-hidden','false');
+}
+function closeWordcardExportSheet() {
+    const el = document.getElementById('ios-wordcard-export-sheet');
+    if(!el) return;
+    el.classList.remove('open');
+    el.setAttribute('aria-hidden','true');
+}
+async function wordcardExportJSONOption() { closeWordcardExportSheet(); await exportCards(); }
+async function wordcardCopyTextOption() { closeWordcardExportSheet(); await copyCardsText(); }
+window.openWordcardExportSheet = openWordcardExportSheet;
+window.closeWordcardExportSheet = closeWordcardExportSheet;
+window.wordcardExportJSONOption = wordcardExportJSONOption;
+window.wordcardCopyTextOption = wordcardCopyTextOption;
+
+function parseWordcardJSON(imported, fallbackGroup='日常') {
+    const out=[];
+    const seen=new Set();
+    const add=(text, group=fallbackGroup)=>{
+        if(text == null) return;
+        const t=String(text).trim(); if(!t) return;
+        const g=String(group || fallbackGroup || '日常').trim() || '日常';
+        const k=g+'\u0000'+t; if(seen.has(k)) return; seen.add(k); out.push({text:t,group:g});
+    };
+    const parseCardArray=(arr, group=fallbackGroup)=>{
+        if(!Array.isArray(arr)) return;
+        arr.forEach(item=>{
+            if(typeof item==='string' || typeof item==='number') add(item,group);
+            else if(item && typeof item==='object') {
+                const text=item.text ?? item.content ?? item.reply ?? item.value ?? item.message;
+                const g=item.group ?? item.category ?? item.groupName ?? item.deck ?? group;
+                if(text != null) add(text,g);
+            }
+        });
+    };
+    const parseGroups=(groups)=>{
+        if(!Array.isArray(groups)) return false;
+        let any=false;
+        groups.forEach(g=>{
+            if(!g || typeof g!=='object') return;
+            const name=g.name ?? g.group ?? g.title ?? g.groupName ?? fallbackGroup;
+            const items=g.items ?? g.cards ?? g.replies ?? g.values ?? g.wordCards;
+            if(Array.isArray(items)) { parseCardArray(items,name); any=true; }
+        });
+        return any;
+    };
+
+    if(Array.isArray(imported)) { parseCardArray(imported); return out; }
+    if(!imported || typeof imported!=='object') return out;
+
+    // Trace 旧版纯数组/新版对象/整站备份。
+    if(Array.isArray(imported.cards)) parseCardArray(imported.cards);
+    if(Array.isArray(imported.wordCards)) parseCardArray(imported.wordCards);
+
+    // reply-groups / reply-library 一类导出：优先保留分组，不把 customReplies 再重复塞进“日常”。
+    const hasCustomGroups = parseGroups(imported.customReplyGroups);
+    parseGroups(imported.groups);
+    parseGroups(imported.replyGroups);
+    if(!hasCustomGroups && Array.isArray(imported.customReplies)) parseCardArray(imported.customReplies);
+    if(Array.isArray(imported.replies)) parseCardArray(imported.replies);
+
+    // 某些站点把 groups 做成 {"分组名":["句子"]}。
+    if(imported.groups && !Array.isArray(imported.groups) && typeof imported.groups==='object') {
+        Object.entries(imported.groups).forEach(([name,items])=>parseCardArray(items,name));
+    }
+
+    // 常见 data 包裹层。
+    if(imported.data && imported.data!==imported && typeof imported.data==='object') {
+        parseWordcardJSON(imported.data, fallbackGroup).forEach(c=>add(c.text,c.group));
+    }
+    return out;
+}
+window.parseWordcardJSON = parseWordcardJSON;
+
 function importCards(e) {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if(!file) return;
     const reader = new FileReader();
     reader.onload = async (ev) => {
         try {
             const imported = JSON.parse(ev.target.result);
-            
-            // 🌟 智能多通道解析引擎 🌟
-            let rawCards = [];
-            if (Array.isArray(imported)) {
-                // 通道A：当前网站的导出，或者 YumeChatPro 的纯字卡(Deck)导出
-                rawCards = imported;
-            } else if (imported && typeof imported === 'object' && Array.isArray(imported.wordCards)) {
-                // 通道B：YumeChatPro 的“全量数据备份包”，自动从中精准提取字卡数据
-                rawCards = imported.wordCards;
+            const fallbackGroup = document.getElementById('card-group-select')?.value || '日常';
+            const cleaned = parseWordcardJSON(imported, fallbackGroup);
+            if(!cleaned.length) { await uiAlert('没有识别到可导入的字卡。支持 Trace 字卡 JSON、cards / wordCards，以及 customReplyGroups / groups 格式。'); return; }
+
+            const existing = new Set((appState.cards||[]).map(c => String(c.group||'日常')+'\u0000'+String(c.text||'').trim()));
+            const added=[];
+            cleaned.forEach(c=>{ const k=c.group+'\u0000'+c.text; if(existing.has(k))return; existing.add(k); appState.cards.push(c); added.push(c); });
+            if(!added.length) { showToast('这些字卡已经存在'); return; }
+
+            // JSON 导入相当于在当前角色下新建/注入分组：只给当前角色自动绑定这些新导入的组。
+            const role=getCurrentRole();
+            if(role) {
+                ensureRoleCardBindings(role);
+                [...new Set(added.map(c=>c.group))].forEach(g=>{ if(!role.allowedCardGroups.includes(g)) role.allowedCardGroups.push(g); });
             }
-
-            // 第一道安检：严格过滤，只有里面真正包含 text（文字内容）的，才承认它是字卡
-            const validCards = rawCards.filter(card => 
-                card && typeof card === 'object' && card.text && String(card.text).trim() !== ''
-            );
-
-            // 如果提取完发现 0 个有效字卡
-            if (validCards.length === 0) {
-                uiAlert("❌ 导入失败：未检测到有效字卡。\n请确保文件是正确的 JSON 字卡备份。");
-                return;
-            }
-
-            // 第二道安检：对有效字卡进行清洗和字段兼容
-            const cleaned = validCards.map(card => {
-                // 兼容另一个网站的 category 字段
-                let groupName = card.group || card.category;
-                
-                return {
-                    text: String(card.text).trim(),
-                    group: (groupName && groupName !== 'undefined') ? String(groupName).trim() : '日常'
-                };
-            });
-
-            // 合并并保存
-            appState.cards = appState.cards.concat(cleaned);
-            saveState(); renderCardList(); renderAllowedGroups();
-            uiAlert(`✅ 成功吸收并导入 ${cleaned.length} 条字卡`);
-
-        } catch(err) { 
-            uiAlert("❌ 文件解析失败：格式损坏或不是 JSON 文件"); 
+            await saveState(); cardDisplayCount=30; renderAllowedGroups(); renderCardList();
+            await uiAlert(`成功导入 ${added.length} 条字卡，共 ${new Set(added.map(c=>c.group)).size} 个分组。`,'字卡已导入');
+        } catch(err) {
+            await uiAlert('文件解析失败，请确认它是有效的 JSON。');
         }
     };
     reader.readAsText(file);
-    e.target.value = '';
+    e.target.value='';
 }
 
 // 长按单条抹除
@@ -3576,43 +3729,9 @@ async function confirmExportData() {
         setTimeout(() => URL.revokeObjectURL(url), 60000);
         showToast("备份文件已生成");
     } catch(e) {
-        await fallbackExport(jsonStr);
+        console.warn('备份下载失败', e);
+        await uiAlert("备份文件没有成功保存，请在 Safari 或主屏幕 App 中重新尝试导出。", "备份失败");
     }
-}
-
-async function copyExportData() {
-    const backup = buildSelectedBackup();
-    if(!backup) { showToast("至少要选择一项哦"); return; }
-    closeExportModal();
-    await fallbackExport(backup.jsonStr, true);
-}
-
-async function fallbackExport(text, userRequested = false) {
-    try {
-        if(navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(text);
-            await uiAlert(userRequested ? "备份数据已经复制到剪贴板。可以粘贴到文件 App 或任意文本编辑器，并保存为 .json 文件。" : "文件保存没有成功，已把备份数据复制到剪贴板。请粘贴到文件 App 或文本编辑器并保存为 .json 文件。", "备份已复制");
-            return true;
-        }
-    } catch(e) { console.warn('clipboard API failed', e); }
-
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-9999px';
-    textArea.style.top = '0';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    let ok = false;
-    try { ok = document.execCommand('copy'); } catch(e) {}
-    textArea.remove();
-    if(ok) {
-        await uiAlert("备份数据已经复制到剪贴板。可以粘贴到文件 App 或任意文本编辑器，并保存为 .json 文件。", "备份已复制");
-        return true;
-    }
-    await uiAlert("浏览器没有允许自动保存或复制。请在 Safari 中再试一次，或者把网站添加到主屏幕后使用“导出备份”。", "备份失败");
-    return false;
 }
 
 function importData(e) { 
@@ -7611,6 +7730,7 @@ body.ios-system-theme #msg-input:focus { background:var(--ios-card) !important; 
 body.ios-system-theme #msg-input:empty::before { color:var(--ios-secondary) !important; font-size:16px !important; }
 body.ios-system-theme #ios-send-btn { order:6 !important; width:32px !important; height:32px !important; min-width:32px !important; padding:0 !important; margin:2px 0 !important; border:0 !important; border-radius:50% !important; background:var(--ios-blue) !important; color:#fff !important; box-shadow:none !important; display:grid !important; place-items:center !important; }
 body.ios-system-theme #ios-send-btn svg { width:17px !important; height:17px !important; stroke-width:2.5 !important; }
+body.ios-system-theme #ios-send-btn { touch-action:manipulation!important; -webkit-user-select:none!important; user-select:none!important; }
 .ios-compose-plus { order:1; width:32px; height:32px; min-width:32px; margin:2px 0; padding:0; border:0; border-radius:50%; display:grid; place-items:center; background:var(--ios-fill); color:var(--ios-secondary); cursor:pointer; }
 .ios-compose-plus.active { background:var(--ios-blue); color:#fff; }
 .ios-compose-plus svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
@@ -8030,10 +8150,9 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
         window.iosCloseComposeSheet();
         if(kind==='photo') document.getElementById('instant-img-upload')?.click();
         else if(kind==='sticker' && typeof toggleStickers==='function') toggleStickers();
-        else if(kind==='stack' && typeof toggleStackMode==='function') { toggleStackMode(); window.iosSyncStackState(); }
         else if(kind==='more') iosShowPage('more');
     };
-    window.iosSyncStackState=function(){ document.getElementById('ios-compose-plus')?.classList.toggle('active',!!(typeof isStackMode !== 'undefined' && isStackMode)); };
+    window.iosSyncStackState=function(){ document.getElementById('ios-compose-plus')?.classList.remove('active'); };
 
     function installChatChrome(){
         const top=document.getElementById('main-top-bar');
@@ -8052,10 +8171,10 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
             row.insertBefore(plus, document.getElementById('msg-input'));
             const bar=document.querySelector('.bottom-bar');
             const sheet=document.createElement('div'); sheet.id='ios-compose-sheet'; sheet.className='ios-compose-sheet';
-            sheet.innerHTML=`<button class="ios-compose-action" onclick="iosComposeAction('photo')"><span class="ios-cell-icon" style="background:#34c759">${svg('photo')}</span>照片</button><button class="ios-compose-action" onclick="iosComposeAction('sticker')"><span class="ios-cell-icon" style="background:#ff9500">${svg('spark')}</span>表情与贴纸</button><button class="ios-compose-action" onclick="iosComposeAction('stack')"><span class="ios-cell-icon" style="background:#5856d6">${svg('box')}</span>连续发送模式</button><button class="ios-compose-action" onclick="iosComposeAction('more')"><span class="ios-cell-icon" style="background:#007aff">${svg('game')}</span>全部功能</button>`;
+            sheet.innerHTML=`<button class="ios-compose-action" onclick="iosComposeAction('photo')"><span class="ios-cell-icon" style="background:#34c759">${svg('photo')}</span>照片</button><button class="ios-compose-action" onclick="iosComposeAction('sticker')"><span class="ios-cell-icon" style="background:#ff9500">${svg('spark')}</span>表情与贴纸</button><button class="ios-compose-action" onclick="iosComposeAction('more')"><span class="ios-cell-icon" style="background:#007aff">${svg('game')}</span>全部功能</button>`;
             bar.appendChild(sheet);
         }
-        const input=document.getElementById('msg-input'); if(input) input.setAttribute('data-placeholder','iMessage 信息');
+        const input=document.getElementById('msg-input'); if(input){ input.placeholder='单击发送 · 双击完成并回复'; input.setAttribute('aria-label','单击发送消息，双击完成这一轮并让对方回复'); }
         iosSyncStackState();
     }
 
@@ -9292,18 +9411,38 @@ body.dark-mode .ios-tips-header{background:rgba(0,0,0,.86)}
 </script>
 
 
-<style id="ios-export-v17-style">
-#export-modal .ios-export-sheet{height:min(82dvh,760px)!important;max-height:min(82dvh,760px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:0!important;border-radius:24px 24px 0 0!important;}
+<style id="ios-export-v9-style">
+#export-modal{padding-top:max(env(safe-area-inset-top,0px),8px)!important;}
+#export-modal .ios-export-sheet{height:min(90dvh,820px)!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - 8px)!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:0!important;border-radius:24px 24px 0 0!important;}
 #export-modal .ios-export-header{flex:none!important;background:color-mix(in srgb,var(--bg) 92%,transparent)!important;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);}
-#export-modal .ios-export-body{flex:1!important;min-height:0!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;padding:16px 16px 18px!important;}
+#export-modal .ios-export-body{flex:1!important;min-height:0!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain;touch-action:pan-y;padding:16px 16px 24px!important;}
 #export-modal .ios-export-note{font-size:13px;color:var(--text-sub);margin:2px 0 14px;line-height:1.45;}
 #export-modal .ios-export-list{display:flex;flex-direction:column;background:var(--bg);border-radius:14px;overflow:hidden;}
-#export-modal .ios-export-list label{min-height:46px;display:flex;align-items:center;gap:11px;padding:0 12px;font-size:15px;position:relative;}
+#export-modal .ios-export-list label{min-height:46px;display:flex;align-items:center;gap:11px;padding:0 12px;font-size:15px;position:relative;flex:none;}
 #export-modal .ios-export-list label+label:before{content:"";position:absolute;left:49px;right:0;top:0;height:.5px;background:rgba(60,60,67,.18);}
-#export-modal .ios-export-footer{flex:none;padding:10px 16px calc(max(env(safe-area-inset-bottom,0px),10px) + 10px);border-top:.5px solid rgba(60,60,67,.18);background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);}
-#export-modal .ios-export-primary{height:50px!important;border-radius:13px!important;font-size:17px!important;font-weight:600!important;}
-#export-modal .ios-export-copy{width:100%;height:38px;border:0;background:transparent;color:#007aff;font:inherit;font-size:14px;margin-top:4px;}
-@media (max-height:700px){#export-modal .ios-export-sheet{height:88dvh!important;max-height:88dvh!important;}}
+#export-modal .ios-export-footer{flex:none;padding:10px 16px calc(24px + env(safe-area-inset-bottom,0px))!important;border-top:.5px solid rgba(60,60,67,.18);background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);}
+#export-modal .ios-export-main-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+#export-modal .ios-export-primary,#export-modal .ios-export-import{height:48px!important;border-radius:13px!important;font-size:16px!important;font-weight:600!important;margin:0!important;}
+#export-modal .ios-export-import{background:var(--ios-fill,rgba(120,120,128,.12))!important;border:0!important;color:var(--ios-blue,#007aff)!important;}
+#export-modal .ios-export-copy{width:100%;height:38px;border:0;background:transparent;color:#007aff;font:inherit;font-size:14px;margin-top:5px;}
+@media (max-width:380px){#export-modal .ios-export-main-actions{grid-template-columns:1fr;}#export-modal .ios-export-sheet{height:94dvh!important;}}
+</style>
+<style id="ios-v9-input-card-tools-style">
+#msg-input{resize:none!important;font-family:inherit!important;-webkit-appearance:none!important;}
+body.ios-system-theme #msg-input::placeholder{color:rgba(60,60,67,.38)!important;opacity:1!important;font-size:14px!important;}
+body.ios-system-theme.dark-mode #msg-input::placeholder{color:rgba(235,235,245,.34)!important;}
+.ios-card-json-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.ios-card-json-tools .btn-full{margin:0!important;min-width:0!important;padding-left:6px!important;padding-right:6px!important;}
+.ios-card-json-note{font-size:10.5px;color:var(--text-sub);line-height:1.45;margin-top:8px;}
+.ios-wordcard-action-overlay{position:fixed;inset:0;z-index:1000800;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.24);padding:0 8px calc(8px + max(env(safe-area-inset-bottom,0px),0px));-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.ios-wordcard-action-overlay.open{display:flex}
+.ios-wordcard-action-wrap{width:min(100%,520px);display:flex;flex-direction:column;gap:8px}
+.ios-wordcard-action-group{background:rgba(248,248,248,.96);border-radius:14px;overflow:hidden;-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%)}
+.ios-wordcard-action-group button{width:100%;height:56px;border:0;background:transparent;color:var(--ios-blue,#007aff);font:inherit;font-size:20px;font-weight:400}
+.ios-wordcard-action-group button+button{border-top:.5px solid rgba(60,60,67,.22)}
+.ios-wordcard-action-cancel{width:100%;height:56px;border:0;border-radius:14px;background:rgba(248,248,248,.96);color:var(--ios-blue,#007aff);font:inherit;font-size:20px;font-weight:600;-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%)}
+body.dark-mode .ios-wordcard-action-group,body.dark-mode .ios-wordcard-action-cancel{background:rgba(44,44,46,.96)}
+body.dark-mode .ios-wordcard-action-group button+button{border-top-color:rgba(84,84,88,.7)}
 </style>
 
 
@@ -9364,7 +9503,7 @@ body.ios-system-theme.ios-chat-open .bottom-bar{display:flex!important;visibilit
   </div>
 </section>
 
-<style id="ios-release-notes-v8-style">
+<style id="ios-release-notes-v9-style">
 /* Old floating update-log ball is retired; release notices now live in Settings. */
 #update-float-ball{display:none!important}
 #ios-release-notes-page{position:fixed;inset:0;z-index:1000010;display:none;background:var(--ios-bg,#f2f2f7);color:var(--ios-label,#000);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif}
@@ -9390,11 +9529,12 @@ body.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:after{conte
 body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:after{box-shadow:0 0 0 2px rgba(28,28,30,.95)}
 </style>
 
-<script id="ios-release-notes-v8-script">
+<script id="ios-release-notes-v9-script">
 (function(){
-  const CURRENT_RELEASE_VERSION='v8';
+  const CURRENT_RELEASE_VERSION='v9';
   const RELEASE_HISTORY=[
-    {version:'v8',tag:'当前版本',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。','修复多角色字卡串用：角色回复严格只读取自己已绑定的字卡组，不再在缺少绑定信息时自动回退到全部分组。','旧版多角色中若仍处于自动全选全部字卡组，首次载入会清理这类全选绑定；已经手动选成子集的绑定会保留。','新建角色默认不再自动绑定所有现有字卡组，需要在角色详情中选择要使用的字卡组。','修复拼字卡上限失效：开启拼字卡后每轮固定只发 1 个拼接气泡，最多使用的字卡条数严格受“最多拼”限制。']},
+    {version:'v9',tag:'当前版本',items:['备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
+    {version:'v8',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。','修复多角色字卡串用：角色回复严格只读取自己已绑定的字卡组，不再在缺少绑定信息时自动回退到全部分组。','旧版多角色中若仍处于自动全选全部字卡组，首次载入会清理这类全选绑定；已经手动选成子集的绑定会保留。','新建角色默认不再自动绑定所有现有字卡组，需要在角色详情中选择要使用的字卡组。','修复拼字卡上限失效：开启拼字卡后每轮固定只发 1 个拼接气泡，最多使用的字卡条数严格受“最多拼”限制。']},
     {version:'v7',items:['侧边快捷球改成接近 iOS AssistiveTouch 的半透明样式，可拖动并记住位置，内含「提示」与「急救」。','聊天页顶部改为覆盖内容的毛玻璃，聊天主体恢复白色；底部导航改为 iOS 浅灰半透明材质。','修复聊天顶栏覆盖信息列表的问题；正在输入与延迟回复按角色独立，不再串到其他角色。']},
     {version:'v6',items:['新增「提示」使用指南页，集中说明角色、字卡、拼字卡、群聊、通话、关系页、备份等操作。','重做 iPhone 备份导出流程：支持原生分享/存储到文件，并补齐群聊、照片、心愿单与完整设置数据。','关系页将关系日历与纪念内容合并到「纪念」标签。']},
     {version:'v5',items:['角色详情新增字卡趋势统计，可查看常用字卡、出现次数与时间范围。','新增恋爱周报与关系日历，用聊天数据整理每周互动趋势。','角色详情顶部整理为「字卡趋势 / 恋爱周报 / 纪念」三个分类。']},
@@ -9435,6 +9575,19 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('ios-release-notes-page')?.classList.contains('open'))iosCloseReleaseNotes()});
   document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{addSettingsRow();syncDot()},50));
   window.addEventListener('load',()=>{setTimeout(()=>{addSettingsRow();syncDot()},250);setTimeout(syncDot,1000)});
+})();
+</script>
+
+<script id="ios-v9-migration-script">
+(function(){
+  async function migrateV9(){
+    if(typeof appState==='undefined')return; let changed=false;
+    (appState.roles||[]).forEach(r=>(r.messages||[]).forEach(m=>{if(m&&m.isDraft){delete m.isDraft;changed=true;}}));
+    if(typeof isStackMode!=='undefined') isStackMode=false;
+    const input=document.getElementById('msg-input'); if(input) input.placeholder='单击发送 · 双击完成并回复';
+    if(changed&&typeof saveState==='function'){try{await saveState(); if(typeof renderMessages==='function')renderMessages(false,true);}catch(e){}}
+  }
+  window.addEventListener('load',()=>{setTimeout(migrateV9,900);setTimeout(migrateV9,1800)});
 })();
 </script>
 
