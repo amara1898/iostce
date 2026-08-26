@@ -9349,11 +9349,10 @@ body.dark-mode .ios-release-notes-header{background:rgba(0,0,0,.84)}
 .ios-release-notes-main{max-width:720px;margin:0 auto;padding:8px 16px 30px}
 .ios-release-current{border-radius:18px;background:var(--ios-card,#fff);padding:18px 18px 16px;margin:8px 0 24px}
 body.dark-mode .ios-release-current,body.dark-mode .ios-release-card{background:#1c1c1e}
-.ios-release-current-kicker{font-size:12px;color:var(--ios-blue,#007aff);font-weight:600;margin-bottom:7px}.ios-release-current-version{font-size:28px;font-weight:700;letter-spacing:-.6px}.ios-release-current-note{font-size:14px;line-height:1.48;color:#8e8e93;margin-top:6px}
+.ios-release-current-kicker{font-size:12px;color:var(--ios-blue,#007aff);font-weight:600;margin-bottom:7px}.ios-release-current-version{font-size:28px;font-weight:700;letter-spacing:-.6px}
 .ios-release-section-title{font-size:13px;color:#8e8e93;margin:0 4px 7px;text-transform:none}.ios-release-card{background:var(--ios-card,#fff);border-radius:14px;overflow:hidden;margin-bottom:20px}
 .ios-release-item{padding:13px 15px;position:relative}.ios-release-item+.ios-release-item:before{content:"";position:absolute;left:15px;right:0;top:0;height:.5px;background:rgba(60,60,67,.18)}body.dark-mode .ios-release-item+.ios-release-item:before{background:rgba(84,84,88,.65)}
 .ios-release-item-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}.ios-release-item-version{font-size:17px;font-weight:600}.ios-release-item-tag{font-size:12px;color:#8e8e93;white-space:nowrap}.ios-release-item ul{margin:7px 0 0 18px;padding:0}.ios-release-item li{font-size:14px;line-height:1.48;margin:3px 0;color:var(--ios-label,#000)}body.dark-mode .ios-release-item li{color:#f2f2f7}
-.ios-release-footnote{font-size:12px;line-height:1.45;color:#8e8e93;text-align:center;padding:2px 18px 10px}
 .ios-version-dot{width:8px;height:8px;min-width:8px;border-radius:50%;background:var(--ios-blue,#007aff);display:inline-block;margin-left:auto;margin-right:3px;box-shadow:0 0 0 1px rgba(0,122,255,.06)}
 .ios-version-dot[hidden]{display:none!important}
 #ios-tab-bar .ios-tab[data-page="settings"]{position:relative}
@@ -9365,14 +9364,14 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
 (function(){
   const CURRENT_RELEASE_VERSION='v8';
   const RELEASE_HISTORY=[
-    {version:'v8',tag:'当前版本',items:['设置页新增「版本说明」，以后每次完成修改并覆盖仓库都按一个新版本记录。','新版本未查看时，「版本说明」旁和设置标签会出现小蓝点；打开版本说明后自动消失。']},
-    {version:'v7',items:['信息聊天列表优先显示角色备注名；没有备注时显示本名。','聊天搜索同时支持备注名与本名，角色列表仍保留本名。']},
-    {version:'v6',items:['角色详情头像可再次点击更换。','角色详情新增备注名，可修改或清空；本名保持不变。']},
-    {version:'v5',items:['修复聊天顶栏覆盖信息列表的问题，列表态与聊天态彻底分离。','正在输入与延迟回复改为按角色独立，不再出现所有角色同时“正在输入”。']},
-    {version:'v4',items:['底部导航改成更接近 iOS 的浅灰半透明材质，并适配深色模式。']},
-    {version:'v3',items:['聊天主体恢复接近白色；顶部头像/名字/通话栏改为真正覆盖内容的毛玻璃。','底部输入区域保留轻微半透明，不再把整页染灰。']},
-    {version:'v2',items:['侧边悬浮球改成类似 AssistiveTouch 的半透明灰色，交互时变实。','修正完整部署包结构。']},
-    {version:'v1',items:['重做备份导出：列表可滚动、导出按钮固定在底部，并优先使用 iOS 分享面板。','补齐群聊、照片、心愿单等备份数据。']}
+    {version:'v8',tag:'当前版本',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。']},
+    {version:'v7',items:['侧边快捷球改成接近 iOS AssistiveTouch 的半透明样式，可拖动并记住位置，内含「提示」与「急救」。','聊天页顶部改为覆盖内容的毛玻璃，聊天主体恢复白色；底部导航改为 iOS 浅灰半透明材质。','修复聊天顶栏覆盖信息列表的问题；正在输入与延迟回复按角色独立，不再串到其他角色。']},
+    {version:'v6',items:['新增「提示」使用指南页，集中说明角色、字卡、拼字卡、群聊、通话、关系页、备份等操作。','重做 iPhone 备份导出流程：支持原生分享/存储到文件，并补齐群聊、照片、心愿单与完整设置数据。','关系页将关系日历与纪念内容合并到「纪念」标签。']},
+    {version:'v5',items:['角色详情新增字卡趋势统计，可查看常用字卡、出现次数与时间范围。','新增恋爱周报与关系日历，用聊天数据整理每周互动趋势。','角色详情顶部整理为「字卡趋势 / 恋爱周报 / 纪念」三个分类。']},
+    {version:'v4',items:['新增群聊，可从信息页选择多个角色创建群聊。','群聊中每个成员只使用自己绑定的字卡组回复，并继续支持拼字卡随机组合。','信息列表同时展示单聊与群聊，并支持群聊未读状态。']},
+    {version:'v3',items:['通话入口增加音频/视频选择；视频通话为 FaceTime 风格模拟界面，不调用摄像头或麦克风。','视频通话支持缩小为悬浮窗口并恢复。','聊天新增时间戳开关与 iOS 三点式「正在输入」动画。']},
+    {version:'v2',items:['角色可分别绑定指定字卡组，角色回复只从自己的绑定词库中抽取。','将「拼字卡」设置归入词库，可控制一次回复随机拼接的字卡数量范围。','继续清理旧网页/像素风控件，统一角色、功能、设置与聊天工具的 iOS 细线图标和圆角样式。']},
+    {version:'v1',items:['整体重做为 iOS 风格界面，新增底部「信息 / 角色 / 功能 / 设置」四个主页面。','重做信息列表与聊天页布局，使会话列表、搜索、聊天气泡和输入区域更接近 iOS 信息。','新增角色创建与角色管理入口。','新增字卡/词库与「拼字卡」功能，可在一次回复中随机组合多张字卡。','将原有互动功能和设置重新整理进「功能」与「设置」页面。']}
   ];
   const esc8=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function seen(){return !!(typeof appState!=='undefined' && appState.settings && appState.settings.lastSeenReleaseVersion===CURRENT_RELEASE_VERSION)}
@@ -9391,7 +9390,7 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
   function renderReleaseNotes(){
     const root=document.getElementById('ios-release-notes-content'); if(!root)return;
     const current=RELEASE_HISTORY[0];
-    root.innerHTML=`<div class="ios-release-current"><div class="ios-release-current-kicker">当前版本</div><div class="ios-release-current-version">${esc8(current.version)}</div><div class="ios-release-current-note">版本号按每次完成修改并覆盖 GitHub 仓库递增。以后每次更新的新功能都会继续写在这里。</div></div><div class="ios-release-section-title">更新记录</div><div class="ios-release-card">${RELEASE_HISTORY.map((r,i)=>`<article class="ios-release-item"><div class="ios-release-item-head"><div class="ios-release-item-version">${esc8(r.version)}</div><div class="ios-release-item-tag">${esc8(r.tag||(i===0?'当前版本':''))}</div></div><ul>${r.items.map(x=>`<li>${esc8(x)}</li>`).join('')}</ul></article>`).join('')}</div><div class="ios-release-footnote">蓝点只表示这个版本的说明还没看过；打开一次后会自动标记为已查看。</div>`;
+    root.innerHTML=`<div class="ios-release-current"><div class="ios-release-current-kicker">当前版本</div><div class="ios-release-current-version">${esc8(current.version)}</div></div><div class="ios-release-section-title">更新记录</div><div class="ios-release-card">${RELEASE_HISTORY.map((r,i)=>`<article class="ios-release-item"><div class="ios-release-item-head"><div class="ios-release-item-version">${esc8(r.version)}</div><div class="ios-release-item-tag">${esc8(r.tag||(i===0?'当前版本':''))}</div></div><ul>${r.items.map(x=>`<li>${esc8(x)}</li>`).join('')}</ul></article>`).join('')}</div>`;
   }
   window.iosOpenReleaseNotes=async function(){
     const page=document.getElementById('ios-release-notes-page'); if(!page)return;
