@@ -1712,7 +1712,7 @@ body.dark-mode .ios-mail-recipient-list{background:#1c1c1e;border-color:#38383a}
     <select id="card-filter-select" onchange="cardDisplayCount=30; renderCardList()" style="width: auto; height: 28px; padding: 0 4px; font-size: 12px; border: 1px solid var(--line-color); border-radius: 0; background: transparent; color: var(--text-main); margin-right: 8px;">
         <option value="all">全部分组</option>
     </select>
-    <button class="btn-noshadow icon-btn" style="width:auto; padding: 4px 8px; font-size: 12px;" onclick="selectAllCards()">全选</button><button class="btn-noshadow icon-btn" style="width:auto; padding: 4px 8px; font-size: 12px;" onclick="unselectAllCards()">取消</button><button class="btn-noshadow icon-btn" style="width:auto; padding: 4px 8px; font-size: 12px;" onclick="moveSelectedCards()">移动</button><button class="btn-noshadow icon-btn" style="width:auto; padding: 4px 8px; font-size: 12px; color: #ff4444;" onclick="deleteSelectedCards()">删除</button></div>
+    <button class="btn-noshadow icon-btn" style="width:auto; padding: 4px 8px; font-size: 12px;" onclick="selectAllCards()">全选</button><button class="btn-noshadow icon-btn" style="width:auto; padding: 4px 8px; font-size: 12px;" onclick="unselectAllCards()">取消</button><button class="btn-noshadow icon-btn" style="width:auto; padding: 4px 8px; font-size: 12px;" onclick="moveSelectedCards()">移动</button><button class="btn-noshadow icon-btn" id="card-dedupe-btn" style="width:auto; padding: 4px 8px; font-size: 12px;" onclick="cleanupDuplicateCards()">清理重复</button><button class="btn-noshadow icon-btn" style="width:auto; padding: 4px 8px; font-size: 12px; color: #ff4444;" onclick="deleteSelectedCards()">删除</button></div>
     <div style="margin-top: 8px; margin-bottom: 8px;">
     <input type="text" id="card-search-input" placeholder="搜索包含的文字..." oninput="cardDisplayCount=30; renderCardList()" style="width: 100%; border: 1px solid var(--line-color); padding: 8px 10px; font-size: 13px; background: transparent; color: var(--text-main); outline: none;">
 </div>
@@ -2895,7 +2895,55 @@ function updateAllowedGroups() {
 
 function updateGroupSelect() { const select = document.getElementById('card-group-select'); const groups = [...new Set(appState.cards.map(c => c.group))]; if(!groups.includes('日常')) groups.unshift('日常'); const currentVal = select.value || '日常'; select.innerHTML = groups.map(g => `<option value="${g}">${g}</option>`).join(''); if (groups.includes(currentVal)) select.value = currentVal; else select.value = groups[0]; }
 async function createNewGroup() { const name = await uiPrompt("请输入新分组名称:", "新增分组"); if (name && name.trim()) { const select = document.getElementById('card-group-select'); const option = document.createElement('option'); option.value = name.trim(); option.text = name.trim(); select.appendChild(option); select.value = name.trim(); const role = getCurrentRole(); if(!role.allowedCardGroups.includes(name.trim())) { role.allowedCardGroups.push(name.trim()); saveState(); renderAllowedGroups(); } } }
-async function importTextCards() { const text = document.getElementById('card-text-input').value; const group = document.getElementById('card-group-select').value || '日常'; const lines = text.split('\n').map(s => s.trim()).filter(s => s !== ""); if(lines.length > 0) { lines.forEach(line => { if(!appState.cards.find(c => c.text === line && c.group === group)) { appState.cards.push({ text: line, group: group }); } }); document.getElementById('card-text-input').value = ''; saveState(); cardDisplayCount = 30; renderAllowedGroups(); renderCardList(); await uiAlert(`✅ 成功注入 ${lines.length} 条字卡到 [${group}] 分组`); } }
+function cardDuplicateKey(card) {
+    const group = String(card?.group || '日常').trim() || '日常';
+    const text = String(card?.text || '').trim();
+    return group + '\u0000' + text;
+}
+function getDuplicateCardIndices() {
+    const seen = new Set(), duplicates = [];
+    (appState.cards || []).forEach((card, index) => {
+        const key = cardDuplicateKey(card);
+        if (!String(card?.text || '').trim()) return;
+        if (seen.has(key)) duplicates.push(index); else seen.add(key);
+    });
+    return duplicates;
+}
+function dedupeCardsInPlace() {
+    const duplicates = getDuplicateCardIndices();
+    for (let i = duplicates.length - 1; i >= 0; i--) appState.cards.splice(duplicates[i], 1);
+    return duplicates.length;
+}
+async function cleanupDuplicateCards() {
+    const duplicates = getDuplicateCardIndices();
+    if (!duplicates.length) { showToast('没有重复字卡'); return; }
+    const ok = await uiConfirm(`发现 ${duplicates.length} 条重复字卡。\n\n会按“同一分组 + 完全相同文字”判断，只保留每组最早的一条；不同分组里的同一句话不会删除。\n\n现在清理吗？`);
+    if (!ok) return;
+    const removed = dedupeCardsInPlace();
+    await saveState();
+    cardDisplayCount = 30;
+    renderAllowedGroups(); renderCardList();
+    showToast(`已清理 ${removed} 条重复字卡`);
+}
+window.cleanupDuplicateCards = cleanupDuplicateCards;
+
+async function importTextCards() {
+    const text = document.getElementById('card-text-input').value;
+    const group = String(document.getElementById('card-group-select').value || '日常').trim() || '日常';
+    const lines = text.split('\n').map(s => s.trim()).filter(Boolean);
+    if (!lines.length) return;
+    const existing = new Set((appState.cards || []).map(cardDuplicateKey));
+    let added = 0, skipped = 0;
+    lines.forEach(line => {
+        const card = { text: line, group };
+        const key = cardDuplicateKey(card);
+        if (existing.has(key)) { skipped++; return; }
+        existing.add(key); appState.cards.push(card); added++;
+    });
+    document.getElementById('card-text-input').value = '';
+    await saveState(); cardDisplayCount = 30; renderAllowedGroups(); renderCardList();
+    await uiAlert(`✅ 新增 ${added} 条字卡到 [${group}] 分组${skipped ? `\n已跳过 ${skipped} 条重复字卡` : ''}`);
+}
 
 function renderCardList() { 
     updateGroupSelect(); 
@@ -2948,7 +2996,7 @@ const searchInput = document.getElementById('card-search-input');
 function getSelectedCardIndices() { return Array.from(document.querySelectorAll('#card-list .card-checkbox:checked')).map(cb => parseInt(cb.value)).sort((a,b) => b - a); }
 function selectAllCards() { document.querySelectorAll('#card-list .card-checkbox').forEach(cb => cb.checked = true); } function unselectAllCards() { document.querySelectorAll('#card-list .card-checkbox').forEach(cb => cb.checked = false); }
 async function deleteSelectedCards() { const indices = getSelectedCardIndices(); if(indices.length === 0) { await uiAlert("请先勾选要删除的字卡"); return; } if(await uiConfirm(`确定要删除选中的 ${indices.length} 条字卡吗？`)) { indices.forEach(idx => appState.cards.splice(idx, 1)); saveState(); renderAllowedGroups(); renderCardList(); } }
-async function moveSelectedCards() { const indices = getSelectedCardIndices(); if(indices.length === 0) { await uiAlert("请先勾选要移动的字卡"); return; } const groups = [...new Set(appState.cards.map(c => c.group))]; if(!groups.includes('日常')) groups.unshift('日常'); let groupListStr = groups.map((g, i) => `${i+1}. ${g}`).join('\n'); let input = await uiPrompt(`请输入目标分组名称\n(或者直接输入下方对应序号):\n\n${groupListStr}`, "移动至目标分组"); if(!input) return; let targetGroup = input.trim(); const num = parseInt(targetGroup); if(!isNaN(num) && num > 0 && num <= groups.length) { targetGroup = groups[num - 1]; } indices.forEach(idx => { appState.cards[idx].group = targetGroup; }); saveState(); renderAllowedGroups(); renderCardList(); await uiAlert(`已将 ${indices.length} 条字卡移动至 [${targetGroup}]`); }
+async function moveSelectedCards() { const indices = getSelectedCardIndices(); if(indices.length === 0) { await uiAlert("请先勾选要移动的字卡"); return; } const groups = [...new Set(appState.cards.map(c => c.group))]; if(!groups.includes('日常')) groups.unshift('日常'); let groupListStr = groups.map((g, i) => `${i+1}. ${g}`).join('\n'); let input = await uiPrompt(`请输入目标分组名称\n(或者直接输入下方对应序号):\n\n${groupListStr}`, "移动至目标分组"); if(!input) return; let targetGroup = input.trim(); const num = parseInt(targetGroup); if(!isNaN(num) && num > 0 && num <= groups.length) { targetGroup = groups[num - 1]; } indices.forEach(idx => { appState.cards[idx].group = targetGroup; }); const removed = dedupeCardsInPlace(); await saveState(); renderAllowedGroups(); renderCardList(); await uiAlert(`已将 ${indices.length} 条字卡移动至 [${targetGroup}]${removed ? `\n并自动清理 ${removed} 条因此产生的重复字卡` : ''}`); }
 function deleteCard(index) { appState.cards.splice(index, 1); saveState(); renderAllowedGroups(); renderCardList(); }
 
 function updateStickerGroupSelect() { const select = document.getElementById('sticker-group-select'); if(!select) return; const groups = [...new Set(appState.stickers.map(c => c.group))]; if(!groups.includes('默认')) groups.unshift('默认'); const currentVal = select.value || '默认'; select.innerHTML = groups.map(g => `<option value="${g}">${g}</option>`).join(''); if (groups.includes(currentVal)) select.value = currentVal; else select.value = groups[0]; }
@@ -7873,12 +7921,19 @@ function rescueEmoji() {
             <h1 class="ios-large-title">角色</h1>
         </header>
         <div class="ios-page-content">
+            <div class="ios-section-label">角色</div>
             <div class="ios-list-card" id="ios-role-page-list"></div>
+            <div class="ios-section-label">群聊</div>
+            <div class="ios-list-card" id="ios-group-page-list"></div>
             <div class="ios-section-label">管理</div>
             <div class="ios-list-card">
                 <div class="ios-setting-row" onclick="openRoleModal()">
                     <div class="ios-cell-icon" style="background:var(--ios-blue)"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path><path d="M4 21a8 8 0 0 1 16 0"></path><path d="M19 8v6M16 11h6"></path></svg></div>
                     <div class="ios-cell-title">添加或管理角色</div><div class="ios-chevron"></div>
+                </div>
+                <div class="ios-setting-row" onclick="iosOpenGroupCreate()">
+                    <div class="ios-cell-icon" style="background:#5856d6"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"></circle><circle cx="17" cy="9" r="2.5"></circle><path d="M3 20a5 5 0 0 1 10 0"></path><path d="M13 16a4 4 0 0 1 7 3"></path><path d="M18 4v5M15.5 6.5h5"></path></svg></div>
+                    <div class="ios-cell-title">新建群聊</div><div class="ios-chevron"></div>
                 </div>
             </div>
         </div>
@@ -9174,6 +9229,8 @@ body.ios-system-theme #focus-modal .focus-settings > div:last-of-type span { bor
 .ios-group-avatar { width:48px; height:48px; flex:0 0 48px; border-radius:50%; background:var(--ios-fill); position:relative; overflow:hidden; display:grid; place-items:center; }
 .ios-group-avatar .ga { position:absolute; width:27px; height:27px; border-radius:50%; overflow:hidden; background:#aeb3bc; display:grid; place-items:center; color:#fff; font-size:11px; font-weight:600; box-shadow:0 0 0 1.5px var(--ios-card); }
 .ios-group-avatar .ga img { width:100%; height:100%; object-fit:cover; }
+.ios-group-avatar.custom { overflow:hidden; }
+.ios-group-avatar.custom>img { width:100%;height:100%;object-fit:cover;display:block; }
 .ios-group-avatar .ga:nth-child(1){left:3px;top:3px}.ios-group-avatar .ga:nth-child(2){right:3px;top:7px}.ios-group-avatar .ga:nth-child(3){left:11px;bottom:2px}
 
 .ios-group-create-overlay { position:fixed; inset:0; z-index:100550; display:none; align-items:flex-end; background:rgba(0,0,0,.25); -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px); }
@@ -9200,14 +9257,22 @@ body.ios-system-theme #focus-modal .focus-settings > div:last-of-type span { bor
 .ios-group-head-center { display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0; }
 .ios-group-head-center .ios-group-avatar { width:42px;height:42px;flex-basis:42px; }.ios-group-head-center .ios-group-avatar .ga{width:24px;height:24px}.ios-group-head-center .ios-group-name{font-size:13px;font-weight:500;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ios-group-members-btn { align-self:center; justify-self:end; border:0;background:transparent;color:var(--ios-blue);font:inherit;font-size:15px;padding:8px 0; }
-.ios-group-message-list { flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 14px 10px; background:var(--ios-card); }
-.ios-group-message { display:flex; flex-direction:column; margin:4px 0 7px; max-width:78%; }
+.ios-group-message-list { flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:12px 10px 14px; background:var(--ios-card); }
+.ios-group-message { display:flex; flex-direction:column; margin:4px 0 7px; max-width:80%; }
 .ios-group-message.me { margin-left:auto; align-items:flex-end; }.ios-group-message.them { margin-right:auto; align-items:flex-start; }
 .ios-group-sender { margin:0 10px 3px; color:var(--ios-secondary); font-size:11px; }
-.ios-group-bubble { border-radius:19px; padding:8px 12px 9px; font-size:17px; line-height:1.28; word-break:break-word; background:#e9e9eb; color:#000; }
-body.dark-mode .ios-group-bubble { background:#3a3a3c;color:#fff; }.ios-group-message.me .ios-group-bubble { background:var(--ios-blue);color:#fff; }
-.ios-group-time { display:none; font-size:10px; color:var(--ios-secondary); margin:3px 8px 0; }
+.ios-group-bubble { position:relative;isolation:isolate;overflow:visible;border:0;box-shadow:none;padding:7px 11px 8px;font-size:var(--base-font-size);letter-spacing:0;line-height:1.25;min-height:32px;word-break:break-word;background:#e9e9eb;color:#000;border-radius:18px 18px 18px 4px;display:flex;align-items:center; }
+.ios-group-text{position:relative;z-index:2;line-height:1.28;white-space:pre-wrap;word-break:break-word;}
+body.dark-mode .ios-group-bubble { background:#2c2c2e;color:#fff; }.ios-group-message.me .ios-group-bubble { background:var(--ios-blue);color:#fff;border-radius:18px 18px 4px 18px; }
+.ios-group-bubble::before,.ios-group-bubble::after{content:"";position:absolute;display:block;pointer-events:none;}
+.ios-group-message.me .ios-group-bubble::before{right:-7px;bottom:0;width:18px;height:18px;background:var(--ios-blue);border-bottom-left-radius:14px;z-index:0}.ios-group-message.me .ios-group-bubble::after{right:-10px;bottom:-1px;width:10px;height:20px;background:var(--ios-card);border-bottom-left-radius:10px;z-index:1}
+.ios-group-message.them .ios-group-bubble::before{left:-7px;bottom:0;width:18px;height:18px;background:#e9e9eb;border-bottom-right-radius:14px;z-index:0}.ios-group-message.them .ios-group-bubble::after{left:-10px;bottom:-1px;width:10px;height:20px;background:var(--ios-card);border-bottom-right-radius:10px;z-index:1}body.dark-mode .ios-group-message.them .ios-group-bubble::before{background:#2c2c2e}
+.ios-group-time { display:none;position:absolute;right:8px;bottom:4px;margin:0;padding:0;font-size:8px;line-height:9px;letter-spacing:0;opacity:.72;color:var(--ios-secondary);white-space:nowrap;pointer-events:none;z-index:2; }
 body.ios-show-timestamp .ios-group-time { display:block; }
+body.ios-show-timestamp .ios-group-bubble{padding:7px 34px 15px 11px;}
+body.ios-show-timestamp .ios-group-message.me .ios-group-time{color:rgba(255,255,255,.72)}
+body.ios-show-timestamp .ios-group-message.them .ios-group-time{color:rgba(60,60,67,.58)}
+body.dark-mode.ios-show-timestamp .ios-group-message.them .ios-group-time{color:rgba(235,235,245,.55)}
 .ios-group-typing { min-height:28px; padding:0 20px; color:var(--ios-secondary); font-size:12px; display:flex;align-items:center;gap:8px; }
 .ios-group-typing-dots { display:inline-flex;gap:4px;background:#e9e9eb;border-radius:15px;padding:8px 10px; }.ios-group-typing-dots i{width:5px;height:5px;border-radius:50%;background:#8e8e93;animation:iosTypingDot 1.2s infinite ease-in-out}.ios-group-typing-dots i:nth-child(2){animation-delay:.16s}.ios-group-typing-dots i:nth-child(3){animation-delay:.32s}
 .ios-group-compose { flex:0 0 auto; display:flex;align-items:flex-end;gap:8px;padding:7px 12px calc(7px + var(--ios-safe-bottom));border-top:.5px solid var(--ios-separator);background:color-mix(in srgb,var(--ios-card) 96%, transparent); }
@@ -9224,7 +9289,7 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
 </div>
 
 <section class="ios-group-chat-page" id="ios-group-chat-page" aria-label="群聊">
-  <header class="ios-group-chat-head"><button class="ios-group-back" onclick="iosCloseGroupChat()"><svg viewBox="0 0 24 24"><path d="m15 4-8 8 8 8"></path></svg><span>信息</span></button><div class="ios-group-head-center" id="ios-group-head-center"></div><button class="ios-group-members-btn" onclick="iosShowGroupMembers()">成员</button></header>
+  <header class="ios-group-chat-head"><button class="ios-group-back" onclick="iosCloseGroupChat()"><svg viewBox="0 0 24 24"><path d="m15 4-8 8 8 8"></path></svg><span>信息</span></button><div class="ios-group-head-center" id="ios-group-head-center"></div><button class="ios-group-members-btn" onclick="iosShowGroupMembers()">详情</button></header>
   <div class="ios-group-message-list" id="ios-group-message-list"></div>
   <div class="ios-group-typing" id="ios-group-typing" style="display:none"></div>
   <div class="ios-group-compose"><input id="ios-group-input" placeholder="iMessage 信息" onkeydown="if(event.key==='Enter'){event.preventDefault();iosSendGroupMessage()}"><button class="ios-group-send" onclick="iosSendGroupMessage()" aria-label="发送"><svg viewBox="0 0 24 24"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"></path></svg></button></div>
@@ -9239,7 +9304,7 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
   const ensureGroups=()=>{ if(typeof appState!=='undefined' && !Array.isArray(appState.groupChats)) appState.groupChats=[]; return appState?.groupChats||[]; };
   const roleById=id=>(appState.roles||[]).find(r=>String(r.id)===String(id));
   const roleAvatarMini=(role,cls='')=>role?.avatar?`<img class="${cls}" src="${esc12(role.avatar)}" alt="">`:`<div class="ios-group-member-fallback ${cls}">${esc12((role?.name||'T').trim().slice(0,1)||'T')}</div>`;
-  const groupAvatar=(group)=>{ const roles=(group?.memberIds||[]).map(roleById).filter(Boolean).slice(0,3); return `<div class="ios-group-avatar">${roles.map((r,i)=>`<span class="ga">${r.avatar?`<img src="${esc12(r.avatar)}" alt="">`:esc12((r.name||'T').slice(0,1))}</span>`).join('')}</div>`; };
+  const groupAvatar=(group)=>{ if(group?.avatar)return `<div class="ios-group-avatar custom"><img src="${esc12(group.avatar)}" alt=""></div>`; const roles=(group?.memberIds||[]).map(roleById).filter(Boolean).slice(0,3); return `<div class="ios-group-avatar">${roles.map((r,i)=>`<span class="ga">${r.avatar?`<img src="${esc12(r.avatar)}" alt="">`:esc12((r.name||'T').slice(0,1))}</span>`).join('')}</div>`; };
   const plainGroupMsg=m=>String(m?.content||'').replace(/<[^>]+>/g,'').trim() || '开始一段新对话';
 
   function installCompose(){
@@ -9260,21 +9325,21 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
     if(groupSelected.size<2){ showToast?.('至少选择两个角色'); return; }
     const ids=[...groupSelected], roles=ids.map(roleById).filter(Boolean), entered=(document.getElementById('ios-group-name-input')?.value||'').trim();
     const group={id:'group_'+Date.now(),name:entered||roles.map(r=>r.name).join('、'),memberIds:ids,messages:[],createdAt:Date.now(),lastMessageTime:Date.now()};
-    ensureGroups().push(group); if(typeof saveState==='function') await saveState(); iosCloseGroupCreate(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); iosOpenGroupChat(group.id);
+    ensureGroups().push(group); if(typeof saveState==='function') await saveState(); iosCloseGroupCreate(); if(typeof window.iosRenderRolesPage==='function')window.iosRenderRolesPage(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); iosOpenGroupChat(group.id);
   };
 
   function renderGroupHead(group){ const roles=(group.memberIds||[]).map(roleById).filter(Boolean); document.getElementById('ios-group-head-center').innerHTML=`${groupAvatar(group)}<div class="ios-group-name">${esc12(group.name||roles.map(r=>r.name).join('、')||'群聊')}</div>`; }
   function renderGroupMessages(group){
     const box=document.getElementById('ios-group-message-list'); if(!box)return;
-    box.innerHTML=(group.messages||[]).map(m=>{ const me=m.senderId==='me', role=me?null:roleById(m.senderId); return `<div class="ios-group-message ${me?'me':'them'}">${me?'':`<div class="ios-group-sender">${esc12(role?.name||'成员')}</div>`}<div class="ios-group-bubble">${esc12(m.content)}</div><div class="ios-group-time">${esc12(fullTime12(m.time))}</div></div>`; }).join('') || '<div style="text-align:center;color:var(--ios-secondary);font-size:13px;padding:30px 0">开始群聊</div>';
+    box.innerHTML=(group.messages||[]).map(m=>{ const me=m.senderId==='me', role=me?null:roleById(m.senderId); return `<div class="ios-group-message ${me?'me':'them'}">${me?'':`<div class="ios-group-sender">${esc12(role?.name||'成员')}</div>`}<div class="ios-group-bubble"><span class="ios-group-text">${esc12(m.content)}</span><span class="ios-group-time">${esc12(fullTime12(m.time))}</span></div></div>`; }).join('') || '<div style="text-align:center;color:var(--ios-secondary);font-size:13px;padding:30px 0">开始群聊</div>';
     requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
   }
   function currentGroup(){ return ensureGroups().find(g=>String(g.id)===String(groupOpenId)); }
   window.iosOpenGroupChat=async function(id){
     const g=ensureGroups().find(x=>String(x.id)===String(id)); if(!g)return; groupOpenId=String(id); (g.messages||[]).forEach(m=>{ if(m.senderId!=='me')m.isRead=true; }); if(typeof saveState==='function')saveState(); renderGroupHead(g); renderGroupMessages(g); document.getElementById('ios-group-chat-page')?.classList.add('open'); document.getElementById('ios-group-input')?.focus(); iosRenderConversations(document.getElementById('ios-message-search')?.value||'');
   };
-  window.iosCloseGroupChat=function(){ document.getElementById('ios-group-chat-page')?.classList.remove('open'); groupOpenId=null; document.getElementById('ios-group-typing').style.display='none'; iosRenderConversations(document.getElementById('ios-message-search')?.value||''); };
-  window.iosShowGroupMembers=function(){ const g=currentGroup(); if(!g)return; const names=(g.memberIds||[]).map(roleById).filter(Boolean).map(r=>r.name).join('\n'); if(typeof uiAlert==='function')uiAlert(names||'暂无成员','群聊成员'); };
+  window.iosCloseGroupChat=function(){ document.getElementById('ios-group-chat-page')?.classList.remove('open'); groupOpenId=null; groupTypingRoles.clear(); const typing=document.getElementById('ios-group-typing'); if(typing){typing.style.display='none';typing.innerHTML='';} iosRenderConversations(document.getElementById('ios-message-search')?.value||''); };
+  window.iosShowGroupMembers=function(){ const g=currentGroup(); if(!g)return; if(typeof window.iosOpenGroupManager==='function')window.iosOpenGroupManager(g.id); else { const names=(g.memberIds||[]).map(roleById).filter(Boolean).map(r=>r.name).join('\n'); if(typeof uiAlert==='function')uiAlert(names||'暂无成员','群聊成员'); } };
 
   function groupReplyText(role){
     let cards=[]; try{ cards=typeof getBoundWordcardsForRole==='function'?getBoundWordcardsForRole(role):[]; }catch(e){}
@@ -9284,14 +9349,21 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
     }
     return String(cards[Math.floor(Math.random()*cards.length)]?.text||'嗯嗯');
   }
-  function setGroupTyping(role,show){ const el=document.getElementById('ios-group-typing'); if(!el)return; if(!show){el.style.display='none';el.innerHTML='';return;} el.style.display='flex'; el.innerHTML=`<span>${esc12(role?.name||'成员')}</span><span class="ios-group-typing-dots"><i></i><i></i><i></i></span>`; }
+  const groupTypingRoles=new Map();
+  function setGroupTyping(role,show){ const el=document.getElementById('ios-group-typing'); if(!el)return; const key=String(role?.id??role?.name??'member'); if(show)groupTypingRoles.set(key,role); else groupTypingRoles.delete(key); if(!groupTypingRoles.size){el.style.display='none';el.innerHTML='';return;} const names=[...groupTypingRoles.values()].map(r=>r?.name||'成员').join('、'); el.style.display='flex'; el.innerHTML=`<span>${esc12(names)}</span><span class="ios-group-typing-dots"><i></i><i></i><i></i></span>`; }
   window.iosSendGroupMessage=async function(){
     const g=currentGroup(), input=document.getElementById('ios-group-input'); if(!g||!input)return; const text=input.value.trim(); if(!text)return; input.value='';
     g.messages.push({id:'gm_'+Date.now(),senderId:'me',content:text,time:Date.now(),isRead:true}); g.lastMessageTime=Date.now(); renderGroupMessages(g); if(typeof saveState==='function')saveState(); iosRenderConversations(document.getElementById('ios-message-search')?.value||'');
     const members=(g.memberIds||[]).map(roleById).filter(Boolean); if(!members.length)return; const shuffled=members.slice().sort(()=>Math.random()-.5); const n=Math.min(shuffled.length,Math.random()<.35?2:1);
+    const minSec=Math.max(0,Number(appState.settings?.minDelaySec ?? 2));
+    const maxSec=Math.max(minSec,Number(appState.settings?.maxDelaySec ?? 6));
     for(let i=0;i<n;i++){
-      const role=shuffled[i]; setTimeout(()=>setGroupTyping(role,true),350+i*1100);
-      setTimeout(()=>{ const still=currentGroup(); const target=ensureGroups().find(x=>String(x.id)===String(g.id)); if(!target)return; setGroupTyping(role,false); const open=still&&String(still.id)===String(g.id)&&document.getElementById('ios-group-chat-page')?.classList.contains('open'); const actuallyVisible=!!open&&document.visibilityState==='visible'; const reply=groupReplyText(role); target.messages.push({id:'gm_'+Date.now()+'_'+i,senderId:String(role.id),content:reply,time:Date.now(),isRead:actuallyVisible}); target.lastMessageTime=Date.now(); if(open)renderGroupMessages(target); if(typeof saveState==='function')saveState(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); if(!actuallyVisible&&typeof window.traceNotifyIncoming==='function'){ const who=String(role?.remark||'').trim()||role?.name||'成员'; window.traceNotifyIncoming({title:target.name||'群聊',body:`${who}：${reply}`,tag:'trace-group-'+String(target.id)}); } },900+i*1250+Math.random()*500);
+      const role=shuffled[i];
+      const replyDelay=Math.round((minSec+Math.random()*(maxSec-minSec))*1000);
+      const typingLead=Math.min(1200,Math.max(240,replyDelay*0.45));
+      const typingAt=Math.max(0,replyDelay-typingLead);
+      setTimeout(()=>setGroupTyping(role,true),typingAt);
+      setTimeout(()=>{ const still=currentGroup(); const target=ensureGroups().find(x=>String(x.id)===String(g.id)); if(!target)return; setGroupTyping(role,false); const open=still&&String(still.id)===String(g.id)&&document.getElementById('ios-group-chat-page')?.classList.contains('open'); const actuallyVisible=!!open&&document.visibilityState==='visible'; const reply=groupReplyText(role); target.messages.push({id:'gm_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,6),senderId:String(role.id),content:reply,time:Date.now(),isRead:actuallyVisible}); target.lastMessageTime=Date.now(); if(open)renderGroupMessages(target); if(typeof saveState==='function')saveState(); iosRenderConversations(document.getElementById('ios-message-search')?.value||''); if(!actuallyVisible&&typeof window.traceNotifyIncoming==='function'){ const who=String(role?.remark||'').trim()||role?.name||'成员'; window.traceNotifyIncoming({title:target.name||'群聊',body:`${who}：${reply}`,tag:'trace-group-'+String(target.id)}); } },replyDelay);
     }
   };
 
@@ -9309,7 +9381,7 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
   window.iosDeleteSelectedConversations=async function(){
     if(!editSelectedV12.size)return; const ok=typeof uiConfirm==='function'?await uiConfirm('聊天记录会被删除；群聊会从列表中移除。','删除对话'):confirm('删除所选对话？'); if(!ok)return;
     for(const key of editSelectedV12){ const [kind,id]=key.split(':'); if(kind==='role'){ const role=roleById(id); if(role){role.messages=[];role.iosConversationHidden=true;} } else if(kind==='group'){ appState.groupChats=ensureGroups().filter(g=>String(g.id)!==String(id)); } }
-    editSelectedV12.clear(); editV12=false; document.getElementById('ios-page-messages')?.classList.remove('ios-editing'); const b=document.getElementById('ios-conversation-edit-btn'); if(b)b.textContent='编辑'; if(typeof saveState==='function')await saveState(); iosRenderConversations(document.getElementById('ios-message-search')?.value||'');
+    editSelectedV12.clear(); editV12=false; document.getElementById('ios-page-messages')?.classList.remove('ios-editing'); const b=document.getElementById('ios-conversation-edit-btn'); if(b)b.textContent='编辑'; if(typeof saveState==='function')await saveState(); if(typeof window.iosRenderRolesPage==='function')window.iosRenderRolesPage(); iosRenderConversations(document.getElementById('ios-message-search')?.value||'');
   };
 
   const showPrev=window.iosShowPage; window.iosShowPage=function(page){ if(page!=='messages'&&editV12){editV12=false;editSelectedV12.clear();document.getElementById('ios-page-messages')?.classList.remove('ios-editing');const b=document.getElementById('ios-conversation-edit-btn');if(b)b.textContent='编辑';} const out=showPrev?.(page); if(page==='messages')setTimeout(()=>{installCompose();iosRenderConversations(document.getElementById('ios-message-search')?.value||'')},0); return out; };
@@ -9657,6 +9729,52 @@ body.ios-system-theme #chat-area .message-wrap.system .bubble::after{display:non
 </script>
 
 
+
+<style id="ios-group-manager-v11-style">
+#ios-group-page-list .ios-group-avatar{width:46px;height:46px;flex-basis:46px}#ios-group-page-list .ios-group-avatar .ga{width:26px;height:26px}
+#ios-group-manager-page{position:fixed;inset:0;z-index:10000070;display:none;background:var(--ios-bg,#f2f2f7);color:var(--ios-label,#000);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif}
+#ios-group-manager-page.open{display:block}body.dark-mode #ios-group-manager-page{background:#000;color:#fff}
+.ios-group-manager-scroll{height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(34px + max(env(safe-area-inset-bottom,0px),10px))}
+.ios-group-manager-nav{position:sticky;top:0;z-index:4;min-height:56px;padding:calc(env(safe-area-inset-top,0px) + 6px) 16px 8px;display:grid;grid-template-columns:84px 1fr 84px;align-items:end;background:color-mix(in srgb,var(--ios-bg,#f2f2f7) 88%,transparent);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border-bottom:.5px solid var(--ios-separator)}
+body.dark-mode .ios-group-manager-nav{background:rgba(0,0,0,.84)}
+.ios-group-manager-nav button{border:0;background:transparent;color:var(--ios-blue);font:inherit;font-size:17px;padding:4px 0}.ios-group-manager-back{text-align:left}.ios-group-manager-chat{text-align:right}.ios-group-manager-title{text-align:center;font-size:17px;font-weight:600}
+.ios-group-manager-body{max-width:720px;margin:0 auto;padding:18px 16px 32px}
+.ios-group-profile{display:flex;align-items:center;gap:14px;margin:2px 2px 22px}
+.ios-group-profile-avatar{position:relative;width:72px;height:72px;min-width:72px;border:0;background:transparent;padding:0;cursor:pointer}.ios-group-profile-avatar .ios-group-avatar{width:72px!important;height:72px!important;flex-basis:72px!important}.ios-group-profile-avatar .ios-group-avatar .ga{width:40px!important;height:40px!important}.ios-group-profile-avatar .ios-group-avatar .ga:nth-child(1){left:4px;top:4px}.ios-group-profile-avatar .ios-group-avatar .ga:nth-child(2){right:4px;top:9px}.ios-group-profile-avatar .ios-group-avatar .ga:nth-child(3){left:17px;bottom:3px}
+.ios-group-avatar-camera{position:absolute;right:-2px;bottom:-2px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:var(--ios-blue);color:#fff;box-shadow:0 0 0 2px var(--ios-bg)}body.dark-mode .ios-group-avatar-camera{box-shadow:0 0 0 2px #000}.ios-group-avatar-camera svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2}
+.ios-group-profile-copy{min-width:0;flex:1}.ios-group-profile-name{border:0;background:transparent;color:var(--ios-label);font:inherit;font-size:28px;font-weight:700;letter-spacing:-.4px;padding:0;display:flex;align-items:center;gap:6px;max-width:100%;text-align:left}.ios-group-profile-name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ios-group-profile-name svg{width:14px;height:14px;stroke:var(--ios-secondary);fill:none;stroke-width:1.8}.ios-group-profile-sub{font-size:12px;color:var(--ios-secondary);margin-top:5px}
+.ios-group-rank-card{background:var(--ios-card);border-radius:14px;overflow:hidden}.ios-group-rank-row{min-height:62px;display:flex;align-items:center;gap:11px;padding:7px 14px;position:relative}.ios-group-rank-row+.ios-group-rank-row:before{content:"";position:absolute;left:58px;right:0;top:0;height:.5px;background:var(--ios-separator)}.ios-group-rank-num{width:22px;text-align:center;color:var(--ios-secondary);font-size:14px;font-variant-numeric:tabular-nums}.ios-group-rank-row .ios-avatar{width:42px;height:42px}.ios-group-rank-main{min-width:0;flex:1}.ios-group-rank-name{font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ios-group-rank-groups{font-size:12px;color:var(--ios-secondary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ios-group-rank-count{font-size:15px;color:var(--ios-secondary);white-space:nowrap;font-variant-numeric:tabular-nums}.ios-group-empty{padding:22px;text-align:center;color:var(--ios-secondary);font-size:14px}
+</style>
+<section id="ios-group-manager-page" aria-hidden="true">
+  <div class="ios-group-manager-scroll">
+    <header class="ios-group-manager-nav"><button class="ios-group-manager-back" onclick="iosCloseGroupManager()">‹ 角色</button><div class="ios-group-manager-title">群聊</div><button class="ios-group-manager-chat" onclick="iosGroupManagerChat()">聊天</button></header>
+    <main class="ios-group-manager-body" id="ios-group-manager-body"></main>
+  </div>
+</section>
+<script id="ios-group-manager-v11-script">
+(function(){
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let groupManagerId=null;
+  const groups=()=>{if(typeof appState==='undefined')return[];if(!Array.isArray(appState.groupChats))appState.groupChats=[];return appState.groupChats};
+  const groupById=id=>groups().find(g=>String(g.id)===String(id));
+  const roleById=id=>(appState.roles||[]).find(r=>String(r.id)===String(id));
+  const roleAvatar=r=>r?.avatar?`<img class="ios-avatar" src="${esc(r.avatar)}" alt="">`:`<div class="ios-avatar ios-avatar-fallback">${esc((r?.name||'T').slice(0,1))}</div>`;
+  function groupAvatarHtml(g){if(g?.avatar)return `<div class="ios-group-avatar custom"><img src="${esc(g.avatar)}" alt=""></div>`;const rs=(g?.memberIds||[]).map(roleById).filter(Boolean).slice(0,3);return `<div class="ios-group-avatar">${rs.map(r=>`<span class="ga">${r.avatar?`<img src="${esc(r.avatar)}" alt="">`:esc((r.name||'T').slice(0,1))}</span>`).join('')}</div>`}
+  function groupBubbleCount(g,roleId){return (g?.messages||[]).reduce((n,m)=>n+(String(m?.senderId)===String(roleId)?1:0),0)}
+  function renderGroupList(){const list=document.getElementById('ios-group-page-list');if(!list)return;const gs=groups();if(!gs.length){list.innerHTML='<div class="ios-empty">还没有群聊</div>';return}list.innerHTML=gs.map(g=>{const members=(g.memberIds||[]).map(roleById).filter(Boolean);const total=members.reduce((n,r)=>n+groupBubbleCount(g,r.id),0);return `<div class="ios-role-row" onclick="iosOpenGroupManager('${esc(g.id)}')">${groupAvatarHtml(g)}<div class="ios-row-main"><div class="ios-row-title">${esc(g.name||'群聊')}</div><div class="ios-row-preview">${members.length} 位成员 · 角色共发送 ${total} 个气泡</div></div><div class="ios-chevron"></div></div>`}).join('')}
+  function syncOpenGroupHeader(g){const head=document.getElementById('ios-group-head-center');const page=document.getElementById('ios-group-chat-page');if(!head||!page?.classList.contains('open'))return;head.innerHTML=`${groupAvatarHtml(g)}<div class="ios-group-name">${esc(g.name||'群聊')}</div>`}
+  function renderManager(){const g=groupById(groupManagerId),body=document.getElementById('ios-group-manager-body');if(!g||!body)return;const members=(g.memberIds||[]).map(roleById).filter(Boolean);const totalRoleBubbles=members.reduce((n,r)=>n+groupBubbleCount(g,r.id),0);const ranking=members.map(r=>({role:r,count:groupBubbleCount(g,r.id)})).sort((a,b)=>b.count-a.count||String(a.role.name||'').localeCompare(String(b.role.name||''),'zh-CN'));const rows=ranking.length?ranking.map((x,i)=>{const pct=totalRoleBubbles?Math.round(x.count/totalRoleBubbles*100):0;return `<div class="ios-group-rank-row"><div class="ios-group-rank-num">${i+1}</div>${roleAvatar(x.role)}<div class="ios-group-rank-main"><div class="ios-group-rank-name">${esc(x.role.name||'Ta')}</div><div class="ios-group-rank-groups">群内角色气泡占比 ${pct}%</div></div><div class="ios-group-rank-count">${x.count} 个</div></div>`}).join(''):'<div class="ios-group-empty">这个群聊还没有成员</div>';body.innerHTML=`<div class="ios-group-profile"><button class="ios-group-profile-avatar" onclick="iosChangeGroupAvatar()" aria-label="更换群头像">${groupAvatarHtml(g)}<span class="ios-group-avatar-camera"><svg viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H9l1.2-1.6h3.6L15 6h2.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5Z"></path><circle cx="12" cy="12.5" r="3"></circle></svg></span></button><div class="ios-group-profile-copy"><button class="ios-group-profile-name" onclick="iosEditGroupName()"><span>${esc(g.name||'群聊')}</span><svg viewBox="0 0 24 24"><path d="m14 5 5 5L9 20H4v-5Z"></path><path d="m12 7 5 5"></path></svg></button><div class="ios-group-profile-sub">${members.length} 位成员 · 轻点头像或名字修改群聊资料</div></div></div><div class="ios-section-label">群内气泡数排名</div><div class="ios-group-rank-card">${rows}</div>`}
+  window.iosOpenGroupManager=function(id){const g=groupById(id);if(!g)return;groupManagerId=String(id);renderManager();const page=document.getElementById('ios-group-manager-page');page?.classList.add('open');page?.setAttribute('aria-hidden','false');page?.querySelector('.ios-group-manager-scroll')?.scrollTo({top:0})};
+  window.iosCloseGroupManager=function(){groupManagerId=null;const page=document.getElementById('ios-group-manager-page');page?.classList.remove('open');page?.setAttribute('aria-hidden','true')};
+  window.iosGroupManagerChat=function(){const id=groupManagerId;if(!id)return;iosCloseGroupManager();if(typeof window.iosOpenGroupChat==='function')window.iosOpenGroupChat(id)};
+  window.iosEditGroupName=async function(){const g=groupById(groupManagerId);if(!g)return;const value=typeof uiPrompt==='function'?await uiPrompt('群聊名称会同时显示在信息列表和群聊顶部。','修改群聊名称',g.name||''):prompt('修改群聊名称',g.name||'');if(value===null||value===undefined)return;const next=String(value).trim();if(!next)return;g.name=next;if(typeof saveState==='function')await saveState();renderManager();renderGroupList();syncOpenGroupHeader(g);if(typeof window.iosRenderConversations==='function')window.iosRenderConversations(document.getElementById('ios-message-search')?.value||'');if(typeof showToast==='function')showToast('群聊名称已更新')};
+  window.iosChangeGroupAvatar=function(){const g=groupById(groupManagerId);if(!g)return;let input=document.getElementById('ios-group-avatar-input');if(!input){input=document.createElement('input');input.type='file';input.accept='image/*';input.id='ios-group-avatar-input';input.style.display='none';document.body.appendChild(input);input.addEventListener('change',async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;const active=groupById(groupManagerId);if(!active)return;try{active.avatar=typeof compressImage==='function'?await compressImage(file,320):await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});if(typeof saveState==='function')await saveState();renderManager();renderGroupList();syncOpenGroupHeader(active);if(typeof window.iosRenderConversations==='function')window.iosRenderConversations(document.getElementById('ios-message-search')?.value||'');if(typeof showToast==='function')showToast('群头像已更换')}catch(err){console.error(err);if(typeof uiAlert==='function')uiAlert('头像读取失败，请换一张图片再试。','更换群头像')}})}input.click()};
+  const previousRolesRender=window.iosRenderRolesPage;window.iosRenderRolesPage=function(){const out=previousRolesRender?.();renderGroupList();return out};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('ios-group-manager-page')?.classList.contains('open'))iosCloseGroupManager()});
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(renderGroupList,90));window.addEventListener('load',()=>setTimeout(renderGroupList,320));
+})();
+</script>
+
 <!-- ===== iOS 提示 / 使用指南（v16） ===== -->
 <section id="ios-tips-page" aria-label="使用提示" aria-hidden="true">
   <div class="ios-tips-scroll">
@@ -9943,7 +10061,7 @@ body.ios-has-new-diary #legacy-diary-entry::after{content:"";position:absolute;t
   </div>
 </section>
 
-<style id="ios-release-notes-v10-style">
+<style id="ios-release-notes-v11-style">
 /* Old floating update-log ball is retired; release notices now live in Settings. */
 #update-float-ball{display:none!important}
 #ios-release-notes-page{position:fixed;inset:0;z-index:1000010;display:none;background:var(--ios-bg,#f2f2f7);color:var(--ios-label,#000);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif}
@@ -9969,11 +10087,12 @@ body.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:after{conte
 body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:after{box-shadow:0 0 0 2px rgba(28,28,30,.95)}
 </style>
 
-<script id="ios-release-notes-v10-script">
+<script id="ios-release-notes-v11-script">
 (function(){
-  const CURRENT_RELEASE_VERSION='v10';
+  const CURRENT_RELEASE_VERSION='v11';
   const RELEASE_HISTORY=[
-    {version:'v10',tag:'当前版本',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','写信页新增多角色收件人选择：可一次勾选多个角色，同一封信分别进入每个角色的独立信箱，每个人使用自己的绑定字卡并在自己的随机时间回信；已有回信在途的角色会暂时不可重复寄送。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
+    {version:'v11',tag:'当前版本',items:['群聊回复速度改为直接读取设置里的“最快响应 / 最慢响应”；同一轮参与回复的角色各自独立随机等待，不再人为规定谁先谁后。','群聊气泡尺寸、文字字号、行高、圆角、尾巴与时间戳布局统一到单聊 iMessage 气泡。','“角色”页新增独立“群聊”分类，群聊与角色一起集中管理，并保留新建群聊入口。','新增群聊资料页：可修改群聊名称和自定义群头像；群头像会同步显示在信息列表与聊天顶部。','群聊资料页新增“群内气泡数排名”，按每个角色在这个群聊里实际发送的气泡数量排序，并显示其占全部角色气泡的比例。','字卡管理新增“清理重复”：同一分组中完全相同的字卡只保留第一条；不同分组中的同一句话不会误删。手动注入会跳过重复，移动分组造成重复时会自动清理。']},
+    {version:'v10',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','写信页新增多角色收件人选择：可一次勾选多个角色，同一封信分别进入每个角色的独立信箱，每个人使用自己的绑定字卡并在自己的随机时间回信；已有回信在途的角色会暂时不可重复寄送。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
     {version:'v9',items:['修复后台来信通知：普通回复、主动消息与群聊消息都会在真正到达时触发系统横幅；前台正在查看时不重复打扰。','备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
     {version:'v8',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。','修复多角色字卡串用：角色回复严格只读取自己已绑定的字卡组，不再在缺少绑定信息时自动回退到全部分组。','旧版多角色中若仍处于自动全选全部字卡组，首次载入会清理这类全选绑定；已经手动选成子集的绑定会保留。','新建角色默认不再自动绑定所有现有字卡组，需要在角色详情中选择要使用的字卡组。','修复拼字卡上限失效：开启拼字卡后每轮固定只发 1 个拼接气泡，最多使用的字卡条数严格受“最多拼”限制。']},
     {version:'v7',items:['侧边快捷球改成接近 iOS AssistiveTouch 的半透明样式，可拖动并记住位置，内含「提示」与「急救」。','聊天页顶部改为覆盖内容的毛玻璃，聊天主体恢复白色；底部导航改为 iOS 浅灰半透明材质。','修复聊天顶栏覆盖信息列表的问题；正在输入与延迟回复按角色独立，不再串到其他角色。']},
