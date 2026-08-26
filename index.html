@@ -1036,27 +1036,53 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
 .ios-mail-recipient-row{width:100%;min-height:58px;border:0;border-bottom:.5px solid var(--ios-separator,rgba(60,60,67,.18));background:transparent;color:inherit;display:flex;align-items:center;gap:11px;padding:8px 12px;text-align:left;font:inherit;-webkit-tap-highlight-color:transparent}
 .ios-mail-recipient-row:last-child{border-bottom:0}.ios-mail-recipient-row:active:not(:disabled){background:var(--ios-fill,rgba(120,120,128,.12))}
 .ios-mail-recipient-row:disabled{opacity:.48}.ios-mail-recipient-avatar{width:40px;height:40px;flex:0 0 40px;border-radius:50%;overflow:hidden;background:#aeb3bc;color:#fff;display:grid;place-items:center;font-size:16px;font-weight:600}.ios-mail-recipient-avatar img{width:100%;height:100%;object-fit:cover}
-.ios-mail-recipient-copy{min-width:0;flex:1}.ios-mail-recipient-name{font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ios-mail-recipient-sub{font-size:12px;color:var(--text-sub);margin-top:2px}
+.ios-mail-recipient-copy{min-width:0;flex:1}.ios-mail-recipient-name,.ios-mail-recipient-sub{display:block}.ios-mail-recipient-name{font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ios-mail-recipient-sub{font-size:12px;color:var(--text-sub);margin-top:2px}
 .ios-mail-recipient-check{width:24px;height:24px;flex:0 0 24px;border-radius:50%;border:1.5px solid #c7c7cc;display:grid;place-items:center}.ios-mail-recipient-row.selected .ios-mail-recipient-check{background:#007aff;border-color:#007aff}.ios-mail-recipient-row.selected .ios-mail-recipient-check::after{content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(0,-1px)}
-#mail-send-btn:disabled{opacity:.38;pointer-events:none}
+#mail-recipient-next-btn:disabled,#mail-send-btn:disabled{opacity:.38;pointer-events:none}
 body.dark-mode .ios-mail-recipient-list{background:#1c1c1e;border-color:#38383a}
+.ios-mail-flow-sheet{height:88vh!important;max-height:88vh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+.ios-mail-flow-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 22px!important}
+.ios-mail-flow-footer{flex:0 0 auto;padding:10px 16px calc(10px + var(--ios-safe-bottom, env(safe-area-inset-bottom)));border-top:.5px solid var(--ios-separator,rgba(60,60,67,.18));background:color-mix(in srgb,var(--ios-card,#fff) 94%,transparent);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%)}
+.ios-mail-flow-footer .btn-full{margin:0!important;border:0!important;border-radius:13px!important;box-shadow:none!important;min-height:48px!important;font-size:17px!important;font-weight:600!important}
+.ios-mail-write-head{display:grid!important;grid-template-columns:72px 1fr 72px;align-items:center}.ios-mail-write-head h3{text-align:center;margin:0}.ios-mail-write-head .ios-mail-head-left{text-align:left}.ios-mail-write-head .ios-mail-head-right{text-align:right}
+.ios-mail-write-head button{border:0!important;background:transparent!important;color:#007aff!important;font:inherit!important;font-size:16px!important;padding:8px 0!important;box-shadow:none!important}
+.ios-mail-write-note{font-size:12px;color:var(--text-sub);text-align:center;margin:2px 0 14px}
+#mail-content-input{width:100%!important;min-height:320px!important;height:100%!important;resize:none!important;border:0!important;border-radius:14px!important;background:var(--ios-card,#fff)!important;padding:16px!important;line-height:1.7!important;font-size:16px!important;box-shadow:inset 0 0 0 .5px var(--ios-separator,rgba(60,60,67,.18))!important}
+body.dark-mode #mail-content-input{background:#1c1c1e!important}
 </style>
 
-<!-- 写信弹窗 -->
-<div class="modal-overlay" id="write-mail-modal" style="z-index: 100000;">
-    <div class="modal-content" style="height: auto; max-height: 88vh;">
+<!-- 选择收件人：独立一步 -->
+<div class="modal-overlay" id="mail-recipient-modal" style="z-index:100000;" onclick="if(event.target===this) closeMailRecipientModal()">
+    <div class="modal-content ios-mail-flow-sheet">
         <div class="modal-header">
-            <h3>写信</h3>
-            <button class="close-btn" onclick="closeWriteMailModal()">取消</button>
+            <h3>选择收件人</h3>
+            <button class="close-btn" onclick="closeMailRecipientModal()">取消</button>
         </div>
-        <div class="modal-body" style="padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;">
-            <div style="font-size:11px;color:var(--text-sub);margin-bottom:14px;line-height:1.5;font-weight:300;">可以同时寄给多个角色。每个人会收到同一封信，再按照自己的字卡和自己的时间分别回信。</div>
+        <div class="modal-body ios-mail-flow-body">
+            <div style="font-size:12px;color:var(--text-sub);margin-bottom:16px;line-height:1.5;">可以同时选择多个角色，每位收件人都会单独收到这封信。</div>
             <div class="ios-mail-recipient-head"><span>收件人</span><span class="ios-mail-recipient-summary" id="mail-recipient-summary">请选择</span></div>
             <div class="ios-mail-recipient-list" id="mail-recipient-list"></div>
-            <div class="input-item" style="margin-bottom:24px;">
-                <textarea class="textarea-box" id="mail-content-input" placeholder="见字如面..." style="height:180px;background:repeating-linear-gradient(0deg,transparent,transparent 24px,var(--line-light) 24px,var(--line-light) 25px);line-height:25px;padding-top:4px;border-style:dashed;"></textarea>
-            </div>
-            <button class="btn-full primary" id="mail-send-btn" onclick="sendMail()" style="border-style:double;border-width:3px;">贴上邮票，投入邮筒</button>
+        </div>
+        <div class="ios-mail-flow-footer">
+            <button class="btn-full primary" id="mail-recipient-next-btn" onclick="nextMailRecipientStep()">下一步</button>
+        </div>
+    </div>
+</div>
+
+<!-- 写信：与收件人选择完全分开的第二步 -->
+<div class="modal-overlay" id="write-mail-modal" style="z-index:100001;">
+    <div class="modal-content ios-mail-flow-sheet">
+        <div class="modal-header ios-mail-write-head">
+            <div class="ios-mail-head-left"><button type="button" onclick="backToMailRecipients()">返回</button></div>
+            <h3>写信</h3>
+            <div class="ios-mail-head-right"><button type="button" onclick="closeWriteMailModal()">取消</button></div>
+        </div>
+        <div class="modal-body ios-mail-flow-body" style="display:flex;flex-direction:column;">
+            <div class="ios-mail-write-note" id="mail-write-recipient-summary">已选择 1 位收件人</div>
+            <textarea class="textarea-box" id="mail-content-input" placeholder="见字如面..."></textarea>
+        </div>
+        <div class="ios-mail-flow-footer">
+            <button class="btn-full primary" id="mail-send-btn" onclick="sendMail()">寄出</button>
         </div>
     </div>
 </div>
@@ -5931,14 +5957,14 @@ function mailHasPendingReplyForRole(roleOrId) {
 function renderMailRecipientPicker() {
     const list = document.getElementById('mail-recipient-list');
     const summary = document.getElementById('mail-recipient-summary');
-    const sendBtn = document.getElementById('mail-send-btn');
+    const nextBtn = document.getElementById('mail-recipient-next-btn');
     if (!list) return;
     initDiaryData();
     const roles = appState.roles || [];
     if (!roles.length) {
         list.innerHTML = '<div style="padding:18px;text-align:center;color:var(--text-sub);font-size:13px">还没有可寄信的角色</div>';
         if (summary) summary.textContent = '0 人';
-        if (sendBtn) sendBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
         return;
     }
 
@@ -5957,9 +5983,9 @@ function renderMailRecipientPicker() {
 
     const count = mailSelectedRoleIdsV10.size;
     if (summary) summary.textContent = count ? `已选择 ${count} 人` : '请选择';
-    if (sendBtn) {
-        sendBtn.disabled = count === 0;
-        sendBtn.textContent = count > 1 ? `贴上邮票，寄给 ${count} 人` : '贴上邮票，投入邮筒';
+    if (nextBtn) {
+        nextBtn.disabled = count === 0;
+        nextBtn.textContent = count ? `下一步（${count}）` : '下一步';
     }
 }
 
@@ -5975,14 +6001,36 @@ window.toggleMailRecipientByIndex = function(index) {
 
 function openWriteMailModal() {
     initDiaryData();
-    document.getElementById('mail-content-input').value = '';
+    const input = document.getElementById('mail-content-input');
+    if (input) input.value = '';
     mailSelectedRoleIdsV10 = new Set();
     const current = getCurrentRole();
     if (current && !mailHasPendingReplyForRole(current.id)) mailSelectedRoleIdsV10.add(String(current.id));
     renderMailRecipientPicker();
-    document.getElementById('write-mail-modal').classList.add('open');
+    document.getElementById('mail-recipient-modal')?.classList.add('open');
 }
-function closeWriteMailModal() { document.getElementById('write-mail-modal').classList.remove('open'); }
+function closeMailRecipientModal() { document.getElementById('mail-recipient-modal')?.classList.remove('open'); }
+function nextMailRecipientStep() {
+    const count = mailSelectedRoleIdsV10.size;
+    if (!count) { showToast('先选择至少一位收件人'); return; }
+    const note = document.getElementById('mail-write-recipient-summary');
+    if (note) note.textContent = count === 1 ? '已选择 1 位收件人' : `已选择 ${count} 位收件人 · 将分别收到这封信`;
+    closeMailRecipientModal();
+    document.getElementById('write-mail-modal')?.classList.add('open');
+    setTimeout(()=>document.getElementById('mail-content-input')?.focus(),80);
+}
+function backToMailRecipients() {
+    document.getElementById('write-mail-modal')?.classList.remove('open');
+    renderMailRecipientPicker();
+    document.getElementById('mail-recipient-modal')?.classList.add('open');
+}
+function closeWriteMailModal() {
+    document.getElementById('write-mail-modal')?.classList.remove('open');
+    document.getElementById('mail-recipient-modal')?.classList.remove('open');
+}
+window.closeMailRecipientModal = closeMailRecipientModal;
+window.nextMailRecipientStep = nextMailRecipientStep;
+window.backToMailRecipients = backToMailRecipients;
 
 function nextMailId(seed = 0) {
     window.__traceMailIdSeqV10 = (Number(window.__traceMailIdSeqV10 || 0) + 1) % 900;
@@ -5995,7 +6043,7 @@ function sendMail() {
     if (!content) { showToast('信件内容不能为空哦'); return; }
 
     const selectedRoles = (appState.roles || []).filter(role => mailSelectedRoleIdsV10.has(String(role.id)) && !mailHasPendingReplyForRole(role.id));
-    if (!selectedRoles.length) { showToast('先选择至少一位可以收信的角色'); renderMailRecipientPicker(); return; }
+    if (!selectedRoles.length) { showToast('所选角色暂时都不能收信，请重新选择'); backToMailRecipients(); return; }
 
     const now = Date.now();
     const batchId = `mail-${now}-${Math.random().toString(36).slice(2,8)}`;
@@ -10171,7 +10219,7 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
 (function(){
   const CURRENT_RELEASE_VERSION='v11';
   const RELEASE_HISTORY=[
-    {version:'v11',tag:'当前版本',items:['群聊回复速度改为直接读取设置里的“最快响应 / 最慢响应”；同一轮参与回复的角色各自独立随机等待，不再人为规定谁先谁后。','群聊气泡尺寸、文字字号、行高、圆角、尾巴与时间戳布局统一到单聊 iMessage 气泡。','“角色”页新增独立“群聊”分类，群聊与角色一起集中管理，并保留新建群聊入口。','新增群聊资料页：可修改群聊名称和自定义群头像；群头像会同步显示在信息列表与聊天顶部。','群聊资料页新增“群内气泡数排名”，按每个角色在这个群聊里实际发送的气泡数量排序，并显示其占全部角色气泡的比例。','修复群聊发送卡顿与双击失效：群聊发送键与单聊统一为单击发送、双击直接触发回复；即使输入框为空也能双击让角色回复。群消息改为增量插入，并合并频繁保存与列表刷新，避免历史消息越多越卡。','字卡管理新增“清理重复”：同一分组中完全相同的字卡只保留第一条；不同分组中的同一句话不会误删。手动注入会跳过重复，移动分组造成重复时会自动清理。']},
+    {version:'v11',tag:'当前版本',items:['群聊回复速度改为直接读取设置里的“最快响应 / 最慢响应”；同一轮参与回复的角色各自独立随机等待，不再人为规定谁先谁后。','群聊气泡尺寸、文字字号、行高、圆角、尾巴与时间戳布局统一到单聊 iMessage 气泡。','“角色”页新增独立“群聊”分类，群聊与角色一起集中管理，并保留新建群聊入口。','新增群聊资料页：可修改群聊名称和自定义群头像；群头像会同步显示在信息列表与聊天顶部。','群聊资料页新增“群内气泡数排名”，按每个角色在这个群聊里实际发送的气泡数量排序，并显示其占全部角色气泡的比例。','修复群聊发送卡顿与双击失效：群聊发送键与单聊统一为单击发送、双击直接触发回复；即使输入框为空也能双击让角色回复。群消息改为增量插入，并合并频繁保存与列表刷新，避免历史消息越多越卡。','字卡管理新增“清理重复”：同一分组中完全相同的字卡只保留第一条；不同分组中的同一句话不会误删。手动注入会跳过重复，移动分组造成重复时会自动清理。','慢信寄信流程拆成独立两步：先单独选择一个或多个收件人，再进入单独写信页；写信页底部固定显示“寄出”，不再把角色选择和信纸放在同一页。']},
     {version:'v10',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','写信页新增多角色收件人选择：可一次勾选多个角色，同一封信分别进入每个角色的独立信箱，每个人使用自己的绑定字卡并在自己的随机时间回信；已有回信在途的角色会暂时不可重复寄送。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
     {version:'v9',items:['修复后台来信通知：普通回复、主动消息与群聊消息都会在真正到达时触发系统横幅；前台正在查看时不重复打扰。','备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
     {version:'v8',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。','修复多角色字卡串用：角色回复严格只读取自己已绑定的字卡组，不再在缺少绑定信息时自动回退到全部分组。','旧版多角色中若仍处于自动全选全部字卡组，首次载入会清理这类全选绑定；已经手动选成子集的绑定会保留。','新建角色默认不再自动绑定所有现有字卡组，需要在角色详情中选择要使用的字卡组。','修复拼字卡上限失效：开启拼字卡后每轮固定只发 1 个拼接气泡，最多使用的字卡条数严格受“最多拼”限制。']},
