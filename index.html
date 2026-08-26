@@ -3300,6 +3300,12 @@ if (msg.quoteText) { const q = document.createElement('div'); q.className = 'quo
         const cardBox = document.createElement('div');
         cardBox.innerHTML = msg.text;
         bubble.appendChild(cardBox);
+    } else if (msg.type === 'poll') {
+        bubble.classList.add('ios-poll-bubble');
+        const pollBox = document.createElement('div');
+        pollBox.className = 'ios-poll-holder';
+        pollBox.innerHTML = (typeof window.iosPollCardHtml === 'function') ? window.iosPollCardHtml(msg, 'private') : '<div class="ios-poll-card"><strong>问卷</strong></div>';
+        bubble.appendChild(pollBox);
     }
     if (msg.type === 'img' || msg.type === 'mix') { 
         const img = document.createElement('img'); 
@@ -3652,6 +3658,7 @@ function triggerAutoReply() {
     const targetRoleId = roleKey(role.id);
     const previousTimer = roleAutoReplyTimers.get(targetRoleId);
     if(previousTimer) clearTimeout(previousTimer); // 只打断这个角色自己的思考，不影响其他角色
+    if (role && typeof window.iosMaybeAutoPollAsk === 'function' && window.iosMaybeAutoPollAsk(role)) return;
 
     ensureRoleCardBindings(role);
     if(!role.allowedStickerGroups) role.allowedStickerGroups = [...new Set(appState.stickers.map(s => s.group))];
@@ -8666,6 +8673,7 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
         window.iosCloseComposeSheet();
         if(kind==='photo') document.getElementById('instant-img-upload')?.click();
         else if(kind==='sticker' && typeof toggleStickers==='function') toggleStickers();
+        else if(kind==='poll' && typeof window.iosOpenPollBuilder==='function') window.iosOpenPollBuilder('private');
         else if(kind==='more') iosShowPage('more');
     };
     window.iosSyncStackState=function(){ document.getElementById('ios-compose-plus')?.classList.remove('active'); };
@@ -8687,7 +8695,7 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
             row.insertBefore(plus, document.getElementById('msg-input'));
             const bar=document.querySelector('.bottom-bar');
             const sheet=document.createElement('div'); sheet.id='ios-compose-sheet'; sheet.className='ios-compose-sheet';
-            sheet.innerHTML=`<button class="ios-compose-action" onclick="iosComposeAction('photo')"><span class="ios-cell-icon" style="background:#34c759">${svg('photo')}</span>照片</button><button class="ios-compose-action" onclick="iosComposeAction('sticker')"><span class="ios-cell-icon" style="background:#ff9500">${svg('spark')}</span>表情与贴纸</button><button class="ios-compose-action" onclick="iosComposeAction('more')"><span class="ios-cell-icon" style="background:#007aff">${svg('game')}</span>全部功能</button>`;
+            sheet.innerHTML=`<button class="ios-compose-action" onclick="iosComposeAction('photo')"><span class="ios-cell-icon" style="background:#34c759">${svg('photo')}</span>照片</button><button class="ios-compose-action" onclick="iosComposeAction('sticker')"><span class="ios-cell-icon" style="background:#ff9500">${svg('spark')}</span>表情与贴纸</button><button class="ios-compose-action" onclick="iosComposeAction('poll')"><span class="ios-cell-icon" style="background:#5856d6"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"></path><path d="M8 9h8M8 13h5M8 17h7"></path><circle cx="17" cy="13" r="1"></circle></svg></span>问卷</button><button class="ios-compose-action" onclick="iosComposeAction('more')"><span class="ios-cell-icon" style="background:#007aff">${svg('game')}</span>全部功能</button>`;
             bar.appendChild(sheet);
         }
         const input=document.getElementById('msg-input'); if(input){ input.placeholder='单击发送 · 双击触发回复'; input.setAttribute('aria-label','单击发送消息，双击发送键可直接触发对方回复，即使输入框为空'); }
@@ -9338,7 +9346,8 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
   <header class="ios-group-chat-head"><button class="ios-group-back" onclick="iosCloseGroupChat()"><svg viewBox="0 0 24 24"><path d="m15 4-8 8 8 8"></path></svg><span>信息</span></button><div class="ios-group-head-center" id="ios-group-head-center"></div><button class="ios-group-members-btn" onclick="iosShowGroupMembers()">详情</button></header>
   <div class="ios-group-message-list" id="ios-group-message-list"></div>
   <div class="ios-group-typing" id="ios-group-typing" style="display:none"></div>
-  <div class="ios-group-compose"><input id="ios-group-input" placeholder="单击发送 · 双击触发回复" onkeydown="iosGroupInputKeydown(event)" aria-label="群聊消息输入框"><button class="ios-group-send" onclick="iosSmartGroupSendTap(event)" aria-label="发送；双击直接触发群聊回复"><svg viewBox="0 0 24 24"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"></path></svg></button></div>
+  <div class="ios-compose-sheet ios-group-compose-sheet" id="ios-group-compose-sheet"><button class="ios-compose-action" onclick="iosGroupComposeAction('poll')"><span class="ios-cell-icon" style="background:#5856d6"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"></path><path d="M8 9h8M8 13h5M8 17h7"></path><circle cx="17" cy="13" r="1"></circle></svg></span>问卷</button></div>
+  <div class="ios-group-compose"><button class="ios-group-plus" id="ios-group-compose-plus" onclick="iosToggleGroupComposeSheet(event)" aria-label="更多"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button><input id="ios-group-input" placeholder="单击发送 · 双击触发回复" onkeydown="iosGroupInputKeydown(event)" aria-label="群聊消息输入框"><button class="ios-group-send" onclick="iosSmartGroupSendTap(event)" aria-label="发送；双击直接触发群聊回复"><svg viewBox="0 0 24 24"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"></path></svg></button></div>
 </section>
 
 <script id="ios-v12-script">
@@ -9379,6 +9388,7 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
   function renderGroupHead(group){ const roles=(group.memberIds||[]).map(roleById).filter(Boolean); document.getElementById('ios-group-head-center').innerHTML=`${groupAvatar(group)}<div class="ios-group-name">${esc12(group.name||roles.map(r=>r.name).join('、')||'群聊')}</div>`; }
   function groupMessageHtml(m){
     const me=m.senderId==='me', role=me?null:roleById(m.senderId);
+    if(m?.type==='poll' && typeof window.iosGroupPollMessageHtml==='function') return window.iosGroupPollMessageHtml(m,role,me,fullTime12(m.time));
     return `<div class="ios-group-message ${me?'me':'them'}" data-group-message-id="${esc12(m.id||'')}">${me?'':`<div class="ios-group-sender">${esc12(role?.name||'成员')}</div>`}<div class="ios-group-bubble"><span class="ios-group-text">${esc12(m.content)}</span><span class="ios-group-time">${esc12(fullTime12(m.time))}</span></div></div>`;
   }
   function renderGroupMessages(group){
@@ -9404,6 +9414,25 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
     requestAnimationFrame(()=>{groupConversationRenderQueued=false; iosRenderConversations(document.getElementById('ios-message-search')?.value||'');});
   }
   function currentGroup(){ return ensureGroups().find(g=>String(g.id)===String(groupOpenId)); }
+  window.iosGroupPollBridge={
+    current:()=>currentGroup(),
+    send:(msg)=>{
+      const g=currentGroup(); if(!g||!msg)return false;
+      g.messages=g.messages||[]; g.messages.push(msg); g.lastMessageTime=Number(msg.time||Date.now());
+      appendGroupMessage(g,msg); scheduleGroupSave(); queueGroupConversationRender(); return true;
+    },
+    refresh:(groupId,msgId)=>{
+      const g=ensureGroups().find(x=>String(x.id)===String(groupId)); if(!g)return;
+      const msg=(g.messages||[]).find(x=>String(x.id)===String(msgId)); if(!msg)return;
+      const box=document.getElementById('ios-group-message-list');
+      const open=String(groupOpenId)===String(groupId)&&document.getElementById('ios-group-chat-page')?.classList.contains('open');
+      if(open&&box){
+        const oldEl=[...box.querySelectorAll('[data-group-message-id]')].find(el=>String(el.dataset.groupMessageId)===String(msgId));
+        if(oldEl) oldEl.outerHTML=groupMessageHtml(msg); else appendGroupMessage(g,msg);
+      }
+      scheduleGroupSave(); queueGroupConversationRender();
+    }
+  };
   window.iosOpenGroupChat=async function(id){
     const g=ensureGroups().find(x=>String(x.id)===String(id)); if(!g)return; groupOpenId=String(id); (g.messages||[]).forEach(m=>{ if(m.senderId!=='me')m.isRead=true; }); if(typeof saveState==='function')saveState(); renderGroupHead(g); renderGroupMessages(g); document.getElementById('ios-group-chat-page')?.classList.add('open'); document.getElementById('ios-group-input')?.focus(); iosRenderConversations(document.getElementById('ios-message-search')?.value||'');
   };
@@ -9964,6 +9993,32 @@ body.dark-mode .ios-group-manager-nav{background:rgba(0,0,0,.84)}
       </section>
 
       <section class="ios-tip-section" data-tip-section>
+        <h2>最近更新</h2>
+        <div class="ios-tip-card">
+          <button class="ios-tip-row" data-search="双击 触发回复 单击发送 空输入 私聊 群聊" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#007aff"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H8l-4 3V6Z"></path><path d="m10 9 4 3-4 3"></path></svg></span>
+            <span class="ios-tip-copy"><strong>双击触发回复</strong><small>单击发送，双击直接让 Ta 回复。</small><span class="ios-tip-detail">不输入文字也可以双击触发，私聊和群聊都能用。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="问卷 自定义题目 选项 随机 群聊 Ta出题 字卡" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#5856d6"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M8 9h8M8 13h5M8 17h7"></path></svg></span>
+            <span class="ios-tip-copy"><strong>问卷</strong><small>聊天左下角＋里可以发问卷。</small><span class="ios-tip-detail">题目和选项都能自己写；群聊成员会各自随机选择，也可以让 Ta 用自己的字卡随机出题。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="群聊 管理 名字 头像 气泡数 排名" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#30b0c7"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"></circle><circle cx="16.5" cy="9" r="2.5"></circle><path d="M2.5 20a5.5 5.5 0 0 1 11 0M13 15.5a4.5 4.5 0 0 1 7.5 3.5"></path></svg></span>
+            <span class="ios-tip-copy"><strong>群聊管理</strong><small>群聊也可以在“角色”页里管理。</small><span class="ios-tip-detail">可以修改群名、群头像，并查看成员在群里的气泡数排行。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="交换日记 慢信 多角色 收件人 蓝点 字卡条数 100" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#ff9500"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"></path><path d="M8 8h8M8 12h8M8 16h5"></path></svg></span>
+            <span class="ios-tip-copy"><strong>日记与慢信</strong><small>每个角色都有自己的日记和信箱。</small><span class="ios-tip-detail">新日记会有蓝点；日记和回信可设置最多 1–100 条字卡。写信时可以一次选择多个收件人。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+          <button class="ios-tip-row" data-search="字卡 清理重复 导入 导出 复制 一条一行" onclick="iosToggleTipRow(this)">
+            <span class="ios-tip-icon" style="--tip-color:#34c759"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"></path><path d="m17 16 3 3 3-3"></path></svg></span>
+            <span class="ios-tip-copy"><strong>字卡整理</strong><small>可以导入、导出和清理重复字卡。</small><span class="ios-tip-detail">导出可选 JSON 或一条一行复制；清理重复只处理同分组里的重复内容。</span></span><span class="ios-tip-chevron"></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="ios-tip-section" data-tip-section>
         <h2>两个人的记录</h2>
         <div class="ios-tip-card">
           <button class="ios-tip-row" data-search="字卡趋势 排行榜 7天 30天 频率 健康" onclick="iosToggleTipRow(this)">
@@ -10190,7 +10245,275 @@ body.ios-has-new-diary #legacy-diary-entry::after{content:"";position:absolute;t
   </div>
 </section>
 
-<style id="ios-release-notes-v11-style">
+
+<!-- ===== v12 · 聊天问卷 ===== -->
+<style id="ios-poll-v12-style">
+.ios-group-plus{width:32px;height:32px;min-width:32px;margin:2px 0;padding:0;border:0;border-radius:50%;display:grid;place-items:center;background:var(--ios-fill);color:var(--ios-secondary);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.ios-group-plus.open{background:var(--ios-blue);color:#fff}.ios-group-plus svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ios-group-compose-sheet{left:10px!important;bottom:calc(56px + var(--ios-safe-bottom))!important;width:220px!important;z-index:100390!important}
+.ios-poll-overlay{position:fixed;inset:0;z-index:1000800;display:none;align-items:flex-end;background:rgba(0,0,0,.28);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.ios-poll-overlay.open{display:flex}.ios-poll-sheet{width:100%;max-width:620px;margin:0 auto;height:min(86dvh,780px);max-height:calc(100dvh - max(var(--ios-safe-top),8px));display:flex;flex-direction:column;overflow:hidden;background:var(--ios-bg);color:var(--ios-label);border-radius:22px 22px 0 0;box-shadow:0 -10px 32px rgba(0,0,0,.18);padding-bottom:var(--ios-safe-bottom)}
+.ios-poll-head{height:56px;flex:0 0 56px;display:grid;grid-template-columns:84px 1fr 84px;align-items:center;padding:0 14px;background:var(--ios-card);border-bottom:.5px solid var(--ios-separator)}.ios-poll-head strong{text-align:center;font-size:17px;font-weight:600}.ios-poll-head button{border:0;background:transparent;color:var(--ios-blue);font:inherit;font-size:17px;text-align:left;padding:8px 0}
+.ios-poll-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(28px + var(--ios-safe-bottom))}
+.ios-poll-context{font-size:13px;color:var(--ios-secondary);line-height:1.45;margin:0 2px 12px}.ios-poll-segment{display:flex;background:var(--ios-fill);border-radius:10px;padding:2px;margin-bottom:14px}.ios-poll-segment button{flex:1;border:0;background:transparent;color:var(--ios-label);border-radius:8px;padding:8px 6px;font:inherit;font-size:14px}.ios-poll-segment button.active{background:var(--ios-card);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.ios-poll-form-card,.ios-poll-auto-card{background:var(--ios-card);border-radius:16px;padding:14px;margin-bottom:14px}.ios-poll-label{display:block;font-size:13px;color:var(--ios-secondary);margin-bottom:7px}.ios-poll-question{width:100%;min-height:84px;resize:none;border:0;border-radius:12px;background:var(--ios-fill);color:var(--ios-label);font:inherit;font-size:16px;line-height:1.4;padding:11px 12px;outline:none}
+.ios-poll-option-head{display:flex;align-items:center;justify-content:space-between;margin:14px 2px 8px}.ios-poll-option-head strong{font-size:15px}.ios-poll-add-option{border:0;background:transparent;color:var(--ios-blue);font:inherit;font-size:14px;padding:4px}
+.ios-poll-option-list{overflow:hidden;border-radius:12px;background:var(--ios-fill)}.ios-poll-option-edit{display:grid;grid-template-columns:1fr 36px;align-items:center;min-height:48px;border-bottom:.5px solid var(--ios-separator);padding-left:12px}.ios-poll-option-edit:last-child{border-bottom:0}.ios-poll-option-edit input{width:100%;height:46px;border:0;background:transparent;color:var(--ios-label);font:inherit;font-size:16px;outline:none}.ios-poll-option-remove{width:34px;height:34px;border:0;background:transparent;color:var(--ios-red);font-size:24px;line-height:1}
+.ios-poll-primary{width:100%;min-height:50px;border:0;border-radius:14px;background:var(--ios-blue);color:#fff;font:inherit;font-size:17px;font-weight:600;margin-top:14px}.ios-poll-primary:disabled{opacity:.35}
+.ios-poll-random-note{font-size:14px;color:var(--ios-secondary);line-height:1.55}.ios-poll-random-note strong{color:var(--ios-label);font-size:17px}.ios-poll-switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0 8px;margin-top:10px;border-top:.5px solid var(--ios-separator)}.ios-poll-switch-copy{min-width:0}.ios-poll-switch-title{font-size:16px}.ios-poll-switch-sub{font-size:12px;color:var(--ios-secondary);margin-top:3px;line-height:1.4}
+.ios-poll-chance{display:flex;gap:8px;margin-top:10px}.ios-poll-chance button{flex:1;border:0;border-radius:10px;background:var(--ios-fill);color:var(--ios-label);padding:9px 4px;font:inherit;font-size:14px}.ios-poll-chance button.active{background:var(--ios-blue);color:#fff;font-weight:600}
+.ios-poll-bubble{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;overflow:visible!important}.ios-poll-bubble::before,.ios-poll-bubble::after{display:none!important}.ios-poll-holder{display:block;max-width:min(310px,74vw)}
+.ios-poll-card{width:min(310px,74vw);background:var(--ios-card);color:var(--ios-label);border:.5px solid var(--ios-separator);border-radius:18px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.07);text-align:left}.ios-poll-card-head{padding:13px 14px 11px;border-bottom:.5px solid var(--ios-separator)}.ios-poll-card-kicker{font-size:11px;color:#5856d6;font-weight:600;text-transform:uppercase;letter-spacing:.2px;margin-bottom:4px}.ios-poll-card-question{font-size:16px;font-weight:600;line-height:1.35;white-space:pre-wrap;word-break:break-word}.ios-poll-card-options{display:flex;flex-direction:column}.ios-poll-choice{position:relative;width:100%;min-height:46px;border:0;border-bottom:.5px solid var(--ios-separator);background:transparent;color:var(--ios-label);font:inherit;text-align:left;padding:10px 42px 10px 14px;display:block}.ios-poll-choice:last-child{border-bottom:0}.ios-poll-choice.can-pick:active{background:var(--ios-fill)}.ios-poll-choice.selected{background:rgba(88,86,214,.10)}.ios-poll-choice-text{display:block;font-size:15px;line-height:1.3;word-break:break-word}.ios-poll-choice-meta{display:block;font-size:11px;color:var(--ios-secondary);line-height:1.3;margin-top:3px;white-space:normal}.ios-poll-choice-mark{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;border:1.5px solid #c7c7cc;display:grid;place-items:center;color:#fff}.ios-poll-choice.selected .ios-poll-choice-mark{background:#5856d6;border-color:#5856d6}.ios-poll-choice.selected .ios-poll-choice-mark::after{content:"";width:8px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(0,-1px)}
+.ios-poll-card-foot{padding:8px 14px 10px;border-top:.5px solid var(--ios-separator);font-size:11px;color:var(--ios-secondary);line-height:1.35}
+.ios-group-message.poll{max-width:min(86%,330px)}.ios-group-message.poll .ios-group-bubble{background:transparent!important;color:inherit!important;border:0!important;border-radius:0!important;padding:0!important;min-height:0!important;overflow:visible!important}.ios-group-message.poll .ios-group-bubble::before,.ios-group-message.poll .ios-group-bubble::after{display:none!important}.ios-group-message.poll .ios-poll-card{width:min(310px,78vw)}.ios-group-message.poll .ios-group-time{display:none!important}
+</style>
+
+<section class="ios-poll-overlay" id="ios-poll-overlay" aria-hidden="true" onclick="if(event.target===this)iosClosePollBuilder()">
+  <div class="ios-poll-sheet" role="dialog" aria-modal="true" aria-label="问卷">
+    <header class="ios-poll-head"><button type="button" onclick="iosClosePollBuilder()">取消</button><strong>问卷</strong><span></span></header>
+    <div class="ios-poll-body">
+      <div class="ios-poll-context" id="ios-poll-context"></div>
+      <div class="ios-poll-segment" id="ios-poll-segment">
+        <button type="button" id="ios-poll-tab-mine" class="active" onclick="iosPollSetMode('mine')">我来出题</button>
+        <button type="button" id="ios-poll-tab-ta" onclick="iosPollSetMode('ta')">让 Ta 出题</button>
+      </div>
+      <div id="ios-poll-panel-mine">
+        <div class="ios-poll-form-card">
+          <label class="ios-poll-label" for="ios-poll-question">题目</label>
+          <textarea class="ios-poll-question" id="ios-poll-question" placeholder="输入你想问的问题"></textarea>
+          <div class="ios-poll-option-head"><strong>选项</strong><button type="button" class="ios-poll-add-option" onclick="iosPollAddOption()">＋ 添加选项</button></div>
+          <div class="ios-poll-option-list" id="ios-poll-option-list"></div>
+        </div>
+        <button type="button" class="ios-poll-primary" id="ios-poll-send" onclick="iosSendCustomPoll()">让 Ta 选择</button>
+      </div>
+      <div id="ios-poll-panel-ta" hidden>
+        <div class="ios-poll-auto-card">
+          <div class="ios-poll-random-note"><strong>让 Ta 随机问你</strong><br>题目和选项都只从当前角色已绑定的字卡里抽。随机选 1 条做题目，再抽 2–5 条做选项；同一张字卡不会同时当题目和选项。</div>
+          <button type="button" class="ios-poll-primary" onclick="iosAskTaPollNow()">现在让 Ta 出题</button>
+          <div class="ios-poll-switch-row"><div class="ios-poll-switch-copy"><div class="ios-poll-switch-title">Ta 偶尔主动问我</div><div class="ios-poll-switch-sub">每次触发 Ta 回复时检查一次；命中后这一轮直接变成问卷。30 分钟内最多出现一次。</div></div><label class="ios-switch"><input type="checkbox" id="ios-poll-auto-toggle" onchange="iosPollAutoToggle(this.checked)"><span class="ios-switch-slider"></span></label></div>
+          <div class="ios-poll-label" style="margin-top:10px">出现概率</div>
+          <div class="ios-poll-chance" id="ios-poll-chance"><button type="button" data-chance="0.05" onclick="iosPollSetChance(.05)">5%</button><button type="button" data-chance="0.10" onclick="iosPollSetChance(.10)">10%</button><button type="button" data-chance="0.20" onclick="iosPollSetChance(.20)">20%</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script id="ios-poll-v12-script">
+(function(){
+  let pollContext={kind:'private',roleId:null,groupId:null};
+  let pollMode='mine';
+  let draftOptions=['',''];
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const roleById=id=>(appState?.roles||[]).find(r=>String(r.id)===String(id));
+  const groupById=id=>(appState?.groupChats||[]).find(g=>String(g.id)===String(id));
+  const displayRole=r=>String(r?.remark||'').trim()||String(r?.name||'Ta');
+  const rid=id=>String(id??'');
+  const rand=(arr)=>arr[Math.floor(Math.random()*arr.length)];
+  function settings(){
+    if(!appState.settings)appState.settings={};
+    if(!Number.isFinite(Number(appState.settings.autoPollAskChance)))appState.settings.autoPollAskChance=.10;
+    return appState.settings;
+  }
+  function responseDelay(){
+    const s=settings(),min=Math.max(0,Number(s.minDelaySec??2)),max=Math.max(min,Number(s.maxDelaySec??6));
+    return Math.round((min+Math.random()*(max-min))*1000);
+  }
+  function captureDraft(){
+    const inputs=[...document.querySelectorAll('#ios-poll-option-list input')];
+    if(inputs.length)draftOptions=inputs.map(x=>x.value);
+  }
+  function renderDraftOptions(){
+    const box=document.getElementById('ios-poll-option-list');if(!box)return;
+    box.innerHTML=draftOptions.map((v,i)=>`<div class="ios-poll-option-edit"><input value="${esc(v)}" placeholder="选项 ${i+1}" oninput="iosPollOptionInput(${i},this.value)"><button type="button" class="ios-poll-option-remove" onclick="iosPollRemoveOption(${i})" aria-label="删除选项">−</button></div>`).join('');
+  }
+  window.iosPollOptionInput=(i,v)=>{draftOptions[Number(i)]=String(v??'')};
+  window.iosPollAddOption=function(){captureDraft();draftOptions.push('');renderDraftOptions();setTimeout(()=>document.querySelector('#ios-poll-option-list .ios-poll-option-edit:last-child input')?.focus(),30)};
+  window.iosPollRemoveOption=function(i){captureDraft();if(draftOptions.length<=2){showToast?.('至少保留两个选项');return}draftOptions.splice(Number(i),1);renderDraftOptions()};
+  function syncAutoUi(){
+    const s=settings(),toggle=document.getElementById('ios-poll-auto-toggle');if(toggle)toggle.checked=!!s.autoPollAskEnabled;
+    document.querySelectorAll('#ios-poll-chance button').forEach(b=>b.classList.toggle('active',Math.abs(Number(b.dataset.chance)-Number(s.autoPollAskChance||.1))<.001));
+  }
+  window.iosPollAutoToggle=function(on){settings().autoPollAskEnabled=!!on;saveState?.();syncAutoUi()};
+  window.iosPollSetChance=function(ch){settings().autoPollAskChance=Math.max(0,Math.min(.5,Number(ch)||.1));saveState?.();syncAutoUi()};
+  window.iosPollSetMode=function(mode){
+    if(pollContext.kind==='group')mode='mine';
+    pollMode=mode==='ta'?'ta':'mine';
+    document.getElementById('ios-poll-tab-mine')?.classList.toggle('active',pollMode==='mine');
+    document.getElementById('ios-poll-tab-ta')?.classList.toggle('active',pollMode==='ta');
+    const mine=document.getElementById('ios-poll-panel-mine'),ta=document.getElementById('ios-poll-panel-ta');
+    if(mine)mine.hidden=pollMode!=='mine';if(ta)ta.hidden=pollMode!=='ta';
+    syncAutoUi();
+  };
+  window.iosOpenPollBuilder=function(kind='private'){
+    pollContext={kind:kind==='group'?'group':'private',roleId:null,groupId:null};
+    if(pollContext.kind==='group'){
+      const g=window.iosGroupPollBridge?.current?.();if(!g){showToast?.('先打开一个群聊');return}
+      pollContext.groupId=String(g.id);
+    }else{
+      const role=typeof getCurrentRole==='function'?getCurrentRole():null;if(!role)return;
+      pollContext.roleId=String(role.id);
+    }
+    draftOptions=['',''];const q=document.getElementById('ios-poll-question');if(q)q.value='';renderDraftOptions();
+    const seg=document.getElementById('ios-poll-segment'),taBtn=document.getElementById('ios-poll-tab-ta'),context=document.getElementById('ios-poll-context'),send=document.getElementById('ios-poll-send');
+    if(pollContext.kind==='group'){
+      const g=groupById(pollContext.groupId);if(context)context.textContent=`发到「${g?.name||'群聊'}」。问卷发出后，群里的每个角色都会各自随机选择一个选项。`;
+      if(seg)seg.style.display='none';if(taBtn)taBtn.hidden=true;if(send)send.textContent='发到群聊';
+      window.iosPollSetMode('mine');
+    }else{
+      const role=roleById(pollContext.roleId);if(context)context.textContent=`发给 ${displayRole(role)}。你可以自己写题目和任意数量的选项，也可以让 Ta 用自己的字卡随机出题。`;
+      if(seg)seg.style.display='flex';if(taBtn)taBtn.hidden=false;if(send)send.textContent='让 Ta 选择';
+      window.iosPollSetMode('mine');
+    }
+    syncAutoUi();document.getElementById('ios-poll-overlay')?.classList.add('open');document.getElementById('ios-poll-overlay')?.setAttribute('aria-hidden','false');
+  };
+  window.iosClosePollBuilder=function(){document.getElementById('ios-poll-overlay')?.classList.remove('open');document.getElementById('ios-poll-overlay')?.setAttribute('aria-hidden','true')};
+  function cleanCustom(){
+    captureDraft();const q=String(document.getElementById('ios-poll-question')?.value||'').trim();
+    const seen=new Set(),opts=[];for(const raw of draftOptions){const t=String(raw||'').trim();if(!t||seen.has(t))continue;seen.add(t);opts.push({id:'po_'+Math.random().toString(36).slice(2,9),text:t})}
+    if(!q){showToast?.('先写题目');return null}if(opts.length<2){showToast?.('至少填写两个不同的选项');return null}
+    return {q,opts};
+  }
+  function findPrivatePoll(roleId,msgId){
+    const role=roleById(roleId);if(!role)return null;const msg=(role.messages||[]).find(m=>String(m.id)===String(msgId));return msg&&msg.type==='poll'?msg:null;
+  }
+  function refreshPrivate(roleId){
+    if(String(appState.currentRoleId)===String(roleId)&&document.body.classList.contains('ios-chat-open')&&typeof renderMessages==='function')renderMessages(false,true);
+    window.iosRenderConversations?.(document.getElementById('ios-message-search')?.value||'');
+  }
+  function resolveTaChoice(roleId,msgId){
+    const role=roleById(roleId),target=findPrivatePoll(roleId,msgId);if(!role||!target||!target.poll||target.poll.completed)return;
+    const opts=target.poll.options||[];if(!opts.length)return;
+    const picked=rand(opts);target.poll.responses=target.poll.responses||{};target.poll.responses[String(roleId)]=picked.id;target.poll.completed=true;target.poll.answeredAt=Date.now();target.isRead=true;
+    try{markMyMessagesAsRead?.(roleId)}catch(e){}saveState?.();refreshPrivate(roleId);
+    const visible=String(appState.currentRoleId)===String(roleId)&&document.body.classList.contains('ios-chat-open')&&document.visibilityState==='visible';
+    if(!visible&&typeof window.traceNotifyIncoming==='function')window.traceNotifyIncoming({title:displayRole(role),body:`问卷里选择了「${picked.text}」`,tag:'trace-poll-'+String(roleId)});
+  }
+  function scheduleTaChoice(role,msg){
+    const delay=responseDelay(),roleId=String(role.id),msgId=String(msg.id);
+    msg.poll.responseDueAt=Date.now()+delay;saveState?.();
+    setTimeout(()=>resolveTaChoice(roleId,msgId),delay);
+  }
+  function resolveGroupChoice(groupId,msgId,roleId){
+    const g=groupById(groupId),target=(g?.messages||[]).find(m=>String(m.id)===String(msgId));if(!g||!target?.poll)return;
+    if(target.poll.responses?.[String(roleId)])return;
+    const opts=target.poll.options||[];if(!opts.length)return;
+    const picked=rand(opts),members=(g.memberIds||[]).map(roleById).filter(Boolean).map(r=>String(r.id));
+    target.poll.responses=target.poll.responses||{};target.poll.responses[String(roleId)]=picked.id;target.poll.answeredAt=Date.now();
+    target.poll.completed=members.length>0&&members.every(id=>!!target.poll.responses[id]);
+    window.iosGroupPollBridge?.refresh?.(String(groupId),String(msgId));
+  }
+  function scheduleGroupChoices(group,msg){
+    const members=(group.memberIds||[]).map(roleById).filter(Boolean),groupId=String(group.id),msgId=String(msg.id);
+    msg.poll.responses=msg.poll.responses||{};msg.poll.responseDueByRole=msg.poll.responseDueByRole||{};
+    members.forEach(role=>{
+      const delay=responseDelay();msg.poll.responseDueByRole[String(role.id)]=Date.now()+delay;
+      setTimeout(()=>resolveGroupChoice(groupId,msgId,String(role.id)),delay);
+    });
+    saveState?.();
+  }
+  function recoverPendingPolls(){
+    const now=Date.now();
+    (appState?.roles||[]).forEach(role=>(role.messages||[]).forEach(msg=>{
+      if(msg?.type!=='poll'||msg?.poll?.direction!=='me_to_them'||msg.poll.completed)return;
+      const due=Number(msg.poll.responseDueAt||0);if(!due)return;
+      if(due<=now)resolveTaChoice(String(role.id),String(msg.id));else setTimeout(()=>resolveTaChoice(String(role.id),String(msg.id)),Math.min(due-now,2147480000));
+    }));
+    (appState?.groupChats||[]).forEach(g=>(g.messages||[]).forEach(msg=>{
+      if(msg?.type!=='poll'||msg?.poll?.direction!=='me_to_them'||msg.poll.completed)return;
+      const dueMap=msg.poll.responseDueByRole||{},responses=msg.poll.responses||{};
+      (g.memberIds||[]).forEach(roleId=>{
+        const id=String(roleId);if(responses[id])return;const due=Number(dueMap[id]||0);if(!due)return;
+        if(due<=now)resolveGroupChoice(String(g.id),String(msg.id),id);else setTimeout(()=>resolveGroupChoice(String(g.id),String(msg.id),id),Math.min(due-now,2147480000));
+      });
+    }));
+  }
+  window.iosSendCustomPoll=function(){
+    const data=cleanCustom();if(!data)return;
+    const now=Date.now(),id='poll_'+now+'_'+Math.random().toString(36).slice(2,7),poll={id,direction:'me_to_them',question:data.q,options:data.opts,responses:{},completed:false,createdAt:now};
+    if(pollContext.kind==='group'){
+      const g=groupById(pollContext.groupId)||window.iosGroupPollBridge?.current?.();if(!g)return;
+      const msg={id:'gp_'+id,senderId:'me',content:'[问卷] '+data.q,type:'poll',time:now,isRead:true,poll};
+      if(!window.iosGroupPollBridge?.send?.(msg)){showToast?.('群聊没有打开');return}window.iosClosePollBuilder();scheduleGroupChoices(g,msg);
+    }else{
+      const role=roleById(pollContext.roleId)||getCurrentRole?.();if(!role)return;
+      const msg={id,type:'poll',text:'[问卷] '+data.q,sender:'me',time:now,quoteText:null,isRead:false,poll};
+      addMessage?.(msg,role.id);window.iosClosePollBuilder();scheduleTaChoice(role,msg);
+    }
+  };
+  function uniqueBoundCards(role){
+    let cards=[];try{cards=typeof getBoundWordcardsForRole==='function'?getBoundWordcardsForRole(role):[]}catch(e){}
+    const seen=new Set(),out=[];for(const c of cards){const t=String(c?.text||'').trim();if(!t||seen.has(t))continue;seen.add(t);out.push({text:t,group:String(c?.group||'日常')})}return out;
+  }
+  function buildRandomTaPoll(role){
+    const cards=uniqueBoundCards(role);if(cards.length<3)return null;
+    const shuffled=cards.slice();for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]}
+    const maxOpt=Math.min(5,shuffled.length-1),count=2+Math.floor(Math.random()*(maxOpt-1));
+    const question=shuffled[0].text,options=shuffled.slice(1,1+count).map(c=>({id:'po_'+Math.random().toString(36).slice(2,9),text:c.text,cardSource:c}));
+    return {question,options,questionSource:shuffled[0]};
+  }
+  function scheduleTaQuestion(role,manual=false){
+    const built=buildRandomTaPoll(role);if(!built){if(manual)showToast?.('这个角色至少需要 3 条不同的已绑定字卡');return false}
+    const roleId=String(role.id),delay=responseDelay();role.lastAutoPollAskAt=Date.now();saveState?.();
+    try{setRolePendingCount?.(roleId,getRolePendingCount?.(roleId)+1);showTyping?.(roleId)}catch(e){}
+    setTimeout(()=>{
+      try{setRolePendingCount?.(roleId,Math.max(0,(getRolePendingCount?.(roleId)||1)-1));hideTyping?.(roleId)}catch(e){}
+      try{markMyMessagesAsRead?.(roleId)}catch(e){}
+      const now=Date.now(),id='poll_ta_'+now+'_'+Math.random().toString(36).slice(2,7);
+      const msg={id,type:'poll',text:'[问卷] '+built.question,sender:'them',time:now,quoteText:null,isRead:false,poll:{id,direction:'them_to_me',question:built.question,questionSource:built.questionSource,options:built.options,responses:{},myChoice:null,completed:false,createdAt:now}};
+      addMessage?.(msg,roleId);
+    },delay);
+    return true;
+  }
+  window.iosAskTaPollNow=function(){
+    if(pollContext.kind!=='private')return;const role=roleById(pollContext.roleId)||getCurrentRole?.();if(!role)return;
+    if(scheduleTaQuestion(role,true))window.iosClosePollBuilder();
+  };
+  window.iosMaybeAutoPollAsk=function(role){
+    const s=settings();if(!s.autoPollAskEnabled||!role)return false;
+    const chance=Math.max(0,Math.min(.5,Number(s.autoPollAskChance)||.1)),last=Number(role.lastAutoPollAskAt||0);
+    if(Date.now()-last<30*60*1000||Math.random()>=chance)return false;
+    return scheduleTaQuestion(role,false);
+  };
+  window.iosChoosePollOption=function(msgId,optId){
+    const role=getCurrentRole?.();if(!role)return;const msg=findPrivatePoll(role.id,msgId);if(!msg?.poll||msg.poll.direction!=='them_to_me'||msg.poll.myChoice)return;
+    const opt=(msg.poll.options||[]).find(o=>String(o.id)===String(optId));if(!opt)return;
+    msg.poll.myChoice=opt.id;msg.poll.completed=true;msg.poll.answeredAt=Date.now();saveState?.();refreshPrivate(role.id);
+  };
+  function responseNamesForPoll(msg,optId,context){
+    const p=msg.poll||{},responses=p.responses||{},ids=Object.keys(responses).filter(k=>String(responses[k])===String(optId));
+    if(context==='group')return ids.map(id=>displayRole(roleById(id))).filter(Boolean);
+    return ids.map(id=>displayRole(roleById(id))).filter(Boolean);
+  }
+  window.iosPollCardHtml=function(msg,context='private'){
+    const p=msg?.poll||{},opts=Array.isArray(p.options)?p.options:[],isTaAsk=p.direction==='them_to_me',myChoice=String(p.myChoice||''),responses=p.responses||{};
+    const total=context==='group'?Object.keys(responses).length:Object.keys(responses).length;
+    const optionHtml=opts.map(o=>{
+      const id=String(o.id),selected=isTaAsk?myChoice===id:Object.values(responses).some(v=>String(v)===id),names=responseNamesForPoll(msg,id,context);
+      const meta=context==='group'?(names.length?`${names.join('、')} · ${names.length} 票`:'还没有人选择'):(isTaAsk?(selected?'你已选择':'轻点选择'):(names.length?`${names.join('、')} 选择了这一项`:'等待 Ta 选择'));
+      const clickable=context==='private'&&isTaAsk&&!myChoice;
+      return `<button type="button" class="ios-poll-choice ${selected?'selected':''} ${clickable?'can-pick':''}" ${clickable?`onclick="iosChoosePollOption('${esc(msg.id)}','${esc(id)}')"`:'aria-disabled="true" tabindex="-1"'}><span class="ios-poll-choice-text">${esc(o.text)}</span><span class="ios-poll-choice-meta">${esc(meta)}</span><span class="ios-poll-choice-mark"></span></button>`;
+    }).join('');
+    let foot='';
+    if(context==='group'){const g=groupById(pollContext.groupId)||null;foot=`${total} 人已选择${p.completed?' · 已全部完成':''}`;}
+    else if(isTaAsk)foot=myChoice?'你已经作答':'Ta 想知道你的选择';
+    else foot=p.completed?'Ta 已经选择':'等待 Ta 选择';
+    return `<div class="ios-poll-card"><div class="ios-poll-card-head"><div class="ios-poll-card-kicker">问卷</div><div class="ios-poll-card-question">${esc(p.question||'未命名问卷')}</div></div><div class="ios-poll-card-options">${optionHtml}</div><div class="ios-poll-card-foot">${esc(foot)}</div></div>`;
+  };
+  window.iosGroupPollMessageHtml=function(msg,role,me,timeText){
+    const sender=me?'me':'them',senderName=me?'':`<div class="ios-group-sender">${esc(displayRole(role))}</div>`;
+    return `<div class="ios-group-message ${sender} poll" data-group-message-id="${esc(msg.id||'')}">${senderName}<div class="ios-group-bubble">${window.iosPollCardHtml(msg,'group')}</div></div>`;
+  };
+  window.iosToggleGroupComposeSheet=function(e){e?.preventDefault?.();e?.stopPropagation?.();const s=document.getElementById('ios-group-compose-sheet'),b=document.getElementById('ios-group-compose-plus');if(!s)return;const open=!s.classList.contains('open');s.classList.toggle('open',open);b?.classList.toggle('open',open)};
+  window.iosCloseGroupComposeSheet=function(){document.getElementById('ios-group-compose-sheet')?.classList.remove('open');document.getElementById('ios-group-compose-plus')?.classList.remove('open')};
+  window.iosGroupComposeAction=function(kind){window.iosCloseGroupComposeSheet();if(kind==='poll')window.iosOpenPollBuilder?.('group')};
+  document.addEventListener('click',e=>{if(!e.target.closest('#ios-group-compose-sheet')&&!e.target.closest('#ios-group-compose-plus'))window.iosCloseGroupComposeSheet?.()});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(recoverPendingPolls,80)});
+  window.addEventListener('load',()=>setTimeout(recoverPendingPolls,1200));
+})();
+</script>
+
+<style id="ios-release-notes-v12-style">
 /* Old floating update-log ball is retired; release notices now live in Settings. */
 #update-float-ball{display:none!important}
 #ios-release-notes-page{position:fixed;inset:0;z-index:1000010;display:none;background:var(--ios-bg,#f2f2f7);color:var(--ios-label,#000);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif}
@@ -10216,11 +10539,12 @@ body.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:after{conte
 body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:after{box-shadow:0 0 0 2px rgba(28,28,30,.95)}
 </style>
 
-<script id="ios-release-notes-v11-script">
+<script id="ios-release-notes-v12-script">
 (function(){
-  const CURRENT_RELEASE_VERSION='v11';
+  const CURRENT_RELEASE_VERSION='v12';
   const RELEASE_HISTORY=[
-    {version:'v11',tag:'当前版本',items:['群聊回复速度改为直接读取设置里的“最快响应 / 最慢响应”；同一轮参与回复的角色各自独立随机等待，不再人为规定谁先谁后。','群聊气泡尺寸、文字字号、行高、圆角、尾巴与时间戳布局统一到单聊 iMessage 气泡。','“角色”页新增独立“群聊”分类，群聊与角色一起集中管理，并保留新建群聊入口。','新增群聊资料页：可修改群聊名称和自定义群头像；群头像会同步显示在信息列表与聊天顶部。','群聊资料页新增“群内气泡数排名”，按每个角色在这个群聊里实际发送的气泡数量排序，并显示其占全部角色气泡的比例。','修复群聊发送卡顿与双击失效：群聊发送键与单聊统一为单击发送、双击直接触发回复；即使输入框为空也能双击让角色回复。群消息改为增量插入，并合并频繁保存与列表刷新，避免历史消息越多越卡。','字卡管理新增“清理重复”：同一分组中完全相同的字卡只保留第一条；不同分组中的同一句话不会误删。手动注入会跳过重复，移动分组造成重复时会自动清理。','慢信寄信流程拆成独立两步：先单独选择一个或多个收件人，再进入单独写信页；写信页底部固定显示“寄出”，不再把角色选择和信纸放在同一页。']},
+    {version:'v12',tag:'当前版本',items:['聊天页左下角“＋”新增问卷：可自定义题目，并动态添加或删除任意数量的选项；发送后 Ta 会在设置的最快/最慢响应时间内随机选择。','群聊输入区新增“＋”入口和问卷；问卷发到群里后，每个群成员都会独立随机选择一个选项，不人为规定谁先谁后，结果会直接汇总在同一张问卷卡片里。','私聊问卷新增“让 Ta 出题”：题目与 2–5 个选项都从当前角色自己已绑定的字卡中随机抽取，用户可直接在问卷卡片里选择答案。','新增可选的“Ta 偶尔主动问我”：默认概率 10%，可切换 5% / 10% / 20%；每次触发 Ta 回复时检查一次，命中后这一轮改为问卷，并设置 30 分钟冷却避免连续刷问卷。']},
+    {version:'v11',items:['群聊回复速度改为直接读取设置里的“最快响应 / 最慢响应”；同一轮参与回复的角色各自独立随机等待，不再人为规定谁先谁后。','群聊气泡尺寸、文字字号、行高、圆角、尾巴与时间戳布局统一到单聊 iMessage 气泡。','“角色”页新增独立“群聊”分类，群聊与角色一起集中管理，并保留新建群聊入口。','新增群聊资料页：可修改群聊名称和自定义群头像；群头像会同步显示在信息列表与聊天顶部。','群聊资料页新增“群内气泡数排名”，按每个角色在这个群聊里实际发送的气泡数量排序，并显示其占全部角色气泡的比例。','修复群聊发送卡顿与双击失效：群聊发送键与单聊统一为单击发送、双击直接触发回复；即使输入框为空也能双击让角色回复。群消息改为增量插入，并合并频繁保存与列表刷新，避免历史消息越多越卡。','字卡管理新增“清理重复”：同一分组中完全相同的字卡只保留第一条；不同分组中的同一句话不会误删。手动注入会跳过重复，移动分组造成重复时会自动清理。','慢信寄信流程拆成独立两步：先单独选择一个或多个收件人，再进入单独写信页；写信页底部固定显示“寄出”，不再把角色选择和信纸放在同一页。']},
     {version:'v10',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','写信页新增多角色收件人选择：可一次勾选多个角色，同一封信分别进入每个角色的独立信箱，每个人使用自己的绑定字卡并在自己的随机时间回信；已有回信在途的角色会暂时不可重复寄送。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
     {version:'v9',items:['修复后台来信通知：普通回复、主动消息与群聊消息都会在真正到达时触发系统横幅；前台正在查看时不重复打扰。','备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
     {version:'v8',items:['角色创建后可在角色详情中直接点击头像重新更换头像。','角色详情新增备注名：可点击顶部名字添加、修改或清空备注；角色本名保持不变。','信息聊天列表优先显示备注名；没有备注时显示本名，搜索同时支持备注名和本名；角色列表仍显示本名。','设置页新增「版本说明」；新版本未查看时，「版本说明」旁和底部「设置」标签显示小蓝点，查看后消失。','修复多角色字卡串用：角色回复严格只读取自己已绑定的字卡组，不再在缺少绑定信息时自动回退到全部分组。','旧版多角色中若仍处于自动全选全部字卡组，首次载入会清理这类全选绑定；已经手动选成子集的绑定会保留。','新建角色默认不再自动绑定所有现有字卡组，需要在角色详情中选择要使用的字卡组。','修复拼字卡上限失效：开启拼字卡后每轮固定只发 1 个拼接气泡，最多使用的字卡条数严格受“最多拼”限制。']},
