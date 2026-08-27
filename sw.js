@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-v12-r3';
+const CACHE_NAME = 'trace-cache-v12-r5';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
