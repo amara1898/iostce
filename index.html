@@ -10660,10 +10660,188 @@ body.ios-system-theme #ios-send-btn,body.ios-system-theme .ios-group-send{touch-
   function safeCssUrl(src){const s=String(src||'').replace(/"/g,'%22').replace(/\n/g,'');return s?`url("${s}")`:'none'}
   window.traceApplyCallVisual=function(role){const el=window.callState?.el||document.getElementById('voice-call-ui');if(!el)return;el.style.setProperty('--trace-call-role-image',safeCssUrl(role?.avatar||''));const mini=document.getElementById('mini-call-name');if(mini)mini.textContent=role?.name||'Ta'};
   function refocusInput(input){if(!input)return;try{input.focus({preventScroll:true})}catch(e){try{input.focus()}catch(_){}}requestAnimationFrame(()=>{try{input.focus({preventScroll:true})}catch(e){try{input.focus()}catch(_){}}try{const n=('value'in input)?input.value.length:0;if(typeof input.setSelectionRange==='function')input.setSelectionRange(n,n)}catch(e){}})}
-  const oldPrivateSend=window.iosSmartSendTap;if(typeof oldPrivateSend==='function'&&!oldPrivateSend.__traceKeepKeyboard){const wrapped=function(e){const input=document.getElementById('msg-input');const out=oldPrivateSend.call(this,e);refocusInput(input);return out};wrapped.__traceKeepKeyboard=true;window.iosSmartSendTap=wrapped}
-  const oldGroupSend=window.iosSmartGroupSendTap;if(typeof oldGroupSend==='function'&&!oldGroupSend.__traceKeepKeyboard){const wrapped=function(e){const input=document.getElementById('ios-group-input');const out=oldGroupSend.call(this,e);refocusInput(input);return out};wrapped.__traceKeepKeyboard=true;window.iosSmartGroupSendTap=wrapped}
+  const oldPrivateSend=window.iosSmartSendTap;if(typeof oldPrivateSend==='function'&&!oldPrivateSend.__traceKeepKeyboard){const wrapped=function(e){const input=document.getElementById('msg-input');const keep=!!input&&document.activeElement===input;const out=oldPrivateSend.call(this,e);if(keep)refocusInput(input);return out};wrapped.__traceKeepKeyboard=true;window.iosSmartSendTap=wrapped}
+  const oldGroupSend=window.iosSmartGroupSendTap;if(typeof oldGroupSend==='function'&&!oldGroupSend.__traceKeepKeyboard){const wrapped=function(e){const input=document.getElementById('ios-group-input');const keep=!!input&&document.activeElement===input;const out=oldGroupSend.call(this,e);if(keep)refocusInput(input);return out};wrapped.__traceKeepKeyboard=true;window.iosSmartGroupSendTap=wrapped}
   function installBlankTapDismiss(){const input=document.getElementById('msg-input'),chat=document.getElementById('chat-area');if(chat&&input&&chat.dataset.blankDismissReady!=='1'){chat.dataset.blankDismissReady='1';chat.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,input,textarea,select,.bubble,.context-menu,.ios-poll-card'))return;try{input.blur()}catch(_){}},{passive:true})}const groupInput=document.getElementById('ios-group-input'),groupList=document.getElementById('ios-group-message-list');if(groupList&&groupInput&&groupList.dataset.blankDismissReady!=='1'){groupList.dataset.blankDismissReady='1';groupList.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,input,textarea,select,.ios-group-bubble,.ios-poll-card'))return;try{groupInput.blur()}catch(_){}},{passive:true})}}
   document.addEventListener('DOMContentLoaded',()=>setTimeout(installBlankTapDismiss,0));window.addEventListener('load',()=>setTimeout(installBlankTapDismiss,180));setTimeout(installBlankTapDismiss,400);
+})();
+</script>
+
+
+<style id="trace-current-layout-theme-adapter-v12-r7-style">
+/* v12-r7: every legacy chat theme now skins the current iMessage layout instead of replacing it. */
+body.ios-system-theme.trace-current-theme #main-top-bar{
+  background:var(--tc-header)!important;border-bottom:.5px solid var(--tc-sep)!important;color:var(--tc-header-text)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(180%)!important;backdrop-filter:blur(24px) saturate(180%)!important;
+}
+body.ios-system-theme.trace-current-theme #main-top-bar .tb-name{color:var(--tc-header-text)!important}
+body.ios-system-theme.trace-current-theme #main-top-bar .tb-status{color:var(--tc-header-secondary)!important}
+body.ios-system-theme.trace-current-theme .ios-chat-back,
+body.ios-system-theme.trace-current-theme .ios-chat-call{color:var(--tc-header-action)!important}
+body.ios-system-theme.trace-current-theme #chat-area{background:var(--tc-chat)!important}
+body.ios-system-theme.trace-current-theme #chat-area .me .bubble{
+  background:var(--tc-me)!important;color:var(--tc-me-text)!important;border-radius:var(--tc-me-radius)!important;
+  border:var(--tc-me-border)!important;box-shadow:var(--tc-me-shadow)!important;text-shadow:var(--tc-me-shadow-text)!important;
+}
+body.ios-system-theme.trace-current-theme #chat-area .them .bubble{
+  background:var(--tc-them)!important;color:var(--tc-them-text)!important;border-radius:var(--tc-them-radius)!important;
+  border:var(--tc-them-border)!important;box-shadow:var(--tc-them-shadow)!important;text-shadow:var(--tc-them-shadow-text)!important;
+}
+body.ios-system-theme.trace-current-theme #chat-area .date-divider,
+body.ios-system-theme.trace-current-theme #chat-area .load-more-btn{color:var(--tc-muted)!important}
+body.ios-system-theme.trace-current-theme #chat-area .typing-status-bubble{background:var(--tc-them)!important;color:var(--tc-them-text)!important;border:var(--tc-them-border)!important;box-shadow:var(--tc-them-shadow)!important}
+body.ios-system-theme.trace-current-theme #chat-area .me .bubble::before,
+body.ios-system-theme.trace-current-theme #chat-area .them .bubble::before,
+body.ios-system-theme.trace-current-theme #chat-area .me .bubble::after,
+body.ios-system-theme.trace-current-theme #chat-area .them .bubble::after{display:var(--tc-tail-display)!important}
+body.ios-system-theme.trace-current-theme #chat-area .me .bubble::before{background:var(--tc-me)!important}
+body.ios-system-theme.trace-current-theme #chat-area .them .bubble::before{background:var(--tc-them)!important}
+body.ios-system-theme.trace-current-theme #chat-area .me .bubble::after,
+body.ios-system-theme.trace-current-theme #chat-area .them .bubble::after{background:var(--tc-chat)!important}
+body.ios-system-theme.trace-current-theme.ios-show-timestamp #chat-area .me .bubble-time{color:var(--tc-me-time)!important}
+body.ios-system-theme.trace-current-theme.ios-show-timestamp #chat-area .them .bubble-time{color:var(--tc-them-time)!important}
+body.ios-system-theme.trace-current-theme .bottom-bar{
+  background:var(--tc-bar)!important;border-top:.5px solid var(--tc-sep)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(180%)!important;backdrop-filter:blur(22px) saturate(180%)!important;
+}
+body.ios-system-theme.trace-current-theme #msg-input{
+  background:var(--tc-input)!important;color:var(--tc-input-text)!important;border:var(--tc-input-border)!important;border-radius:18px!important;box-shadow:var(--tc-input-shadow)!important;
+}
+body.ios-system-theme.trace-current-theme #msg-input:focus{background:var(--tc-input)!important}
+body.ios-system-theme.trace-current-theme #msg-input::placeholder{color:var(--tc-muted)!important}
+body.ios-system-theme.trace-current-theme #ios-send-btn{background:var(--tc-accent)!important;color:var(--tc-send-text)!important}
+body.ios-system-theme.trace-current-theme .ios-compose-plus{background:var(--tc-plus-bg)!important;color:var(--tc-plus-text)!important}
+body.ios-system-theme.trace-current-theme .ios-compose-plus.open,
+body.ios-system-theme.trace-current-theme .ios-compose-plus.active{background:var(--tc-accent)!important;color:var(--tc-send-text)!important}
+body.ios-system-theme.trace-current-theme .ios-compose-sheet{background:var(--tc-sheet)!important;border-color:var(--tc-sep)!important}
+body.ios-system-theme.trace-current-theme .ios-compose-action{color:var(--tc-sheet-text)!important}
+
+/* Group chat keeps the exact same layout and follows the selected skin. */
+body.ios-system-theme.trace-current-theme #ios-group-chat-page{background:var(--tc-chat)!important;color:var(--tc-chat-text)!important}
+body.ios-system-theme.trace-current-theme .ios-group-chat-head{
+  background:var(--tc-header)!important;border-bottom-color:var(--tc-sep)!important;color:var(--tc-header-text)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(180%)!important;backdrop-filter:blur(24px) saturate(180%)!important;
+}
+body.ios-system-theme.trace-current-theme .ios-group-name{color:var(--tc-header-text)!important}
+body.ios-system-theme.trace-current-theme .ios-group-back,
+body.ios-system-theme.trace-current-theme .ios-group-members-btn{color:var(--tc-header-action)!important}
+body.ios-system-theme.trace-current-theme .ios-group-message-list{background:var(--tc-chat)!important}
+body.ios-system-theme.trace-current-theme .ios-group-sender,
+body.ios-system-theme.trace-current-theme .ios-group-typing{color:var(--tc-muted)!important}
+body.ios-system-theme.trace-current-theme .ios-group-message.me .ios-group-bubble{
+  background:var(--tc-me)!important;color:var(--tc-me-text)!important;border-radius:var(--tc-me-radius)!important;border:var(--tc-me-border)!important;box-shadow:var(--tc-me-shadow)!important;text-shadow:var(--tc-me-shadow-text)!important;
+}
+body.ios-system-theme.trace-current-theme .ios-group-message.them .ios-group-bubble{
+  background:var(--tc-them)!important;color:var(--tc-them-text)!important;border-radius:var(--tc-them-radius)!important;border:var(--tc-them-border)!important;box-shadow:var(--tc-them-shadow)!important;text-shadow:var(--tc-them-shadow-text)!important;
+}
+body.ios-system-theme.trace-current-theme .ios-group-bubble::before,
+body.ios-system-theme.trace-current-theme .ios-group-bubble::after{display:var(--tc-tail-display)!important}
+body.ios-system-theme.trace-current-theme .ios-group-message.me .ios-group-bubble::before{background:var(--tc-me)!important}
+body.ios-system-theme.trace-current-theme .ios-group-message.them .ios-group-bubble::before{background:var(--tc-them)!important}
+body.ios-system-theme.trace-current-theme .ios-group-message.me .ios-group-bubble::after,
+body.ios-system-theme.trace-current-theme .ios-group-message.them .ios-group-bubble::after{background:var(--tc-chat)!important}
+body.ios-system-theme.trace-current-theme .ios-group-typing-dots{background:var(--tc-them)!important}
+body.ios-system-theme.trace-current-theme .ios-group-compose{background:var(--tc-bar)!important;border-top-color:var(--tc-sep)!important}
+body.ios-system-theme.trace-current-theme .ios-group-compose input{background:var(--tc-input)!important;color:var(--tc-input-text)!important;border:var(--tc-input-border)!important;box-shadow:var(--tc-input-shadow)!important}
+body.ios-system-theme.trace-current-theme .ios-group-compose input::placeholder{color:var(--tc-muted)!important}
+body.ios-system-theme.trace-current-theme .ios-group-send{background:var(--tc-accent)!important;color:var(--tc-send-text)!important}
+body.ios-system-theme.trace-current-theme .ios-group-plus{background:var(--tc-plus-bg)!important;color:var(--tc-plus-text)!important}
+body.ios-system-theme.trace-current-theme .ios-group-compose-sheet{background:var(--tc-sheet)!important;border-color:var(--tc-sep)!important}
+
+/* Theme store itself is adapted to the iOS settings UI. */
+#theme-modal #theme-preview-box{border:0!important;border-radius:20px!important;box-shadow:0 1px 0 rgba(60,60,67,.08),0 8px 24px rgba(0,0,0,.08)!important;height:260px!important}
+#theme-modal #theme-store-list{display:flex!important;flex-direction:column!important;gap:8px!important}
+#theme-modal .trace-theme-store-card{width:100%;min-height:66px;border:0;background:var(--ios-card,#fff);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:11px;text-align:left;color:var(--ios-label,#000);font:inherit;box-shadow:none;position:relative}
+#theme-modal .trace-theme-store-card.active{box-shadow:inset 0 0 0 2px var(--ios-blue,#007aff)}
+#theme-modal .trace-theme-store-swatch{width:48px;height:42px;flex:0 0 48px;border-radius:11px;background:var(--sw-chat,#fff);position:relative;overflow:hidden;border:.5px solid rgba(60,60,67,.14)}
+#theme-modal .trace-theme-store-swatch i{position:absolute;height:10px;border-radius:6px;display:block}.trace-theme-store-swatch .them{left:5px;bottom:15px;width:25px;background:var(--sw-them,#ddd)}.trace-theme-store-swatch .me{right:5px;bottom:5px;width:28px;background:var(--sw-me,#007aff)}
+#theme-modal .trace-theme-store-copy{min-width:0;flex:1}.trace-theme-store-name{font-size:15px;font-weight:600}.trace-theme-store-desc{font-size:11px;color:var(--ios-secondary,#8e8e93);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trace-theme-store-check{width:22px;height:22px;border-radius:50%;border:1.5px solid #c7c7cc;flex:none}.trace-theme-store-card.active .trace-theme-store-check{background:var(--ios-blue,#007aff);border-color:var(--ios-blue,#007aff);position:relative}.trace-theme-store-card.active .trace-theme-store-check:after{content:"";position:absolute;width:8px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);left:6px;top:6px}
+</style>
+<script id="trace-current-layout-theme-adapter-v12-r7-script">
+(function(){
+  const SKINS={
+    imessage:{name:'iMessage',desc:'当前默认 · iOS 信息布局与蓝灰气泡',chat:'#ffffff',chatText:'#000',header:'rgba(248,248,248,.78)',headerText:'#111',headerSecondary:'#8e8e93',headerAction:'#007aff',bar:'rgba(248,248,248,.78)',me:'#007aff',meText:'#fff',them:'#e9e9eb',themText:'#000',accent:'#007aff',input:'rgba(255,255,255,.78)',inputText:'#111',inputBorder:'1px solid #c7c7cc',sep:'rgba(60,60,67,.20)',muted:'#8e8e93',meRadius:'18px 18px 4px 18px',themRadius:'18px 18px 18px 4px',tail:'block'},
+    trace:{name:'Trace 细线',desc:'极简黑白 · 保留当前布局',chat:'#f7f7f8',chatText:'#111',header:'rgba(255,255,255,.88)',headerText:'#111',headerSecondary:'#777',headerAction:'#111',bar:'rgba(255,255,255,.90)',me:'#111',meText:'#fff',them:'#fff',themText:'#111',accent:'#111',input:'#fff',inputText:'#111',inputBorder:'1px solid #c9c9ce',sep:'rgba(0,0,0,.12)',muted:'#777',meRadius:'15px',themRadius:'15px',meBorder:'0 solid transparent',themBorder:'1px solid #d7d7dc'},
+    line_classic:{name:'LINE / Kakao',desc:'灰蓝底 · 黄白气泡',chat:'#9bbad4',chatText:'#263642',header:'rgba(155,186,212,.92)',headerText:'#263642',headerSecondary:'#456070',headerAction:'#263642',bar:'rgba(255,255,255,.94)',me:'#fde251',meText:'#111',them:'#fff',themText:'#111',accent:'#5b7890',input:'#f5f5f5',inputText:'#111',inputBorder:'0 solid transparent',sep:'rgba(36,54,66,.15)',muted:'rgba(35,50,60,.64)',meRadius:'18px',themRadius:'18px'},
+    bubble_star:{name:'Bubble (Lysn)',desc:'粉蓝底 · 明黄气泡',chat:'#b9d9f9',chatText:'#243343',header:'rgba(255,255,255,.86)',headerText:'#111',headerSecondary:'#789',headerAction:'#79b7e7',bar:'rgba(255,255,255,.90)',me:'#fef036',meText:'#111',them:'#fff',themText:'#111',accent:'#79b7e7',input:'rgba(242,242,247,.92)',inputText:'#111',inputBorder:'0 solid transparent',sep:'rgba(0,0,0,.08)',muted:'#708090',meRadius:'20px 20px 5px 20px',themRadius:'20px 20px 20px 5px',themShadow:'0 1px 3px rgba(0,0,0,.05)'},
+    viber_purple:{name:'Viber 魅紫',desc:'紫色顶栏 · 白紫气泡',chat:'#e6e5eb',chatText:'#222',header:'rgba(102,92,172,.94)',headerText:'#fff',headerSecondary:'rgba(255,255,255,.70)',headerAction:'#fff',bar:'rgba(242,242,242,.94)',me:'#8f5db7',meText:'#fff',them:'#fff',themText:'#111',accent:'#665cac',input:'#fff',inputText:'#111',inputBorder:'0 solid transparent',sep:'rgba(0,0,0,.10)',muted:'#777',meRadius:'16px 16px 5px 16px',themRadius:'16px 16px 16px 5px',themShadow:'0 1px 2px rgba(0,0,0,.10)'},
+    wechat:{name:'WeChat 微信',desc:'微信灰底 · 绿白气泡',chat:'#ededed',chatText:'#111',header:'rgba(237,237,237,.94)',headerText:'#111',headerSecondary:'#777',headerAction:'#111',bar:'rgba(247,247,247,.96)',me:'#95ec69',meText:'#111',them:'#fff',themText:'#111',accent:'#07c160',input:'#fff',inputText:'#111',inputBorder:'0 solid transparent',sep:'#d9d9d9',muted:'#777',meRadius:'8px',themRadius:'8px'},
+    qq:{name:'QQ 企鹅',desc:'清爽浅灰 · QQ 蓝气泡',chat:'#f5f6fa',chatText:'#111',header:'rgba(255,255,255,.94)',headerText:'#111',headerSecondary:'#888',headerAction:'#0099ff',bar:'rgba(245,246,250,.94)',me:'#0099ff',meText:'#fff',them:'#fff',themText:'#111',accent:'#0099ff',input:'#fff',inputText:'#111',inputBorder:'0 solid transparent',sep:'#eaeaea',muted:'#8e8e93',meRadius:'16px 5px 16px 16px',themRadius:'5px 16px 16px 16px',themShadow:'0 1px 2px rgba(0,0,0,.06)'},
+    telegram:{name:'Telegram 夜间',desc:'深色底 · 紫色发送气泡',chat:'#0f0f0f',chatText:'#fff',header:'rgba(33,33,33,.94)',headerText:'#fff',headerSecondary:'#aaa',headerAction:'#fff',bar:'rgba(15,15,15,.96)',me:'#8774e1',meText:'#fff',them:'#212121',themText:'#fff',accent:'#8774e1',input:'#212121',inputText:'#fff',inputBorder:'0 solid transparent',sep:'rgba(255,255,255,.08)',muted:'#989898',meRadius:'14px 14px 4px 14px',themRadius:'14px 14px 14px 4px'},
+    whatsapp:{name:'WhatsApp',desc:'米色聊天底 · 绿白气泡',chat:'#efe7dd',chatText:'#111',header:'rgba(7,94,84,.96)',headerText:'#fff',headerSecondary:'rgba(255,255,255,.72)',headerAction:'#fff',bar:'rgba(247,247,247,.90)',me:'#dcf8c6',meText:'#111',them:'#fff',themText:'#111',accent:'#00a884',input:'#fff',inputText:'#111',inputBorder:'0 solid transparent',sep:'rgba(0,0,0,.08)',muted:'#667781',meRadius:'10px 10px 4px 10px',themRadius:'10px 10px 10px 4px',themShadow:'0 1px 1px rgba(0,0,0,.10)'},
+    messenger:{name:'Messenger',desc:'纯白底 · 蓝色渐变气泡',chat:'#fff',chatText:'#111',header:'rgba(255,255,255,.90)',headerText:'#111',headerSecondary:'#8a8a8a',headerAction:'#0084ff',bar:'rgba(255,255,255,.92)',me:'linear-gradient(135deg,#00b2ff 0%,#006aff 100%)',meText:'#fff',them:'#f0f2f5',themText:'#111',accent:'#0084ff',input:'#f0f2f5',inputText:'#111',inputBorder:'0 solid transparent',sep:'#f0f2f5',muted:'#8a8d91',meRadius:'18px',themRadius:'18px'},
+    discord:{name:'Discord',desc:'深灰界面 · Discord 紫强调色',chat:'#313338',chatText:'#dbdee1',header:'rgba(49,51,56,.96)',headerText:'#f2f3f5',headerSecondary:'#b5bac1',headerAction:'#b5bac1',bar:'rgba(49,51,56,.96)',me:'#404249',meText:'#dbdee1',them:'#383a40',themText:'#dbdee1',accent:'#5865f2',input:'#383a40',inputText:'#dbdee1',inputBorder:'0 solid transparent',sep:'#1e1f22',muted:'#949ba4',meRadius:'8px',themRadius:'8px'},
+    red:{name:'Little Red',desc:'小红书红 · 极简白底',chat:'#fff',chatText:'#222',header:'rgba(255,255,255,.92)',headerText:'#111',headerSecondary:'#999',headerAction:'#ff2442',bar:'rgba(255,255,255,.94)',me:'#ff2442',meText:'#fff',them:'#f5f5f5',themText:'#333',accent:'#ff2442',input:'#f5f5f5',inputText:'#111',inputBorder:'0 solid transparent',sep:'#f0f0f0',muted:'#999',meRadius:'18px',themRadius:'18px'},
+    instagram:{name:'Instagram',desc:'纯黑底 · IG 渐变气泡',chat:'#000',chatText:'#fff',header:'rgba(0,0,0,.92)',headerText:'#fff',headerSecondary:'#a8a8a8',headerAction:'#fff',bar:'rgba(0,0,0,.94)',me:'linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',meText:'#fff',them:'#262626',themText:'#fff',accent:'#e1306c',input:'#121212',inputText:'#fff',inputBorder:'1px solid #363636',sep:'#262626',muted:'#a8a8a8',meRadius:'20px',themRadius:'20px'},
+    bubble_pink:{name:'Bubble 粉红',desc:'奶油粉底 · 柔和渐变气泡',chat:'#fff0f5',chatText:'#8f4454',header:'rgba(255,255,255,.76)',headerText:'#ff6b81',headerSecondary:'#b98591',headerAction:'#ff6b81',bar:'rgba(255,255,255,.70)',me:'linear-gradient(135deg,#ff9a9e 0%,#fecfef 100%)',meText:'#fff',them:'#fff',themText:'#ff6b81',accent:'#ff6b81',input:'#fff',inputText:'#ff6b81',inputBorder:'0 solid transparent',sep:'rgba(255,107,129,.12)',muted:'#b98591',meRadius:'24px 24px 8px 24px',themRadius:'24px 24px 24px 8px',meShadow:'0 4px 10px rgba(255,154,158,.28)',themShadow:'0 4px 10px rgba(255,182,193,.22)'},
+    ios6_retro:{name:'iOS6 拟物复古',desc:'旧 iOS 蓝灰渐变 · 拟物质感',chat:'#e6e7eb',chatText:'#111',header:'linear-gradient(to bottom,#8bb1dc,#5885c3)',headerText:'#fff',headerSecondary:'rgba(255,255,255,.75)',headerAction:'#fff',bar:'linear-gradient(to bottom,#f2f3f7,#cdd5e0)',me:'linear-gradient(to bottom,#60abf8,#1c75e2)',meText:'#fff',them:'linear-gradient(to bottom,#fff,#e6e6e6)',themText:'#111',accent:'#1c75e2',input:'#fff',inputText:'#111',inputBorder:'1px solid #9da4ad',sep:'#99a2b0',muted:'#66717d',meRadius:'16px',themRadius:'16px',meBorder:'1px solid #145db7',themBorder:'1px solid #aaa',meShadow:'inset 0 1px 0 rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.18)',themShadow:'inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.12)',meShadowText:'0 -1px 0 rgba(0,0,0,.3)',themShadowText:'0 1px 0 #fff'},
+    bubble_pro:{name:'Bubble Pro',desc:'暗色韩系 · ARTIST 氛围',chat:'#2b1e22',chatText:'#e0e0e0',header:'rgba(28,28,28,.95)',headerText:'#e0e0e0',headerSecondary:'#999',headerAction:'#e33b38',bar:'rgba(28,28,28,.96)',me:'#453e05',meText:'#e0e0e0',them:'#1c1c1c',themText:'#e0e0e0',accent:'#e33b38',input:'#2b1e22',inputText:'#e0e0e0',inputBorder:'1px solid #444',sep:'rgba(255,255,255,.06)',muted:'#999',meRadius:'16px 5px 16px 16px',themRadius:'5px 16px 16px 16px'},
+    nokia_retro:{name:'Nokia 复古按键',desc:'粗边框 · 立体渐变质感',chat:'#e8eaeb',chatText:'#333',header:'linear-gradient(to bottom,#505050,#222)',headerText:'#fff',headerSecondary:'#ccc',headerAction:'#fff',bar:'linear-gradient(to bottom,#e0e0e0,#b0b0b0)',me:'linear-gradient(to bottom,#4cb8f3,#006bce)',meText:'#fff',them:'linear-gradient(to bottom,#f9f9f9,#d1d1d1)',themText:'#333',accent:'#006bce',input:'#fff',inputText:'#111',inputBorder:'1px solid #555',sep:'#777',muted:'#666',meRadius:'6px',themRadius:'6px',meBorder:'1px solid #004b93',themBorder:'1px solid #7a7a7a',meShadow:'inset 0 1px 2px rgba(255,255,255,.5),2px 2px 4px rgba(0,0,0,.18)',themShadow:'inset 0 1px 2px rgba(255,255,255,.8),2px 2px 4px rgba(0,0,0,.10)',meShadowText:'0 -1px 0 rgba(0,0,0,.3)',themShadowText:'0 1px 0 #fff'},
+    telegram_day:{name:'Telegram 日间',desc:'经典蓝顶栏 · 白绿气泡',chat:'#b5cce4',chatText:'#263746',header:'rgba(82,125,163,.96)',headerText:'#fff',headerSecondary:'rgba(255,255,255,.72)',headerAction:'#fff',bar:'rgba(255,255,255,.96)',me:'#effdd6',meText:'#111',them:'#fff',themText:'#111',accent:'#527da3',input:'#fff',inputText:'#111',inputBorder:'0 solid transparent',sep:'rgba(0,0,0,.08)',muted:'#60788b',meRadius:'14px 14px 4px 14px',themRadius:'14px 14px 14px 4px',themShadow:'0 1px 2px rgba(0,0,0,.10)'}
+  };
+  const DARK={
+    imessage:{chat:'#000',chatText:'#fff',header:'rgba(28,28,30,.80)',headerText:'#fff',headerSecondary:'#98989f',headerAction:'#0a84ff',bar:'rgba(28,28,30,.82)',me:'#0a84ff',them:'#2c2c2e',themText:'#fff',accent:'#0a84ff',input:'rgba(44,44,46,.82)',inputText:'#fff',inputBorder:'1px solid #48484a',sep:'rgba(84,84,88,.58)',muted:'#98989f'},
+    trace:{chat:'#111',chatText:'#eee',header:'rgba(24,24,24,.90)',headerText:'#fff',headerSecondary:'#aaa',headerAction:'#fff',bar:'rgba(24,24,24,.92)',me:'#eee',meText:'#111',them:'#1d1d1f',themText:'#eee',accent:'#eee',input:'#1d1d1f',inputText:'#eee',inputBorder:'1px solid #3a3a3c',sep:'#333',muted:'#999',themBorder:'1px solid #3a3a3c'},
+    line_classic:{chat:'#14191d',chatText:'#ddd',header:'rgba(26,26,26,.94)',headerText:'#eee',headerSecondary:'#aaa',headerAction:'#9bbad4',bar:'rgba(18,18,18,.96)',me:'#3d3921',meText:'#f5e992',them:'#202020',themText:'#eee',accent:'#9bbad4',input:'#1a1a1a',inputText:'#eee',inputBorder:'1px solid #333',sep:'#333',muted:'#999'},
+    bubble_star:{chat:'#1a2332',chatText:'#eee',header:'rgba(20,27,39,.92)',headerText:'#eee',headerSecondary:'#99a7b8',headerAction:'#86bce8',bar:'rgba(18,24,34,.94)',me:'#5d5720',meText:'#fff3a4',them:'#222d3d',themText:'#eee',accent:'#86bce8',input:'#222d3d',inputText:'#eee',inputBorder:'0 solid transparent',sep:'#2d394a',muted:'#99a7b8'},
+    viber_purple:{chat:'#17171b',chatText:'#eee',header:'rgba(82,73,144,.96)',headerText:'#fff',headerSecondary:'rgba(255,255,255,.7)',headerAction:'#fff',bar:'rgba(20,20,22,.96)',me:'#8f5db7',them:'#252529',themText:'#eee',accent:'#8f5db7',input:'#252529',inputText:'#eee',inputBorder:'1px solid #3a3a3e',sep:'#343438',muted:'#aaa'},
+    wechat:{chat:'#111',chatText:'#eee',header:'rgba(28,28,28,.96)',headerText:'#eee',headerSecondary:'#999',headerAction:'#eee',bar:'rgba(24,24,24,.96)',me:'#3f6d34',meText:'#e9fbe1',them:'#242424',themText:'#eee',accent:'#07c160',input:'#242424',inputText:'#eee',inputBorder:'0 solid transparent',sep:'#333',muted:'#999'},
+    qq:{chat:'#11151a',chatText:'#eee',header:'rgba(20,24,29,.95)',headerText:'#eee',headerSecondary:'#999',headerAction:'#0099ff',bar:'rgba(18,22,27,.96)',me:'#087fca',them:'#20252b',themText:'#eee',accent:'#0099ff',input:'#20252b',inputText:'#eee',inputBorder:'0 solid transparent',sep:'#2c3238',muted:'#9aa2aa'},
+    whatsapp:{chat:'#0b141a',chatText:'#e9edef',header:'rgba(32,44,51,.97)',headerText:'#e9edef',headerSecondary:'#8696a0',headerAction:'#e9edef',bar:'rgba(32,44,51,.95)',me:'#005c4b',meText:'#e9edef',them:'#202c33',themText:'#e9edef',accent:'#00a884',input:'#2a3942',inputText:'#e9edef',inputBorder:'0 solid transparent',sep:'#26333a',muted:'#8696a0'},
+    messenger:{chat:'#000',chatText:'#eee',header:'rgba(18,18,18,.94)',headerText:'#fff',headerSecondary:'#aaa',headerAction:'#0084ff',bar:'rgba(18,18,18,.95)',them:'#242526',themText:'#eee',input:'#242526',inputText:'#eee',inputBorder:'0 solid transparent',sep:'#242526',muted:'#aaa'},
+    red:{chat:'#0d0d0d',chatText:'#eee',header:'rgba(18,18,18,.94)',headerText:'#eee',headerSecondary:'#999',headerAction:'#ff2442',bar:'rgba(18,18,18,.95)',me:'#d91e38',them:'#242424',themText:'#eee',input:'#242424',inputText:'#eee',inputBorder:'0 solid transparent',sep:'#2b2b2b',muted:'#999'},
+    bubble_pink:{chat:'#21171b',chatText:'#f1cbd4',header:'rgba(36,25,30,.90)',headerText:'#ff91a3',headerSecondary:'#c68c9a',headerAction:'#ff91a3',bar:'rgba(36,25,30,.90)',me:'linear-gradient(135deg,#9e5a67 0%,#7b536e 100%)',them:'#3d232c',themText:'#ffb2c0',accent:'#ff6b81',input:'#3d232c',inputText:'#ffd3dc',inputBorder:'0 solid transparent',sep:'#4b2d36',muted:'#c68c9a'},
+    ios6_retro:{chat:'#1c2026',chatText:'#eee',header:'linear-gradient(to bottom,#415a78,#293f58)',headerText:'#fff',headerSecondary:'#cbd6e2',headerAction:'#fff',bar:'linear-gradient(to bottom,#363a40,#24272c)',me:'linear-gradient(to bottom,#325a8c,#1e3c72)',them:'linear-gradient(to bottom,#383838,#242424)',themText:'#eee',accent:'#3f8be0',input:'#202328',inputText:'#eee',inputBorder:'1px solid #555',sep:'#41464d',muted:'#aaa',themBorder:'1px solid #444'},
+    nokia_retro:{chat:'#16191d',chatText:'#ddd',header:'linear-gradient(to bottom,#303030,#111)',headerText:'#fff',headerSecondary:'#ccc',headerAction:'#fff',bar:'linear-gradient(to bottom,#3a3a3a,#242424)',me:'linear-gradient(to bottom,#225f90,#003f78)',them:'linear-gradient(to bottom,#393939,#252525)',themText:'#eee',accent:'#2f8ed8',input:'#202020',inputText:'#eee',inputBorder:'1px solid #555',sep:'#444',muted:'#aaa',themBorder:'1px solid #555'},
+    telegram_day:{chat:'#17202a',chatText:'#eee',header:'rgba(33,33,33,.96)',headerText:'#fff',headerSecondary:'#aaa',headerAction:'#fff',bar:'rgba(26,26,26,.96)',me:'#2f4c37',meText:'#d9f3df',them:'#212121',themText:'#fff',accent:'#527da3',input:'#1a1a1a',inputText:'#fff',inputBorder:'0 solid transparent',sep:'#303030',muted:'#999'}
+  };
+  const FALLBACK={chat:'#fff',chatText:'#111',header:'rgba(248,248,248,.82)',headerText:'#111',headerSecondary:'#8e8e93',headerAction:'#007aff',bar:'rgba(248,248,248,.82)',me:'#007aff',meText:'#fff',them:'#e9e9eb',themText:'#111',accent:'#007aff',input:'#fff',inputText:'#111',inputBorder:'1px solid #c7c7cc',sep:'rgba(60,60,67,.2)',muted:'#8e8e93',meRadius:'18px 18px 4px 18px',themRadius:'18px 18px 18px 4px'};
+  const DESC={};Object.keys(SKINS).forEach(k=>DESC[k]=SKINS[k].desc);
+  function palette(id){const base={...FALLBACK,...(SKINS[id]||SKINS.imessage)};if(document.body.classList.contains('dark-mode')&&DARK[id])Object.assign(base,DARK[id]);return base}
+  function setv(k,v){document.body.style.setProperty(k,String(v))}
+  window.traceApplyCurrentChatTheme=function(id){
+    id=SKINS[id]?id:'imessage';const p=palette(id);document.body.dataset.traceChatTheme=id;document.body.classList.add('trace-current-theme');
+    setv('--tc-chat',p.chat);setv('--tc-chat-text',p.chatText||p.inputText||'#111');setv('--tc-header',p.header);setv('--tc-header-text',p.headerText);setv('--tc-header-secondary',p.headerSecondary||p.muted);setv('--tc-header-action',p.headerAction||p.accent);setv('--tc-bar',p.bar);setv('--tc-me',p.me);setv('--tc-me-text',p.meText);setv('--tc-them',p.them);setv('--tc-them-text',p.themText);setv('--tc-accent',p.accent);setv('--tc-input',p.input);setv('--tc-input-text',p.inputText);setv('--tc-input-border',p.inputBorder||'0 solid transparent');setv('--tc-input-shadow',p.inputShadow||'none');setv('--tc-sep',p.sep);setv('--tc-muted',p.muted);setv('--tc-me-radius',p.meRadius||'18px');setv('--tc-them-radius',p.themRadius||'18px');setv('--tc-me-border',p.meBorder||'0 solid transparent');setv('--tc-them-border',p.themBorder||'0 solid transparent');setv('--tc-me-shadow',p.meShadow||'none');setv('--tc-them-shadow',p.themShadow||'none');setv('--tc-me-shadow-text',p.meShadowText||'none');setv('--tc-them-shadow-text',p.themShadowText||'none');setv('--tc-tail-display',p.tail||'none');setv('--tc-me-time',p.meTime||'rgba(255,255,255,.72)');setv('--tc-them-time',p.themTime||p.muted||'rgba(60,60,67,.58)');setv('--tc-send-text',p.sendText||'#fff');setv('--tc-plus-bg',p.plusBg||'rgba(120,120,128,.14)');setv('--tc-plus-text',p.plusText||p.muted);setv('--tc-sheet',p.sheet||p.bar);setv('--tc-sheet-text',p.sheetText||p.chatText||p.inputText);
+    if(typeof appState!=='undefined'&&appState.settings)appState.settings.activeThemeId=id;
+    syncThemeSettingLabel();return id;
+  };
+  function activeId(){return (typeof appState!=='undefined'&&appState.settings&&SKINS[appState.settings.activeThemeId])?appState.settings.activeThemeId:'imessage'}
+  function themeName(id){return (SKINS[id]||SKINS.imessage).name}
+  function syncThemeSettingLabel(){
+    document.querySelectorAll('.ios-setting-row').forEach(row=>{const t=row.querySelector('.ios-cell-title');if(t&&t.textContent.trim()==='外观与气泡'){const d=row.querySelector('.ios-cell-detail');if(d)d.textContent=themeName(activeId())}});
+  }
+  const oldDark=window.applyDarkMode; if(typeof oldDark==='function'&&!oldDark.__traceThemeWrap){const f=function(){const out=oldDark.apply(this,arguments);setTimeout(()=>window.traceApplyCurrentChatTheme(activeId()),0);return out};f.__traceThemeWrap=true;window.applyDarkMode=f}
+  const oldSettings=window.iosRenderSettings;if(typeof oldSettings==='function'&&!oldSettings.__traceThemeWrap){const f=function(){const out=oldSettings.apply(this,arguments);syncThemeSettingLabel();return out};f.__traceThemeWrap=true;window.iosRenderSettings=f}
+  const legacyRender=window.renderThemeStore, legacyPreview=window.previewTheme, legacyApply=window.applySelectedTheme, legacyOpen=window.openThemeModal;
+  window.previewTheme=function(config){
+    if(storeMode!=='theme')return legacyPreview?.(config);const id=config?.id&&SKINS[config.id]?config.id:activeId(),p=palette(id),box=document.getElementById('theme-preview-box');if(!box)return;
+    box.className='layout-modern';box.dataset.previewTheme=id;
+    const escCss=v=>String(v||'').replace(/</g,'');
+    document.getElementById('theme-preview-style').textContent=`
+#theme-preview-box{background:${escCss(p.chat)}!important;color:${escCss(p.chatText||'#111')}!important}
+#theme-preview-box .top-bar{height:66px!important;padding:7px 10px 6px!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;background:${escCss(p.header)}!important;border:0!important;border-bottom:.5px solid ${escCss(p.sep)}!important;box-shadow:none!important}
+#theme-preview-box .tb-them{display:flex!important;flex-direction:column!important;align-items:center!important;gap:2px!important;margin:0!important}.theme-dummy{}
+#theme-preview-box .tb-avatar-wrap img{width:30px!important;height:30px!important;border-radius:50%!important;border:0!important}#theme-preview-box .tb-name{font-size:10px!important;color:${escCss(p.headerText)}!important;font-weight:600!important}#theme-preview-box .tb-tools,#theme-preview-box .tb-me{display:none!important}
+#theme-preview-box .preview-chat{background:${escCss(p.chat)}!important;padding:10px 9px!important;gap:7px!important}#theme-preview-box .bubble-avatar{display:none!important}#theme-preview-box .bubble-container{max-width:82%!important;gap:0!important}
+#theme-preview-box .bubble{border:0!important;box-shadow:none!important;padding:6px 9px!important;font-size:11px!important;line-height:1.25!important}#theme-preview-box .them .bubble{background:${escCss(p.them)}!important;color:${escCss(p.themText)}!important;border-radius:${escCss(p.themRadius||'18px')}!important}#theme-preview-box .me .bubble{background:${escCss(p.me)}!important;color:${escCss(p.meText)}!important;border-radius:${escCss(p.meRadius||'18px')}!important}
+#theme-preview-box .bottom-bar{height:52px!important;background:${escCss(p.bar)}!important;border:0!important;border-top:.5px solid ${escCss(p.sep)}!important;padding:7px 9px!important;display:flex!important;gap:7px!important}#theme-preview-box .bottom-bar>.icon-btn:first-child{background:${escCss(p.plusBg||'rgba(120,120,128,.15)')}!important;color:${escCss(p.muted)}!important;border-radius:50%!important;width:28px!important;height:28px!important}#theme-preview-box .input-box{flex:1!important;background:${escCss(p.input)}!important;color:${escCss(p.muted)}!important;border:${escCss(p.inputBorder||'0 solid transparent')}!important;border-radius:16px!important;box-shadow:none!important}#theme-preview-box .bottom-bar>.icon-btn:last-child{background:${escCss(p.accent)}!important;color:#fff!important;border-radius:50%!important;width:28px!important;height:28px!important}
+`;
+  };
+  window.renderThemeStore=function(){
+    if(storeMode!=='theme')return legacyRender?.();const list=document.getElementById('theme-store-list');if(!list)return;const current=selectedThemeId&&SKINS[selectedThemeId]?selectedThemeId:activeId();selectedThemeId=current;list.innerHTML='';
+    const order=['imessage','trace',...Object.keys(SKINS).filter(x=>!['imessage','trace'].includes(x))];
+    order.forEach(id=>{const skin=SKINS[id],card=document.createElement('button');card.type='button';card.className='trace-theme-store-card'+(id===current?' active':'');card.style.setProperty('--sw-chat',skin.chat);card.style.setProperty('--sw-them',skin.them);card.style.setProperty('--sw-me',skin.me);card.innerHTML=`<span class="trace-theme-store-swatch"><i class="them"></i><i class="me"></i></span><span class="trace-theme-store-copy"><span class="trace-theme-store-name">${skin.name}</span><span class="trace-theme-store-desc">${skin.desc}</span></span><span class="trace-theme-store-check"></span>`;card.onclick=()=>{selectedThemeId=id;window.renderThemeStore();window.previewTheme({id})};list.appendChild(card)});
+    window.previewTheme({id:current});
+  };
+  window.applySelectedTheme=function(){
+    if(storeMode!=='theme')return legacyApply?.();const id=SKINS[selectedThemeId]?selectedThemeId:'imessage';
+    if(!appState.settings)appState.settings={};appState.settings.activeThemeId=id;appState.settings.topbarLayout='layout-modern';appState.settings.bubbleCSS='';appState.settings.customCSS='';
+    const l=document.getElementById('set-topbar-layout');if(l)l.value='layout-modern';const b=document.getElementById('set-bubble-css');if(b)b.value='';const c=document.getElementById('set-custom-css');if(c)c.value='';
+    if(typeof updateSettings==='function')updateSettings();window.traceApplyCurrentChatTheme(id);if(typeof saveState==='function')saveState();if(typeof showToast==='function')showToast('已应用主题：'+themeName(id));setTimeout(()=>window.iosRenderSettings?.(),0);
+  };
+  window.openThemeModal=function(){selectedThemeId=activeId();const out=legacyOpen?.();setTimeout(()=>window.renderThemeStore(),0);return out};
+  function boot(){if(typeof appState==='undefined')return;if(!appState.settings)appState.settings={};if(!SKINS[appState.settings.activeThemeId])appState.settings.activeThemeId='imessage';selectedThemeId=appState.settings.activeThemeId;window.traceApplyCurrentChatTheme(selectedThemeId);syncThemeSettingLabel()}
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,80));window.addEventListener('load',()=>setTimeout(boot,450));setTimeout(boot,700);
 })();
 </script>
 
