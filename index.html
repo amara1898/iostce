@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-BJSYERETPJ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-BJSYERETPJ');
-</script>
     <!-- 引入 PWA 清单 -->
     <link rel="manifest" href="manifest.json">
     <!-- 设置手机状态栏的颜色 -->
@@ -1708,7 +1700,7 @@ body.dark-mode #mail-content-input{background:#1c1c1e!important}
                         <div class="setting-label">回复设置</div>
                         <div class="input-item" style="padding-top: 5px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>最快响应 (秒)</span><span id="min-delay-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-min-delay" min="0" max="120" step="1" oninput="updateDelayDisplay()" onchange="updateSettings()"></div>
                         <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>最慢响应 (秒)</span><span id="max-delay-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-max-delay" min="0" max="300" step="1" oninput="updateDelayDisplay()" onchange="updateSettings()"></div>
-                        <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>单次最多回复 (条)</span><span id="max-reply-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-max-reply" min="1" max="10" step="1" oninput="updateReplyCountDisplay()" onchange="updateSettings()"></div>
+                        <div class="input-item" style="padding-top: 15px;"><div style="display:flex; justify-content:space-between; width:100%;"><span>单次最多回复 (条)</span><span id="max-reply-val" style="font-family:monospace; font-size:12px;"></span></div><input type="range" id="set-max-reply" min="1" max="10" step="1" oninput="updateReplyCountDisplay(true)" onchange="updateReplyCountDisplay(true)"></div>
                     </div>
                 </div>
 
@@ -2200,7 +2192,40 @@ function updateRadiusRealtime() { const val = document.getElementById('set-avata
 function updateFontSizeRealtime() { const val = document.getElementById('set-font-size').value; document.getElementById('fontsize-val').innerText = val; document.documentElement.style.setProperty('--base-font-size', val + 'px'); }
 function updateFontWeightRealtime() { const val = document.getElementById('set-font-weight').value; document.getElementById('fontweight-val').innerText = val; document.documentElement.style.setProperty('--base-font-weight', val); }
 function updateDelayDisplay() { document.getElementById('min-delay-val').innerText = Number(document.getElementById('set-min-delay').value).toFixed(0); document.getElementById('max-delay-val').innerText = Number(document.getElementById('set-max-delay').value).toFixed(0); }
-function updateReplyCountDisplay() { document.getElementById('max-reply-val').innerText = document.getElementById('set-max-reply').value; }
+function getReplyBubbleLimit() {
+    const raw = Number(appState?.settings?.maxReplyCount);
+    return Math.min(10, Math.max(1, Number.isFinite(raw) ? Math.floor(raw) : 1));
+}
+function pickReplyBubbleCount(limit = getReplyBubbleLimit()) {
+    const maxCount = Math.min(10, Math.max(1, Math.floor(Number(limit) || 1)));
+    if (maxCount <= 1) return 1;
+    const weights = [];
+    for (let i = 1; i <= maxCount; i++) {
+        if (i === 1) weights.push(50);
+        else if (i === 2) weights.push(30);
+        else if (i === 3) weights.push(10);
+        else if (i === 4) weights.push(5);
+        else weights.push(1);
+    }
+    let r = Math.random() * weights.reduce((a,b)=>a+b,0);
+    for (let i = 0; i < weights.length; i++) {
+        if (r < weights[i]) return i + 1;
+        r -= weights[i];
+    }
+    return 1;
+}
+function updateReplyCountDisplay(persist = false) {
+    const slider = document.getElementById('set-max-reply');
+    const label = document.getElementById('max-reply-val');
+    if (!slider) return;
+    const value = Math.min(10, Math.max(1, Math.floor(Number(slider.value) || 1)));
+    slider.value = value;
+    if (label) label.innerText = value;
+    if (persist && appState?.settings) {
+        appState.settings.maxReplyCount = value;
+        saveState();
+    }
+}
 function updateStitchCardDisplay(changed) {
     const enabledEl = document.getElementById('set-card-stitch-enable');
     const minEl = document.getElementById('set-min-stitch');
@@ -2367,7 +2392,7 @@ if(appState.settings.timeStyle === 'time-top') document.body.classList.add('time
 function updateSettings() {
     appState.settings.meName = document.getElementById('set-me-name').value || '我';
     appState.settings.avatarRadius = Number(document.getElementById('set-avatar-radius').value); appState.settings.fontSize = Number(document.getElementById('set-font-size').value); appState.settings.fontWeight = Number(document.getElementById('set-font-weight').value);
-appState.settings.minDelaySec = Number(document.getElementById('set-min-delay').value); appState.settings.maxDelaySec = Number(document.getElementById('set-max-delay').value); appState.settings.maxReplyCount = Number(document.getElementById('set-max-reply').value);
+appState.settings.minDelaySec = Number(document.getElementById('set-min-delay').value); appState.settings.maxDelaySec = Number(document.getElementById('set-max-delay').value); appState.settings.maxReplyCount = Math.min(10, Math.max(1, Math.floor(Number(document.getElementById('set-max-reply').value) || 1)));
     const stitchEnable = document.getElementById('set-card-stitch-enable');
     const minStitch = document.getElementById('set-min-stitch');
     const maxStitch = document.getElementById('set-max-stitch');
@@ -3706,26 +3731,10 @@ if(pool.length === 0) pool = [{ text: "嗯嗯", type: 'text' }];
 
         const minMs = (appState.settings.minDelaySec || 2) * 1000; 
         const maxMs = (appState.settings.maxDelaySec || 6) * 1000;
-        let maxCount = appState.settings.maxReplyCount || 1; 
-        let count = 1;
-        // 拼字卡本身就是“一个气泡组合多条字卡”。开启后不再叠加“单次最多回复”产生多个拼接气泡，
-        // 否则设置最多 5 条时，一轮可能出现 2×5、3×5 条，看起来突破上限。
-        if (!appState.settings.enableCardStitch && maxCount > 1) {
-            let weights = [];
-            for (let i = 1; i <= maxCount; i++) {
-                if (i === 1) weights.push(50);       // 回 1 条的权重极高 (最常见)
-                else if (i === 2) weights.push(30);  // 回 2 条的权重较高
-                else if (i === 3) weights.push(10);  // 回 3 条的概率变小
-                else if (i === 4) weights.push(5);   // 回 4 条的概率很小
-                else weights.push(1);                // 5条及以上的概率极低 (除非小概率大爆发)
-            }
-            let totalW = weights.reduce((a, b) => a + b, 0);
-            let r = Math.random() * totalW;
-            for (let i = 0; i < maxCount; i++) {
-                if (r < weights[i]) { count = i + 1; break; }
-                r -= weights[i];
-            }
-        }
+        const maxCount = getReplyBubbleLimit();
+        // “单次最多回复”是每一轮回复的硬上限。拼字卡开启时仍保持一轮 1 个拼接气泡；
+        // 普通回复则在 1～上限之间随机，但绝不突破设置值。
+        const count = appState.settings.enableCardStitch ? 1 : pickReplyBubbleCount(maxCount);
         
         let baseDelay = Math.max(minMs, Math.random() * (maxMs - minMs) + minMs);
         setRolePendingCount(targetRoleId, getRolePendingCount(targetRoleId) + count);
@@ -5692,14 +5701,25 @@ function ensureRoleDiaryPlan(role, now = new Date()) {
     return { plan, created };
 }
 
+function joinDiaryCardsNaturally(cards) {
+    const parts = (cards || []).map(c => String(c?.text || c || '').trim().replace(/\s*\n+\s*/g, ' ')).filter(Boolean);
+    if (!parts.length) return '';
+    return parts.reduce((out, part) => {
+        if (!out) return part;
+        const left = out.trimEnd();
+        const right = part.trimStart();
+        const noExtraSep = /[，。！？!?；;：:、…,.]$/.test(left) || /^[，。！？!?；;：:、…,.]/.test(right);
+        return left + (noExtraSep ? '' : '，') + right;
+    }, '');
+}
+
 function buildThemDiaryContent(role) {
     const limits = ensureDiaryCardLimits();
     const selected = pickDiaryCardsForRole(role, limits.diary);
 
     if (selected.length) {
-        const joiner = selected.length > 6 ? '\n' : (Math.random() < 0.58 ? '\n' : '，');
         return {
-            content: selected.map(c => String(c.text || '').trim()).join(joiner),
+            content: joinDiaryCardsNaturally(selected),
             sources: selected.map(c => ({ text:String(c.text || '').trim(), group:String(c.group || '日常') }))
         };
     }
@@ -5892,6 +5912,7 @@ function renderDiary() {
         const d = new Date(r.time);
         const timeStr = `${r.date} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         const isMe = r.author === 'me';
+        const visibleContent = (!isMe && Array.isArray(r.cardSources) && r.cardSources.length) ? joinDiaryCardsNaturally(r.cardSources) : String(r.content || '');
         const card = document.createElement('div');
         card.className = `diary-card ${isMe ? 'me' : 'them'}`;
         card.innerHTML = `
@@ -5903,7 +5924,7 @@ function renderDiary() {
                 <div class="diary-mood">${escapeDiaryHtml(r.mood)}</div>
                 ${isMe ? `<button class="btn-noshadow icon-btn" style="border:none; box-shadow:none; padding:2px; font-size:12px; color:var(--text-sub);" onclick="deleteDiary(${Number(r.id)})">✕</button>` : ''}
             </div>
-            <div class="diary-content">${escapeDiaryHtml(r.content)}</div>
+            <div class="diary-content">${escapeDiaryHtml(visibleContent)}</div>
         `;
         list.appendChild(card);
     });
@@ -6102,7 +6123,7 @@ function sendMail() {
         const selectedCards = pickDiaryCardsForRole(role, limits.letter);
         let taContent = '见字如面。\n\n你的来信我已收到。';
         if (selectedCards.length) {
-            taContent += '\n\n' + selectedCards.map(c => String(c.text || '').trim()).join('\n\n');
+            taContent += '\n\n' + joinDiaryCardsNaturally(selectedCards);
         } else {
             taContent += '\n\n愿你今天一切顺利。';
         }
@@ -6210,7 +6231,12 @@ function readMail(id) {
     const isMe = letter.author === 'me';
     const d = new Date(letter.sendTime);
     document.getElementById('read-mail-title').innerText = isMe ? `寄给 ${roleName} 的信` : `来自 ${roleName} 的回信`;
-    document.getElementById('read-mail-content').innerText = letter.content;
+    let visibleMailContent = String(letter.content || '');
+    if (!isMe && Array.isArray(letter.cardSources) && letter.cardSources.length) {
+        const intro = '见字如面。\n\n你的来信我已收到。';
+        visibleMailContent = visibleMailContent.startsWith(intro) ? `${intro}\n\n${joinDiaryCardsNaturally(letter.cardSources)}` : joinDiaryCardsNaturally(letter.cardSources);
+    }
+    document.getElementById('read-mail-content').innerText = visibleMailContent;
     document.getElementById('read-mail-time').innerText = `写于 ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
     document.getElementById('read-mail-modal').classList.add('open');
 }
@@ -9487,7 +9513,7 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
     const members=(g.memberIds||[]).map(roleById).filter(Boolean);
     if(!members.length)return;
     const shuffled=members.slice().sort(()=>Math.random()-.5);
-    const n=Math.min(shuffled.length,Math.random()<.35?2:1);
+    const n=pickReplyBubbleCount(Math.min(shuffled.length,getReplyBubbleLimit()));
     const minSec=Math.max(0,Number(appState.settings?.minDelaySec ?? 2));
     const maxSec=Math.max(minSec,Number(appState.settings?.maxDelaySec ?? 6));
     for(let i=0;i<n;i++){
@@ -10636,7 +10662,7 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
 </script>
 
 
-<style id="ios-chat-call-polish-v12-r5-style">
+<style id="ios-chat-call-polish-v12-r8-style">
 body.ios-system-theme .call-modal{isolation:isolate!important;overflow:hidden!important;background:linear-gradient(165deg,rgba(45,45,50,.42),rgba(8,8,10,.58))!important;color:#fff!important}
 body.ios-system-theme .call-modal::before{content:"";position:absolute;inset:-64px;z-index:0;pointer-events:none;background-image:var(--trace-call-role-image,none);background-size:cover;background-position:center;filter:blur(54px) saturate(145%) brightness(.62);transform:scale(1.16);opacity:.72}
 body.ios-system-theme .call-modal::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 50% 12%,rgba(255,255,255,.20),transparent 34%),linear-gradient(180deg,rgba(18,18,22,.16),rgba(10,10,14,.34));-webkit-backdrop-filter:blur(28px) saturate(145%);backdrop-filter:blur(28px) saturate(145%)}
@@ -10663,15 +10689,23 @@ body.ios-system-theme .call-modal.minimized .mini-call-phone{width:20px!importan
 body.ios-system-theme .call-modal.minimized.dragging{transform:none!important;box-shadow:0 15px 38px rgba(0,0,0,.24)!important}
 body.ios-system-theme #ios-send-btn,body.ios-system-theme .ios-group-send{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 </style>
-<script id="ios-chat-call-polish-v12-r5-script">
+<script id="ios-chat-call-polish-v12-r8-script">
 (function(){
   function safeCssUrl(src){const s=String(src||'').replace(/"/g,'%22').replace(/\n/g,'');return s?`url("${s}")`:'none'}
   window.traceApplyCallVisual=function(role){const el=window.callState?.el||document.getElementById('voice-call-ui');if(!el)return;el.style.setProperty('--trace-call-role-image',safeCssUrl(role?.avatar||''));const mini=document.getElementById('mini-call-name');if(mini)mini.textContent=role?.name||'Ta'};
   function refocusInput(input){if(!input)return;try{input.focus({preventScroll:true})}catch(e){try{input.focus()}catch(_){}}requestAnimationFrame(()=>{try{input.focus({preventScroll:true})}catch(e){try{input.focus()}catch(_){}}try{const n=('value'in input)?input.value.length:0;if(typeof input.setSelectionRange==='function')input.setSelectionRange(n,n)}catch(e){}})}
-  const oldPrivateSend=window.iosSmartSendTap;if(typeof oldPrivateSend==='function'&&!oldPrivateSend.__traceKeepKeyboard){const wrapped=function(e){const input=document.getElementById('msg-input');const keep=!!input&&document.activeElement===input;const out=oldPrivateSend.call(this,e);if(keep)refocusInput(input);return out};wrapped.__traceKeepKeyboard=true;window.iosSmartSendTap=wrapped}
-  const oldGroupSend=window.iosSmartGroupSendTap;if(typeof oldGroupSend==='function'&&!oldGroupSend.__traceKeepKeyboard){const wrapped=function(e){const input=document.getElementById('ios-group-input');const keep=!!input&&document.activeElement===input;const out=oldGroupSend.call(this,e);if(keep)refocusInput(input);return out};wrapped.__traceKeepKeyboard=true;window.iosSmartGroupSendTap=wrapped}
+  // iOS 会在 click 触发前先把 textarea/input 失焦，所以不能在发送函数里才判断 activeElement。
+  // 在手指按下发送键的瞬间先记住“键盘原本是否打开”：原本打开就恢复焦点，原本关闭就绝不主动唤起。
+  const sendFocusSnapshot={privateKeep:false,privateAt:0,groupKeep:false,groupAt:0};
+  function rememberSendFocus(input,key){sendFocusSnapshot[key+'Keep']=!!input&&document.activeElement===input;sendFocusSnapshot[key+'At']=performance.now()}
+  function shouldKeepKeyboard(input,key){const live=!!input&&document.activeElement===input;const recent=(performance.now()-(sendFocusSnapshot[key+'At']||0))<1200;const keep=live||(recent&&sendFocusSnapshot[key+'Keep']);sendFocusSnapshot[key+'Keep']=false;sendFocusSnapshot[key+'At']=0;return keep}
+  function bindSendFocusSnapshot(btn,input,key){if(!btn||!input||btn.dataset.traceKeyboardSnapshot==='1')return;btn.dataset.traceKeyboardSnapshot='1';const snap=()=>rememberSendFocus(input,key);btn.addEventListener('pointerdown',snap,{capture:true,passive:true});btn.addEventListener('touchstart',snap,{capture:true,passive:true})}
+  function installSendFocusSnapshot(){const privateInput=document.getElementById('msg-input');const privateBtn=document.getElementById('ios-send-btn')||document.querySelector('button[onclick*="iosSmartSendTap"]');bindSendFocusSnapshot(privateBtn,privateInput,'private');const groupInput=document.getElementById('ios-group-input');const groupBtn=document.querySelector('.ios-group-send');bindSendFocusSnapshot(groupBtn,groupInput,'group')}
+  const oldPrivateSend=window.iosSmartSendTap;if(typeof oldPrivateSend==='function'&&!oldPrivateSend.__traceKeepKeyboard){const wrapped=function(e){const input=document.getElementById('msg-input');const keep=shouldKeepKeyboard(input,'private');const out=oldPrivateSend.call(this,e);if(keep)refocusInput(input);return out};wrapped.__traceKeepKeyboard=true;window.iosSmartSendTap=wrapped}
+  const oldGroupSend=window.iosSmartGroupSendTap;if(typeof oldGroupSend==='function'&&!oldGroupSend.__traceKeepKeyboard){const wrapped=function(e){const input=document.getElementById('ios-group-input');const keep=shouldKeepKeyboard(input,'group');const out=oldGroupSend.call(this,e);if(keep)refocusInput(input);return out};wrapped.__traceKeepKeyboard=true;window.iosSmartGroupSendTap=wrapped}
   function installBlankTapDismiss(){const input=document.getElementById('msg-input'),chat=document.getElementById('chat-area');if(chat&&input&&chat.dataset.blankDismissReady!=='1'){chat.dataset.blankDismissReady='1';chat.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,input,textarea,select,.bubble,.context-menu,.ios-poll-card'))return;try{input.blur()}catch(_){}},{passive:true})}const groupInput=document.getElementById('ios-group-input'),groupList=document.getElementById('ios-group-message-list');if(groupList&&groupInput&&groupList.dataset.blankDismissReady!=='1'){groupList.dataset.blankDismissReady='1';groupList.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,input,textarea,select,.ios-group-bubble,.ios-poll-card'))return;try{groupInput.blur()}catch(_){}},{passive:true})}}
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(installBlankTapDismiss,0));window.addEventListener('load',()=>setTimeout(installBlankTapDismiss,180));setTimeout(installBlankTapDismiss,400);
+  function installInputBehavior(){installSendFocusSnapshot();installBlankTapDismiss()}
+  installInputBehavior();document.addEventListener('DOMContentLoaded',()=>setTimeout(installInputBehavior,0));window.addEventListener('load',()=>setTimeout(installInputBehavior,180));setTimeout(installInputBehavior,400);
 })();
 </script>
 
