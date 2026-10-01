@@ -10836,7 +10836,7 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
 (function(){
   const CURRENT_RELEASE_VERSION='v12';
   const RELEASE_HISTORY=[
-    {version:'v12',tag:'当前版本',items:['修复手机导入 GIF、动态 WebP 与 APNG 后被压成静态首帧的问题；拍一拍与系统通知取消虚线框；字卡和表情分组控件改为 iOS 填充样式；功能页统一为完整页面，并清理五子棋、神秘学、一起听、陪伴专注等页面遗留的黑色描边。','群聊新增受限引用：只有用户自己发出的群消息可以成为引用目标；群成员不会互相引用。角色回复用户时会以较低概率引用用户近期群消息，并设置冷却避免连续引用。','单聊新增双方引用：点一下任意文字、图片或互动消息，再点“引用”即可带引用发送；角色回复时也会以较低概率引用用户近期发过的消息。','表情、问卷、图片与图文混合消息取消普通文字气泡外壳；对方头像略微放大并去除边框遮挡。开启时间戳时只把时间略微上移并收紧额外高度，关闭时间戳的普通气泡保持原样。','系统级“信箱”的交换日记页新增独立角色选择：查看、写日记和心情统计都跟随信箱内选择，切换当前聊天角色不会带着改变；角色选项会提示各自的新日记。','单聊重新显示对方头像，可在顶部头像或对方消息头像上双击拍一拍。每个角色会记住自己的拍一拍文案，只有约 3% 的低概率才从拍一拍池换成另一条；拍一拍后仍会随机触发 Ta 发信息、Ta 拍你一下或低概率来电。','功能页“交换日记”改名为“信箱”；信件未读蓝点只显示在底部“功能”和功能页“信箱”一行，角色页与聊天页不显示信件提醒。','来电改为突然出现的全屏页面，通话中改为简洁的 FaceTime 风格成员卡片；页面只做模拟通话，不调用麦克风或摄像头。背景会从来电角色头像提取色系；合家欢模式显示邀请入口，多人竞争模式隐藏邀请入口。','主动来电改为手机级统一来电池，不再区分单聊和群聊。首选项新增“多人竞争 / 合家欢”：竞争模式同时来电只能选一人接听，其余角色收到“用户正忙”；合家欢模式会把时间重叠的独立来电合并为多人通话。群聊电话按钮改为用户主动呼出，不会再随机制造角色来电。','多人通话新增与单聊一致的最小化悬浮条：显示通话成员、人数和通话时长，可拖动位置、点击恢复；缩小后通话和计时继续。','新增低概率角色撤回：默认关闭，可选 0.5% / 1% / 2%，只撤回角色刚发出的普通文字或表情，并显示“撤回了一条消息”。','本地表情导入保留 GIF、WebP 和 APNG 动画；单聊与群聊输入框都新增紧邻“＋”的表情快捷按钮。','修复状态混入开关被刷新逻辑强制关闭的问题；状态库改为每行一项，文字、纯 Emoji 和颜文字都会缩小显示在名字下方，只有不含文字的项目会低概率混入句子。','慢信收纳盒改为系统级信箱：统一展示所有角色的来信和在途状态，与当前聊天角色无关；来信未读蓝点只显示在底部“功能”和功能页“交换日记”一行，角色页与聊天页不再显示信件提醒。','角色每个回复气泡会独立在文字与表情之间选择：表情保持 8% 低概率并始终单独成条。表情按角色绑定分组，清空绑定后该角色不会主动发表情；角色管理页可直接全选、清空或逐组选择。','回复条数改为“最少 / 最多”区间；每轮会在区间内随机取值。两项设成同一个数时仍会严格发送固定条数，单聊与群聊统一遵守。','每个轮到回复的角色各自有 3% 低概率附加触发主动来电，不会吞掉原定回复；所有角色共用同一来电池，同时来电按“多人竞争 / 合家欢”设置决定选一人接听或合并通话。','群聊消息显示成员头像；双击某个成员头像会触发“拍一拍”系统提示，并从现有自定义动作库随机取句。被拍成员随后会随机发来一条信息、拍你一下，或在已允许主动来电时拨来电话；只由被拍成员回应。拍一拍设置位于「首选项 → 参数」，原有数据保持兼容。','修复单聊聊天页顶部名称：有备注时优先显示备注，没有备注时显示角色本名。','聊天页左下角“＋”新增问卷：可自定义题目，并动态添加或删除任意数量的选项；发送后 Ta 会在设置的最快/最慢响应时间内随机选择。','群聊输入区新增“＋”入口和问卷；问卷发到群里后，每个群成员都会独立随机选择一个选项，不人为规定谁先谁后，结果会直接汇总在同一张问卷卡片里。','私聊问卷新增“让 Ta 出题”：题目与 2–5 个选项都从当前角色自己已绑定的字卡中随机抽取，用户可直接在问卷卡片里选择答案。','新增可选的“Ta 偶尔主动问我”：默认概率 10%，可切换 5% / 10% / 20%；每次触发 Ta 回复时检查一次，命中后这一轮改为问卷，并设置 30 分钟冷却避免连续刷问卷。','修复 Ta 的日记与慢信回信把字卡逐条换行的问题，现按自然段连续排列。','保留 iOS 键盘行为：键盘打开时发送后继续保持，键盘已收起时发送不会自动弹出。']},
+    {version:'v12',tag:'当前版本',items:['全屏功能页统一使用左上角返回，修复纪念日与神秘学顶部操作重叠；五子棋、神秘学、抉择、话题扭蛋、一起听、陪伴专注、心愿单、纪念日、存钱罐和照片页新增明确的互动角色选择。','修复手机导入 GIF、动态 WebP 与 APNG 后被压成静态首帧的问题；拍一拍与系统通知取消虚线框；字卡和表情分组控件改为 iOS 填充样式；功能页统一为完整页面，并清理五子棋、神秘学、一起听、陪伴专注等页面遗留的黑色描边。','群聊新增受限引用：只有用户自己发出的群消息可以成为引用目标；群成员不会互相引用。角色回复用户时会以较低概率引用用户近期群消息，并设置冷却避免连续引用。','单聊新增双方引用：点一下任意文字、图片或互动消息，再点“引用”即可带引用发送；角色回复时也会以较低概率引用用户近期发过的消息。','表情、问卷、图片与图文混合消息取消普通文字气泡外壳；对方头像略微放大并去除边框遮挡。开启时间戳时只把时间略微上移并收紧额外高度，关闭时间戳的普通气泡保持原样。','系统级“信箱”的交换日记页新增独立角色选择：查看、写日记和心情统计都跟随信箱内选择，切换当前聊天角色不会带着改变；角色选项会提示各自的新日记。','单聊重新显示对方头像，可在顶部头像或对方消息头像上双击拍一拍。每个角色会记住自己的拍一拍文案，只有约 3% 的低概率才从拍一拍池换成另一条；拍一拍后仍会随机触发 Ta 发信息、Ta 拍你一下或低概率来电。','功能页“交换日记”改名为“信箱”；信件未读蓝点只显示在底部“功能”和功能页“信箱”一行，角色页与聊天页不显示信件提醒。','来电改为突然出现的全屏页面，通话中改为简洁的 FaceTime 风格成员卡片；页面只做模拟通话，不调用麦克风或摄像头。背景会从来电角色头像提取色系；合家欢模式显示邀请入口，多人竞争模式隐藏邀请入口。','主动来电改为手机级统一来电池，不再区分单聊和群聊。首选项新增“多人竞争 / 合家欢”：竞争模式同时来电只能选一人接听，其余角色收到“用户正忙”；合家欢模式会把时间重叠的独立来电合并为多人通话。群聊电话按钮改为用户主动呼出，不会再随机制造角色来电。','多人通话新增与单聊一致的最小化悬浮条：显示通话成员、人数和通话时长，可拖动位置、点击恢复；缩小后通话和计时继续。','新增低概率角色撤回：默认关闭，可选 0.5% / 1% / 2%，只撤回角色刚发出的普通文字或表情，并显示“撤回了一条消息”。','本地表情导入保留 GIF、WebP 和 APNG 动画；单聊与群聊输入框都新增紧邻“＋”的表情快捷按钮。','修复状态混入开关被刷新逻辑强制关闭的问题；状态库改为每行一项，文字、纯 Emoji 和颜文字都会缩小显示在名字下方，只有不含文字的项目会低概率混入句子。','慢信收纳盒改为系统级信箱：统一展示所有角色的来信和在途状态，与当前聊天角色无关；来信未读蓝点只显示在底部“功能”和功能页“交换日记”一行，角色页与聊天页不再显示信件提醒。','角色每个回复气泡会独立在文字与表情之间选择：表情保持 8% 低概率并始终单独成条。表情按角色绑定分组，清空绑定后该角色不会主动发表情；角色管理页可直接全选、清空或逐组选择。','回复条数改为“最少 / 最多”区间；每轮会在区间内随机取值。两项设成同一个数时仍会严格发送固定条数，单聊与群聊统一遵守。','每个轮到回复的角色各自有 3% 低概率附加触发主动来电，不会吞掉原定回复；所有角色共用同一来电池，同时来电按“多人竞争 / 合家欢”设置决定选一人接听或合并通话。','群聊消息显示成员头像；双击某个成员头像会触发“拍一拍”系统提示，并从现有自定义动作库随机取句。被拍成员随后会随机发来一条信息、拍你一下，或在已允许主动来电时拨来电话；只由被拍成员回应。拍一拍设置位于「首选项 → 参数」，原有数据保持兼容。','修复单聊聊天页顶部名称：有备注时优先显示备注，没有备注时显示角色本名。','聊天页左下角“＋”新增问卷：可自定义题目，并动态添加或删除任意数量的选项；发送后 Ta 会在设置的最快/最慢响应时间内随机选择。','群聊输入区新增“＋”入口和问卷；问卷发到群里后，每个群成员都会独立随机选择一个选项，不人为规定谁先谁后，结果会直接汇总在同一张问卷卡片里。','私聊问卷新增“让 Ta 出题”：题目与 2–5 个选项都从当前角色自己已绑定的字卡中随机抽取，用户可直接在问卷卡片里选择答案。','新增可选的“Ta 偶尔主动问我”：默认概率 10%，可切换 5% / 10% / 20%；每次触发 Ta 回复时检查一次，命中后这一轮改为问卷，并设置 30 分钟冷却避免连续刷问卷。','修复 Ta 的日记与慢信回信把字卡逐条换行的问题，现按自然段连续排列。','保留 iOS 键盘行为：键盘打开时发送后继续保持，键盘已收起时发送不会自动弹出。']},
     {version:'v11',items:['群聊回复速度改为直接读取设置里的“最快响应 / 最慢响应”；同一轮参与回复的角色各自独立随机等待，不再人为规定谁先谁后。','群聊气泡尺寸、文字字号、行高、圆角、尾巴与时间戳布局统一到单聊 iMessage 气泡。','“角色”页新增独立“群聊”分类，群聊与角色一起集中管理，并保留新建群聊入口。','新增群聊资料页：可修改群聊名称和自定义群头像；群头像会同步显示在信息列表与聊天顶部。','群聊资料页新增“群内气泡数排名”，按每个角色在这个群聊里实际发送的气泡数量排序，并显示其占全部角色气泡的比例。','修复群聊发送卡顿与双击失效：群聊发送键与单聊统一为单击发送、双击直接触发回复；即使输入框为空也能双击让角色回复。群消息改为增量插入，并合并频繁保存与列表刷新，避免历史消息越多越卡。','字卡管理新增“清理重复”：同一分组中完全相同的字卡只保留第一条；不同分组中的同一句话不会误删。手动注入会跳过重复，移动分组造成重复时会自动清理。','慢信寄信流程拆成独立两步：先单独选择一个或多个收件人，再进入单独写信页；写信页底部固定显示“寄出”，不再把角色选择和信纸放在同一页。']},
     {version:'v10',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','写信页新增多角色收件人选择：可一次勾选多个角色，同一封信分别进入每个角色的独立信箱，每个人使用自己的绑定字卡并在自己的随机时间回信；已有回信在途的角色会暂时不可重复寄送。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
     {version:'v9',items:['修复后台来信通知：普通回复、主动消息与群聊消息都会在真正到达时触发系统横幅；前台正在查看时不重复打扰。','备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
@@ -11525,6 +11525,195 @@ body.ios-system-theme #focus-modal.trace-feature-page #focus-wrap {
   }
 
   function install(){markFeaturePages();installStickerImport()}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+})();
+</script>
+
+<!-- ===== r21: real navigation bars + explicit feature role picker ===== -->
+<style id="trace-r21-navigation-role-style">
+body.ios-system-theme .trace-feature-page .modal-header {
+  display:grid !important;
+  grid-template-columns:minmax(78px,1fr) auto minmax(78px,1fr) !important;
+  align-items:end !important;
+  column-gap:8px !important;
+}
+body.ios-system-theme .trace-feature-page .modal-header h3 {
+  grid-column:2 !important;
+  grid-row:1 !important;
+  align-self:center !important;
+  margin:0 !important;
+  padding:0 0 13px !important;
+  white-space:nowrap !important;
+}
+body.ios-system-theme .trace-feature-page .modal-header .close-btn {
+  position:static !important;
+  min-width:0 !important;
+  min-height:44px !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  color:var(--ios-blue) !important;
+  box-shadow:none !important;
+  font-size:16px !important;
+  font-weight:400 !important;
+  letter-spacing:0 !important;
+  white-space:nowrap !important;
+}
+body.ios-system-theme .trace-feature-page .modal-header > .trace-feature-back {
+  grid-column:1 !important;
+  grid-row:1 !important;
+  justify-self:start !important;
+  align-self:end !important;
+  text-align:left !important;
+}
+body.ios-system-theme .trace-feature-page .modal-header > :not(h3):not(.trace-feature-back) {
+  grid-column:3 !important;
+  grid-row:1 !important;
+  justify-self:end !important;
+  align-self:end !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:12px !important;
+  min-width:0 !important;
+}
+.trace-feature-role-bar {
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:50px;
+  padding:7px 16px;
+  border-bottom:.5px solid var(--ios-separator);
+  background:var(--ios-card);
+  color:var(--ios-label);
+}
+.trace-feature-role-copy { flex:1;min-width:0;display:flex;flex-direction:column;gap:2px; }
+.trace-feature-role-copy strong { font-size:14px;font-weight:600; }
+.trace-feature-role-copy small { font-size:11px;color:var(--ios-secondary); }
+body.ios-system-theme .trace-feature-page .trace-feature-role-select {
+  width:auto !important;
+  max-width:48vw !important;
+  min-height:34px !important;
+  border:0 !important;
+  border-radius:10px !important;
+  background:var(--ios-fill) !important;
+  color:var(--ios-label) !important;
+  box-shadow:none !important;
+  padding:0 28px 0 11px !important;
+  font:500 14px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif !important;
+}
+body.ios-system-theme #focus-modal #focus-close-btn.trace-feature-back {
+  left:16px !important;
+  right:auto !important;
+  top:calc(var(--ios-safe-top) + 12px) !important;
+  min-width:72px !important;
+  text-align:left !important;
+}
+#focus-modal .trace-feature-role-bar {
+  position:absolute;
+  z-index:9;
+  top:calc(var(--ios-safe-top) + 60px);
+  left:16px;
+  right:16px;
+  min-height:46px;
+  padding:6px 10px 6px 12px;
+  border:0;
+  border-radius:14px;
+  background:rgba(255,255,255,.13);
+  color:#fff;
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  backdrop-filter:blur(18px) saturate(140%);
+}
+#focus-modal .trace-feature-role-copy small { color:rgba(255,255,255,.62); }
+body.ios-system-theme #focus-modal .trace-feature-role-select { background:rgba(255,255,255,.16) !important;color:#fff !important; }
+</style>
+<script id="trace-r21-navigation-role-runtime">
+(function(){
+  const roleFeatures={
+    'gomoku-modal':'openGomokuModal',
+    'tarot-modal':'openTarotModal',
+    'decision-modal':'openDecisionModal',
+    'gacha-modal':'openGachaModal',
+    'music-modal':'openMusicModal',
+    'focus-modal':'openFocusModal',
+    'wish-modal':'openWishModal',
+    'anniversary-modal':'openAnniversaryModal',
+    'piggy-bank-modal':'openPiggyBankModal',
+    'photo-modal':'openPhotoModal'
+  };
+
+  function roles(){return Array.isArray(appState?.roles)?appState.roles:[]}
+  function roleLabel(role){return String(role?.remark||role?.name||'Ta').trim()||'Ta'}
+  function roleById(id){return roles().find(role=>String(role.id)===String(id))||null}
+  function featureMap(){
+    appState.settings=appState.settings||{};
+    appState.settings.featureRoleIds=appState.settings.featureRoleIds&&typeof appState.settings.featureRoleIds==='object'?appState.settings.featureRoleIds:{};
+    return appState.settings.featureRoleIds;
+  }
+  function selectedId(modalId){
+    const saved=featureMap()[modalId];
+    if(roleById(saved))return String(saved);
+    const current=roleById(appState.currentRoleId)||roles()[0];
+    return current?String(current.id):'';
+  }
+  function applySelectedRole(modalId,id,save=true){
+    const role=roleById(id);if(!role)return null;
+    featureMap()[modalId]=String(role.id);
+    appState.currentRoleId=role.id;
+    const select=document.querySelector(`#${modalId} .trace-feature-role-select`);if(select)select.value=String(role.id);
+    if(modalId==='gomoku-modal'){
+      const avatar=document.getElementById('gomoku-ta-avatar'),name=document.getElementById('gomoku-ta-name');
+      if(avatar)avatar.src=role.avatar||'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      if(name)name.textContent=roleLabel(role)+'(白)';
+    }
+    if(modalId==='focus-modal'){
+      const avatar=document.getElementById('focus-ta-avatar');if(avatar)avatar.src=role.avatar||'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    }
+    if(save&&typeof saveState==='function')saveState();
+    return role;
+  }
+  window.traceSetFeatureRole=function(modalId,id){return applySelectedRole(modalId,id,true)};
+
+  function roleBar(modalId){
+    const modal=document.getElementById(modalId);if(!modal)return null;
+    let bar=modal.querySelector(':scope .trace-feature-role-bar');
+    if(!bar){
+      bar=document.createElement('div');bar.className='trace-feature-role-bar';bar.dataset.featureRoleFor=modalId;
+      bar.innerHTML='<span class="trace-feature-role-copy"><strong>互动角色</strong><small>本页内容与结果会使用所选角色</small></span><select class="trace-feature-role-select" aria-label="选择互动角色"></select>';
+      const header=modal.querySelector(':scope > .modal-content > .modal-header');
+      if(header)header.insertAdjacentElement('afterend',bar);else modal.querySelector('#focus-wrap')?.appendChild(bar);
+      bar.querySelector('select').addEventListener('change',event=>applySelectedRole(modalId,event.target.value,true));
+    }
+    const select=bar.querySelector('select'),wanted=selectedId(modalId);
+    select.innerHTML=roles().map(role=>`<option value="${String(role.id).replace(/&/g,'&amp;').replace(/"/g,'&quot;')}">${roleLabel(role).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</option>`).join('');
+    if(roleById(wanted))select.value=wanted;
+    return bar;
+  }
+
+  function normalizeHeader(modal){
+    const header=modal.querySelector(':scope > .modal-content > .modal-header');if(!header)return;
+    const buttons=[...header.querySelectorAll('.close-btn')];
+    const back=buttons.find(button=>/close[A-Za-z]+Modal\s*\(/i.test(button.getAttribute('onclick')||''))||buttons.at(-1);
+    if(!back)return;
+    back.classList.add('trace-feature-back');back.textContent='‹ 返回';back.setAttribute('aria-label','返回功能页');
+    if(header.firstElementChild!==back)header.insertBefore(back,header.firstElementChild);
+  }
+
+  function normalizeAll(){
+    document.querySelectorAll('.trace-feature-page').forEach(modal=>normalizeHeader(modal));
+    const focusBack=document.getElementById('focus-close-btn');if(focusBack){focusBack.classList.add('trace-feature-back');focusBack.textContent='‹ 返回';focusBack.setAttribute('aria-label','返回功能页')}
+    Object.keys(roleFeatures).forEach(roleBar);
+  }
+
+  function wrapOpen(modalId,fnName){
+    const original=window[fnName];if(typeof original!=='function'||original.__traceRolePicker)return;
+    const wrapped=function(){const id=selectedId(modalId);if(id)applySelectedRole(modalId,id,false);const out=original.apply(this,arguments);normalizeAll();roleBar(modalId);applySelectedRole(modalId,id,false);return out};
+    wrapped.__traceRolePicker=true;window[fnName]=wrapped;
+  }
+
+  function install(){normalizeAll();Object.entries(roleFeatures).forEach(([id,fn])=>wrapOpen(id,fn))}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
 </script>
