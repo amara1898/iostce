@@ -8470,7 +8470,7 @@ body.dark-mode .ios-call-picker-group { background:rgba(44,44,46,.94); }
         ]],
         ['陪伴', [
             ['一起听','共享音乐与播放列表','openMusicModal','music','#ff2d55'],
-            ['交换日记','日记与慢信邮筒','openDiaryModal','diary','#ff9500'],
+            ['信箱','日记与慢信邮筒','openDiaryModal','diary','#ff9500'],
             ['陪伴专注','计时与陪伴','openFocusModal','focus','#30b0c7']
         ]],
         ['生活记录', [
@@ -9475,16 +9475,15 @@ body.dark-mode .ios-group-compose input { border-color:#48484a; }
     return addGroupRecord(group,{id:'gs_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),senderId:'system',type:'system',content:String(text||''),time:Date.now(),isRead:String(groupOpenId)===String(group.id)});
   };
   function formatGroupPat(role){
-    const target=displayRole(role), meName=String(appState.settings?.meName||'我');
-    const custom=String(appState.settings?.customPats||'').split('\n').map(s=>s.trim()).filter(Boolean);
-    let action=custom.length?custom[Math.floor(Math.random()*custom.length)]:'拍了拍我';
-    action=action.replace(/我的/g,`${target}的`).replace(/我/g,target).replace(/你|他|她|Ta/gi,target);
+    const target=displayRole(role),meName=String(appState.settings?.meName||'我');
+    let action=window.traceGetRolePatAction?window.traceGetRolePatAction(role,true).action:'拍了拍我';
+    action=window.tracePatActionForTarget?window.tracePatActionForTarget(action,target):action;
     return `${meName} ${action}`.replace(/\s+/g,' ').trim();
   }
   function formatGroupPatBack(role){
-    const meName=String(appState.settings?.meName||'我'), custom=String(appState.settings?.customPats||'').split('\n').map(s=>s.trim()).filter(Boolean);
-    let action=custom.length?custom[Math.floor(Math.random()*custom.length)]:'拍了拍我';
-    action=action.replace(/我的/g,`${meName}的`).replace(/我/g,meName).replace(/你|他|她|Ta/gi,meName);
+    const meName=String(appState.settings?.meName||'我');
+    let action=window.traceGetRolePatAction?window.traceGetRolePatAction(role,false).action:'拍了拍我';
+    action=window.tracePatActionForTarget?window.tracePatActionForTarget(action,meName):action;
     return `${displayRole(role)} ${action}`.replace(/\s+/g,' ').trim();
   }
   function scheduleGroupPatReaction(group,role){
@@ -10837,7 +10836,7 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
 (function(){
   const CURRENT_RELEASE_VERSION='v12';
   const RELEASE_HISTORY=[
-    {version:'v12',tag:'当前版本',items:['来电改为突然出现的全屏页面，通话中改为简洁的 FaceTime 风格成员卡片；页面只做模拟通话，不调用麦克风或摄像头。背景会从来电角色头像提取色系；合家欢模式显示邀请入口，多人竞争模式隐藏邀请入口。','主动来电改为手机级统一来电池，不再区分单聊和群聊。首选项新增“多人竞争 / 合家欢”：竞争模式同时来电只能选一人接听，其余角色收到“用户正忙”；合家欢模式会把时间重叠的独立来电合并为多人通话。群聊电话按钮改为用户主动呼出，不会再随机制造角色来电。','多人通话新增与单聊一致的最小化悬浮条：显示通话成员、人数和通话时长，可拖动位置、点击恢复；缩小后通话和计时继续。','新增低概率角色撤回：默认关闭，可选 0.5% / 1% / 2%，只撤回角色刚发出的普通文字或表情，并显示“撤回了一条消息”。','本地表情导入保留 GIF、WebP 和 APNG 动画；单聊与群聊输入框都新增紧邻“＋”的表情快捷按钮。','修复状态混入开关被刷新逻辑强制关闭的问题；状态库改为每行一项，文字、纯 Emoji 和颜文字都会缩小显示在名字下方，只有不含文字的项目会低概率混入句子。','慢信收纳盒改为系统级信箱：统一展示所有角色的来信和在途状态，与当前聊天角色无关；来信未读蓝点只显示在底部“功能”和功能页“交换日记”一行，角色页与聊天页不再显示信件提醒。','角色每个回复气泡会独立在文字与表情之间选择：表情保持 8% 低概率并始终单独成条。表情按角色绑定分组，清空绑定后该角色不会主动发表情；角色管理页可直接全选、清空或逐组选择。','回复条数改为“最少 / 最多”区间；每轮会在区间内随机取值。两项设成同一个数时仍会严格发送固定条数，单聊与群聊统一遵守。','每个轮到回复的角色各自有 3% 低概率附加触发主动来电，不会吞掉原定回复；所有角色共用同一来电池，同时来电按“多人竞争 / 合家欢”设置决定选一人接听或合并通话。','群聊消息显示成员头像；双击某个成员头像会触发“拍一拍”系统提示，并从现有自定义动作库随机取句。被拍成员随后会随机发来一条信息、拍你一下，或在已允许主动来电时拨来电话；只由被拍成员回应。拍一拍设置位于「首选项 → 参数」，原有数据保持兼容。','修复单聊聊天页顶部名称：有备注时优先显示备注，没有备注时显示角色本名。','聊天页左下角“＋”新增问卷：可自定义题目，并动态添加或删除任意数量的选项；发送后 Ta 会在设置的最快/最慢响应时间内随机选择。','群聊输入区新增“＋”入口和问卷；问卷发到群里后，每个群成员都会独立随机选择一个选项，不人为规定谁先谁后，结果会直接汇总在同一张问卷卡片里。','私聊问卷新增“让 Ta 出题”：题目与 2–5 个选项都从当前角色自己已绑定的字卡中随机抽取，用户可直接在问卷卡片里选择答案。','新增可选的“Ta 偶尔主动问我”：默认概率 10%，可切换 5% / 10% / 20%；每次触发 Ta 回复时检查一次，命中后这一轮改为问卷，并设置 30 分钟冷却避免连续刷问卷。','修复 Ta 的日记与慢信回信把字卡逐条换行的问题，现按自然段连续排列。','保留 iOS 键盘行为：键盘打开时发送后继续保持，键盘已收起时发送不会自动弹出。']},
+    {version:'v12',tag:'当前版本',items:['单聊重新显示对方头像，可在顶部头像或对方消息头像上双击拍一拍。每个角色会记住自己的拍一拍文案，只有约 3% 的低概率才从拍一拍池换成另一条；拍一拍后仍会随机触发 Ta 发信息、Ta 拍你一下或低概率来电。','功能页“交换日记”改名为“信箱”；信件未读蓝点只显示在底部“功能”和功能页“信箱”一行，角色页与聊天页不显示信件提醒。','来电改为突然出现的全屏页面，通话中改为简洁的 FaceTime 风格成员卡片；页面只做模拟通话，不调用麦克风或摄像头。背景会从来电角色头像提取色系；合家欢模式显示邀请入口，多人竞争模式隐藏邀请入口。','主动来电改为手机级统一来电池，不再区分单聊和群聊。首选项新增“多人竞争 / 合家欢”：竞争模式同时来电只能选一人接听，其余角色收到“用户正忙”；合家欢模式会把时间重叠的独立来电合并为多人通话。群聊电话按钮改为用户主动呼出，不会再随机制造角色来电。','多人通话新增与单聊一致的最小化悬浮条：显示通话成员、人数和通话时长，可拖动位置、点击恢复；缩小后通话和计时继续。','新增低概率角色撤回：默认关闭，可选 0.5% / 1% / 2%，只撤回角色刚发出的普通文字或表情，并显示“撤回了一条消息”。','本地表情导入保留 GIF、WebP 和 APNG 动画；单聊与群聊输入框都新增紧邻“＋”的表情快捷按钮。','修复状态混入开关被刷新逻辑强制关闭的问题；状态库改为每行一项，文字、纯 Emoji 和颜文字都会缩小显示在名字下方，只有不含文字的项目会低概率混入句子。','慢信收纳盒改为系统级信箱：统一展示所有角色的来信和在途状态，与当前聊天角色无关；来信未读蓝点只显示在底部“功能”和功能页“交换日记”一行，角色页与聊天页不再显示信件提醒。','角色每个回复气泡会独立在文字与表情之间选择：表情保持 8% 低概率并始终单独成条。表情按角色绑定分组，清空绑定后该角色不会主动发表情；角色管理页可直接全选、清空或逐组选择。','回复条数改为“最少 / 最多”区间；每轮会在区间内随机取值。两项设成同一个数时仍会严格发送固定条数，单聊与群聊统一遵守。','每个轮到回复的角色各自有 3% 低概率附加触发主动来电，不会吞掉原定回复；所有角色共用同一来电池，同时来电按“多人竞争 / 合家欢”设置决定选一人接听或合并通话。','群聊消息显示成员头像；双击某个成员头像会触发“拍一拍”系统提示，并从现有自定义动作库随机取句。被拍成员随后会随机发来一条信息、拍你一下，或在已允许主动来电时拨来电话；只由被拍成员回应。拍一拍设置位于「首选项 → 参数」，原有数据保持兼容。','修复单聊聊天页顶部名称：有备注时优先显示备注，没有备注时显示角色本名。','聊天页左下角“＋”新增问卷：可自定义题目，并动态添加或删除任意数量的选项；发送后 Ta 会在设置的最快/最慢响应时间内随机选择。','群聊输入区新增“＋”入口和问卷；问卷发到群里后，每个群成员都会独立随机选择一个选项，不人为规定谁先谁后，结果会直接汇总在同一张问卷卡片里。','私聊问卷新增“让 Ta 出题”：题目与 2–5 个选项都从当前角色自己已绑定的字卡中随机抽取，用户可直接在问卷卡片里选择答案。','新增可选的“Ta 偶尔主动问我”：默认概率 10%，可切换 5% / 10% / 20%；每次触发 Ta 回复时检查一次，命中后这一轮改为问卷，并设置 30 分钟冷却避免连续刷问卷。','修复 Ta 的日记与慢信回信把字卡逐条换行的问题，现按自然段连续排列。','保留 iOS 键盘行为：键盘打开时发送后继续保持，键盘已收起时发送不会自动弹出。']},
     {version:'v11',items:['群聊回复速度改为直接读取设置里的“最快响应 / 最慢响应”；同一轮参与回复的角色各自独立随机等待，不再人为规定谁先谁后。','群聊气泡尺寸、文字字号、行高、圆角、尾巴与时间戳布局统一到单聊 iMessage 气泡。','“角色”页新增独立“群聊”分类，群聊与角色一起集中管理，并保留新建群聊入口。','新增群聊资料页：可修改群聊名称和自定义群头像；群头像会同步显示在信息列表与聊天顶部。','群聊资料页新增“群内气泡数排名”，按每个角色在这个群聊里实际发送的气泡数量排序，并显示其占全部角色气泡的比例。','修复群聊发送卡顿与双击失效：群聊发送键与单聊统一为单击发送、双击直接触发回复；即使输入框为空也能双击让角色回复。群消息改为增量插入，并合并频繁保存与列表刷新，避免历史消息越多越卡。','字卡管理新增“清理重复”：同一分组中完全相同的字卡只保留第一条；不同分组中的同一句话不会误删。手动注入会跳过重复，移动分组造成重复时会自动清理。','慢信寄信流程拆成独立两步：先单独选择一个或多个收件人，再进入单独写信页；写信页底部固定显示“寄出”，不再把角色选择和信纸放在同一页。']},
     {version:'v10',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','写信页新增多角色收件人选择：可一次勾选多个角色，同一封信分别进入每个角色的独立信箱，每个人使用自己的绑定字卡并在自己的随机时间回信；已有回信在途的角色会暂时不可重复寄送。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
     {version:'v9',items:['修复后台来信通知：普通回复、主动消息与群聊消息都会在真正到达时触发系统横幅；前台正在查看时不重复打扰。','备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
@@ -11211,5 +11210,48 @@ body.ios-system-theme .call-modal:not(.minimized) .call-info{background:transpar
     Object.entries(defs).forEach(([id,[icon,label]])=>{const el=document.getElementById(id);if(el)el.innerHTML=`<span>${icon}</span><span>${label}</span>`})
   }
   const hang=document.querySelector('#ios-group-active-call .ios-wechat-call-control.hangup');if(hang)hang.id='ios-group-hangup-btn';installIcons();document.addEventListener('DOMContentLoaded',installIcons);
+})();
+</script>
+<style id="trace-r17-pat-style">
+body.ios-system-theme:not(.hide-avatar) #chat-area .them .bubble-avatar{display:block!important;width:30px!important;height:30px!important;min-width:30px!important;border-radius:50%!important;object-fit:cover!important;background:linear-gradient(145deg,#b7c3d0,#8d9caf)!important;cursor:pointer!important;box-shadow:none!important;margin-bottom:1px}
+body.ios-system-theme #chat-area .me .bubble-avatar{display:none!important}
+body.ios-system-theme:not(.hide-avatar) #chat-area .them .bubble-container{gap:7px!important;max-width:88%!important}
+body.ios-system-theme #main-top-bar .tb-avatar-wrap{cursor:pointer!important;position:relative!important}
+body.ios-system-theme #main-top-bar .tb-avatar-wrap::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid transparent;transition:border-color .15s}
+body.ios-system-theme #main-top-bar .tb-avatar-wrap:active::after{border-color:color-mix(in srgb,var(--ios-blue) 42%,transparent)}
+.trace-pat-avatar-fallback{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#a9b7c7,#7f91a5);color:#fff;font-size:15px;font-weight:650}
+</style>
+<script id="trace-r17-pat-runtime">
+(function(){
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function roleById(id){return (appState.roles||[]).find(r=>String(r.id)===String(id));}
+  function displayRole(role){return String(role?.remark||'').trim()||role?.name||'Ta';}
+  function patPool(){const items=String(appState.settings?.customPats||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);return items.length?items:['拍了拍'];}
+  window.traceGetRolePatAction=function(role,allowRotate=false){
+    if(!role)return{action:'拍了拍',changed:false};const pool=patPool();let action=String(role.tracePatAction||'').trim(),changed=false;
+    if(!pool.includes(action)){action=pool[Math.floor(Math.random()*pool.length)];changed=true}
+    else if(allowRotate&&pool.length>1&&Math.random()<.03){const choices=pool.filter(x=>x!==action);action=choices[Math.floor(Math.random()*choices.length)];changed=true}
+    if(changed){role.tracePatAction=action;try{saveState?.()}catch(e){}}
+    return{action,changed};
+  };
+  window.tracePatActionForTarget=function(action,target){return String(action||'拍了拍').replace(/我的/g,`${target}的`).replace(/我/g,target).replace(/你|他|她|Ta/gi,target)};
+  function systemText(text){return `<div class="trace-private-pat-system">${esc(text)}</div>`;}
+  function addPrivateSystem(role,text){addMessage({id:'pat_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),text:systemText(text),type:'system',sender:'system',time:Date.now(),quoteText:null,isRead:false},role.id)}
+  function patBackText(role){const meName=String(appState.settings?.meName||'我'),action=window.traceGetRolePatAction(role,false).action;return `${displayRole(role)} ${window.tracePatActionForTarget(action,meName)}`.replace(/\s+/g,' ').trim()}
+  window.traceSchedulePrivatePatReaction=function(roleId,forcedOutcome=''){
+    const role=roleById(roleId);if(!role)return false;const minSec=Math.max(0,Number(appState.settings?.minDelaySec??2)),maxSec=Math.max(minSec,Number(appState.settings?.maxDelaySec??6));const delay=Math.round((minSec+Math.random()*(maxSec-minSec))*1000);
+    const callAvailable=!!appState.settings?.allowAutoCall&&!(typeof callState!=='undefined'&&callState.active)&&!document.getElementById('ios-group-call-overlay')?.classList.contains('open');
+    const roll=Math.random();let outcome=forcedOutcome||(roll<.62?'message':roll<.88?'pat':'call');if(outcome==='call'&&!callAvailable)outcome=Math.random()<.68?'message':'pat';
+    setTimeout(()=>{const live=roleById(roleId);if(!live)return;if(outcome==='call'){window.traceQueueIncomingCall?.(live.id,null);return}if(outcome==='pat'){addPrivateSystem(live,patBackText(live));return}if(String(appState.currentRoleId)===String(live.id)){if(typeof triggerAutoReply==='function')triggerAutoReply()}else{const prev=appState.currentRoleId;appState.currentRoleId=live.id;try{triggerAutoReply?.()}finally{appState.currentRoleId=prev}}},delay);return outcome;
+  };
+  window.tracePrivatePat=function(roleId){const role=roleById(roleId)||getCurrentRole?.();if(!role)return false;const target=displayRole(role),meName=String(appState.settings?.meName||'我'),action=window.traceGetRolePatAction(role,true).action;addPrivateSystem(role,`${meName} ${window.tracePatActionForTarget(action,target)}`.replace(/\s+/g,' ').trim());try{navigator.vibrate?.([30,50,30])}catch(e){}window.traceSchedulePrivatePatReaction(role.id);return true};
+  window.triggerPat=function(){const role=getCurrentRole?.();return role?window.tracePrivatePat(role.id):false};
+  let avatarTapAt=0,avatarTapRole='';
+  window.tracePrivateAvatarTap=function(event){event?.preventDefault?.();event?.stopPropagation?.();const role=getCurrentRole?.();if(!role)return;const now=Date.now(),key=String(role.id);if(avatarTapRole===key&&now-avatarTapAt<=430){avatarTapAt=0;avatarTapRole='';window.tracePrivatePat(key);return}avatarTapAt=now;avatarTapRole=key};
+  function syncHeaderAvatar(){const role=getCurrentRole?.(),wrap=document.querySelector('#main-top-bar .tb-avatar-wrap'),img=document.getElementById('them-avatar');if(!wrap||!role)return;wrap.setAttribute('aria-label','双击拍一拍 '+displayRole(role));wrap.setAttribute('title','双击拍一拍');wrap.onclick=window.tracePrivateAvatarTap;let fallback=wrap.querySelector('.trace-pat-avatar-fallback');if(role.avatar){if(img){img.style.display='block';img.src=role.avatar}fallback?.remove()}else{if(img)img.style.display='none';if(!fallback){fallback=document.createElement('span');fallback.className='trace-pat-avatar-fallback';wrap.appendChild(fallback)}fallback.textContent=(role.name||'Ta').trim().slice(0,1)||'T'}}
+  function bindBubbleDoubleTap(){const area=document.getElementById('chat-area');if(!area||area.dataset.tracePatBound==='1')return;area.dataset.tracePatBound='1';area.addEventListener('dblclick',event=>{const avatar=event.target.closest('.message-wrap.them .bubble-avatar');if(!avatar)return;event.preventDefault();event.stopPropagation();const role=getCurrentRole?.();if(role)window.tracePrivatePat(role.id)})}
+  function install(){syncHeaderAvatar();bindBubbleDoubleTap()}
+  const oldOpen=window.iosOpenChat;if(typeof oldOpen==='function'&&!oldOpen.__r17Pat){const wrapped=function(id){const out=oldOpen.apply(this,arguments);setTimeout(install,0);return out};wrapped.__r17Pat=true;window.iosOpenChat=wrapped}
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(install,50));window.addEventListener('load',()=>setTimeout(install,250));setTimeout(install,700);
 })();
 </script>
