@@ -933,7 +933,7 @@ body.time-style-top .message-wrap { margin-top: 18px !important; }
 <div class="modal-overlay" id="diary-modal">
     <div class="modal-content" style="height: 85vh;">
         <div class="modal-header">
-            <h3>日记与慢信</h3>
+            <h3>信箱</h3>
             <button class="close-btn" onclick="closeDiaryModal()">收起</button>
         </div>
         <div class="tab-nav">
@@ -10836,7 +10836,7 @@ body.dark-mode.ios-has-new-release #ios-tab-bar .ios-tab[data-page="settings"]:a
 (function(){
   const CURRENT_RELEASE_VERSION='v12';
   const RELEASE_HISTORY=[
-    {version:'v12',tag:'当前版本',items:['单聊重新显示对方头像，可在顶部头像或对方消息头像上双击拍一拍。每个角色会记住自己的拍一拍文案，只有约 3% 的低概率才从拍一拍池换成另一条；拍一拍后仍会随机触发 Ta 发信息、Ta 拍你一下或低概率来电。','功能页“交换日记”改名为“信箱”；信件未读蓝点只显示在底部“功能”和功能页“信箱”一行，角色页与聊天页不显示信件提醒。','来电改为突然出现的全屏页面，通话中改为简洁的 FaceTime 风格成员卡片；页面只做模拟通话，不调用麦克风或摄像头。背景会从来电角色头像提取色系；合家欢模式显示邀请入口，多人竞争模式隐藏邀请入口。','主动来电改为手机级统一来电池，不再区分单聊和群聊。首选项新增“多人竞争 / 合家欢”：竞争模式同时来电只能选一人接听，其余角色收到“用户正忙”；合家欢模式会把时间重叠的独立来电合并为多人通话。群聊电话按钮改为用户主动呼出，不会再随机制造角色来电。','多人通话新增与单聊一致的最小化悬浮条：显示通话成员、人数和通话时长，可拖动位置、点击恢复；缩小后通话和计时继续。','新增低概率角色撤回：默认关闭，可选 0.5% / 1% / 2%，只撤回角色刚发出的普通文字或表情，并显示“撤回了一条消息”。','本地表情导入保留 GIF、WebP 和 APNG 动画；单聊与群聊输入框都新增紧邻“＋”的表情快捷按钮。','修复状态混入开关被刷新逻辑强制关闭的问题；状态库改为每行一项，文字、纯 Emoji 和颜文字都会缩小显示在名字下方，只有不含文字的项目会低概率混入句子。','慢信收纳盒改为系统级信箱：统一展示所有角色的来信和在途状态，与当前聊天角色无关；来信未读蓝点只显示在底部“功能”和功能页“交换日记”一行，角色页与聊天页不再显示信件提醒。','角色每个回复气泡会独立在文字与表情之间选择：表情保持 8% 低概率并始终单独成条。表情按角色绑定分组，清空绑定后该角色不会主动发表情；角色管理页可直接全选、清空或逐组选择。','回复条数改为“最少 / 最多”区间；每轮会在区间内随机取值。两项设成同一个数时仍会严格发送固定条数，单聊与群聊统一遵守。','每个轮到回复的角色各自有 3% 低概率附加触发主动来电，不会吞掉原定回复；所有角色共用同一来电池，同时来电按“多人竞争 / 合家欢”设置决定选一人接听或合并通话。','群聊消息显示成员头像；双击某个成员头像会触发“拍一拍”系统提示，并从现有自定义动作库随机取句。被拍成员随后会随机发来一条信息、拍你一下，或在已允许主动来电时拨来电话；只由被拍成员回应。拍一拍设置位于「首选项 → 参数」，原有数据保持兼容。','修复单聊聊天页顶部名称：有备注时优先显示备注，没有备注时显示角色本名。','聊天页左下角“＋”新增问卷：可自定义题目，并动态添加或删除任意数量的选项；发送后 Ta 会在设置的最快/最慢响应时间内随机选择。','群聊输入区新增“＋”入口和问卷；问卷发到群里后，每个群成员都会独立随机选择一个选项，不人为规定谁先谁后，结果会直接汇总在同一张问卷卡片里。','私聊问卷新增“让 Ta 出题”：题目与 2–5 个选项都从当前角色自己已绑定的字卡中随机抽取，用户可直接在问卷卡片里选择答案。','新增可选的“Ta 偶尔主动问我”：默认概率 10%，可切换 5% / 10% / 20%；每次触发 Ta 回复时检查一次，命中后这一轮改为问卷，并设置 30 分钟冷却避免连续刷问卷。','修复 Ta 的日记与慢信回信把字卡逐条换行的问题，现按自然段连续排列。','保留 iOS 键盘行为：键盘打开时发送后继续保持，键盘已收起时发送不会自动弹出。']},
+    {version:'v12',tag:'当前版本',items:['修复手机导入 GIF、动态 WebP 与 APNG 后被压成静态首帧的问题；拍一拍与系统通知取消虚线框；字卡和表情分组控件改为 iOS 填充样式；功能页统一为完整页面，并清理五子棋、神秘学、一起听、陪伴专注等页面遗留的黑色描边。','群聊新增受限引用：只有用户自己发出的群消息可以成为引用目标；群成员不会互相引用。角色回复用户时会以较低概率引用用户近期群消息，并设置冷却避免连续引用。','单聊新增双方引用：点一下任意文字、图片或互动消息，再点“引用”即可带引用发送；角色回复时也会以较低概率引用用户近期发过的消息。','表情、问卷、图片与图文混合消息取消普通文字气泡外壳；对方头像略微放大并去除边框遮挡。开启时间戳时只把时间略微上移并收紧额外高度，关闭时间戳的普通气泡保持原样。','系统级“信箱”的交换日记页新增独立角色选择：查看、写日记和心情统计都跟随信箱内选择，切换当前聊天角色不会带着改变；角色选项会提示各自的新日记。','单聊重新显示对方头像，可在顶部头像或对方消息头像上双击拍一拍。每个角色会记住自己的拍一拍文案，只有约 3% 的低概率才从拍一拍池换成另一条；拍一拍后仍会随机触发 Ta 发信息、Ta 拍你一下或低概率来电。','功能页“交换日记”改名为“信箱”；信件未读蓝点只显示在底部“功能”和功能页“信箱”一行，角色页与聊天页不显示信件提醒。','来电改为突然出现的全屏页面，通话中改为简洁的 FaceTime 风格成员卡片；页面只做模拟通话，不调用麦克风或摄像头。背景会从来电角色头像提取色系；合家欢模式显示邀请入口，多人竞争模式隐藏邀请入口。','主动来电改为手机级统一来电池，不再区分单聊和群聊。首选项新增“多人竞争 / 合家欢”：竞争模式同时来电只能选一人接听，其余角色收到“用户正忙”；合家欢模式会把时间重叠的独立来电合并为多人通话。群聊电话按钮改为用户主动呼出，不会再随机制造角色来电。','多人通话新增与单聊一致的最小化悬浮条：显示通话成员、人数和通话时长，可拖动位置、点击恢复；缩小后通话和计时继续。','新增低概率角色撤回：默认关闭，可选 0.5% / 1% / 2%，只撤回角色刚发出的普通文字或表情，并显示“撤回了一条消息”。','本地表情导入保留 GIF、WebP 和 APNG 动画；单聊与群聊输入框都新增紧邻“＋”的表情快捷按钮。','修复状态混入开关被刷新逻辑强制关闭的问题；状态库改为每行一项，文字、纯 Emoji 和颜文字都会缩小显示在名字下方，只有不含文字的项目会低概率混入句子。','慢信收纳盒改为系统级信箱：统一展示所有角色的来信和在途状态，与当前聊天角色无关；来信未读蓝点只显示在底部“功能”和功能页“交换日记”一行，角色页与聊天页不再显示信件提醒。','角色每个回复气泡会独立在文字与表情之间选择：表情保持 8% 低概率并始终单独成条。表情按角色绑定分组，清空绑定后该角色不会主动发表情；角色管理页可直接全选、清空或逐组选择。','回复条数改为“最少 / 最多”区间；每轮会在区间内随机取值。两项设成同一个数时仍会严格发送固定条数，单聊与群聊统一遵守。','每个轮到回复的角色各自有 3% 低概率附加触发主动来电，不会吞掉原定回复；所有角色共用同一来电池，同时来电按“多人竞争 / 合家欢”设置决定选一人接听或合并通话。','群聊消息显示成员头像；双击某个成员头像会触发“拍一拍”系统提示，并从现有自定义动作库随机取句。被拍成员随后会随机发来一条信息、拍你一下，或在已允许主动来电时拨来电话；只由被拍成员回应。拍一拍设置位于「首选项 → 参数」，原有数据保持兼容。','修复单聊聊天页顶部名称：有备注时优先显示备注，没有备注时显示角色本名。','聊天页左下角“＋”新增问卷：可自定义题目，并动态添加或删除任意数量的选项；发送后 Ta 会在设置的最快/最慢响应时间内随机选择。','群聊输入区新增“＋”入口和问卷；问卷发到群里后，每个群成员都会独立随机选择一个选项，不人为规定谁先谁后，结果会直接汇总在同一张问卷卡片里。','私聊问卷新增“让 Ta 出题”：题目与 2–5 个选项都从当前角色自己已绑定的字卡中随机抽取，用户可直接在问卷卡片里选择答案。','新增可选的“Ta 偶尔主动问我”：默认概率 10%，可切换 5% / 10% / 20%；每次触发 Ta 回复时检查一次，命中后这一轮改为问卷，并设置 30 分钟冷却避免连续刷问卷。','修复 Ta 的日记与慢信回信把字卡逐条换行的问题，现按自然段连续排列。','保留 iOS 键盘行为：键盘打开时发送后继续保持，键盘已收起时发送不会自动弹出。']},
     {version:'v11',items:['群聊回复速度改为直接读取设置里的“最快响应 / 最慢响应”；同一轮参与回复的角色各自独立随机等待，不再人为规定谁先谁后。','群聊气泡尺寸、文字字号、行高、圆角、尾巴与时间戳布局统一到单聊 iMessage 气泡。','“角色”页新增独立“群聊”分类，群聊与角色一起集中管理，并保留新建群聊入口。','新增群聊资料页：可修改群聊名称和自定义群头像；群头像会同步显示在信息列表与聊天顶部。','群聊资料页新增“群内气泡数排名”，按每个角色在这个群聊里实际发送的气泡数量排序，并显示其占全部角色气泡的比例。','修复群聊发送卡顿与双击失效：群聊发送键与单聊统一为单击发送、双击直接触发回复；即使输入框为空也能双击让角色回复。群消息改为增量插入，并合并频繁保存与列表刷新，避免历史消息越多越卡。','字卡管理新增“清理重复”：同一分组中完全相同的字卡只保留第一条；不同分组中的同一句话不会误删。手动注入会跳过重复，移动分组造成重复时会自动清理。','慢信寄信流程拆成独立两步：先单独选择一个或多个收件人，再进入单独写信页；写信页底部固定显示“寄出”，不再把角色选择和信纸放在同一页。']},
     {version:'v10',items:['交换日记改为按角色独立保存：不同角色不再共用同一份 Ta 日记，旧版无法识别归属的日记首次升级时归到当前角色。','Ta 的日记与慢信回信都只使用当前角色已绑定的字卡；模块内新增字卡条数设置，日记与回信可分别编辑最多使用 1–100 条，不再写死固定条数。','写信页新增多角色收件人选择：可一次勾选多个角色，同一封信分别进入每个角色的独立信箱，每个人使用自己的绑定字卡并在自己的随机时间回信；已有回信在途的角色会暂时不可重复寄送。','新增日记后台检查：每个角色每天独立决定是否写日记并安排随机时间；网页仍存活时会自动生成，被 iOS 挂起后下次打开会补检查。','有新日记时，底部「功能」、功能页「交换日记」以及对应角色旁显示 iOS 蓝点；打开该角色的日记后蓝点消失。']},
     {version:'v9',items:['修复后台来信通知：普通回复、主动消息与群聊消息都会在真正到达时触发系统横幅；前台正在查看时不重复打扰。','备份面板改为完整可滚动布局，底部提供“导出 JSON 备份 / 导入 JSON 备份”，避免小屏幕底部内容被遮住。','字卡 JSON 导入扩展兼容：支持 Trace 原版数组、cards / wordCards，以及 reply-groups 常见的 customReplyGroups + items 分组结构；导入后保留原分组。','字卡区整理为“导入字卡 / 导出字卡”；点击“导出字卡”会弹出 iOS 风格操作表，可选择导出 JSON，或把全部字卡按“一条一行”的纯文本格式复制到剪贴板。','取消可见的连发模式开关：发送键单击只发送消息、不结束这一轮；双击发送键结束这一轮并触发角色回复，可连续单击多条后再双击完成。','私聊输入区改用原生 textarea，并在浅色占位提示中直接写明“单击发送 · 双击完成并回复”，同时改善 iOS 主屏幕 Web App 的键盘兼容性。']},
@@ -11143,6 +11143,392 @@ body.ios-system-theme #main-top-bar .tb-status.trace-visible{display:block!impor
   const originalAdd=window.addMessage;if(typeof originalAdd==='function'&&!originalAdd.__r15Withdraw){const wrapped=function(msg,targetRoleId=null){const roleId=targetRoleId==null?appState.currentRoleId:targetRoleId;const out=originalAdd.call(this,msg,targetRoleId);if(eligible(msg))window.traceSchedulePrivateWithdrawal(roleId,msg.id);return out;};wrapped.__r15Withdraw=true;window.addMessage=wrapped;addMessage=wrapped;}
 })();
 </script>
+<style id="trace-r18-diary-role-style">
+.trace-diary-role-picker{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:10px 12px;border:1px solid var(--line-color);border-radius:12px;background:var(--card-bg,#fff)}
+.trace-diary-role-picker label{font-size:12px;color:var(--text-sub);white-space:nowrap}
+.trace-diary-role-picker select{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--text-main);font:600 15px/1.3 inherit;text-align:right;text-align-last:right}
+.trace-diary-role-picker option{color:#111;background:#fff}
+.trace-diary-role-empty{font-size:12px;color:var(--text-sub);text-align:center;padding:10px 0 14px}
+</style>
+<script id="trace-r18-diary-role-runtime">
+(function(){
+  function roleLabel(role){return String(role?.remark||'').trim()||role?.name||'Ta'}
+  function selectedRole(){
+    initDiaryData();const roles=appState.roles||[];let id=String(appState.diaryData.selectedRoleId||'');let role=roles.find(r=>String(r.id)===id);
+    if(!role){role=(typeof getCurrentRole==='function'?getCurrentRole():null)||roles[0]||null;if(role)appState.diaryData.selectedRoleId=String(role.id)}
+    return role;
+  }
+  window.traceGetDiarySelectedRole=selectedRole;
+  function ensurePicker(){
+    const title=document.querySelector('#diary-modal .modal-header h3');if(title)title.textContent='信箱';const pane=document.getElementById('diary-tab-diary');if(!pane)return null;let wrap=document.getElementById('trace-diary-role-picker');
+    if(!wrap){wrap=document.createElement('div');wrap.id='trace-diary-role-picker';wrap.className='trace-diary-role-picker';wrap.innerHTML='<label for="trace-diary-role-select">查看角色</label><select id="trace-diary-role-select" aria-label="选择交换日记角色"></select>';pane.insertBefore(wrap,pane.firstElementChild);wrap.querySelector('select').addEventListener('change',event=>window.traceSelectDiaryRole(event.target.value))}
+    return wrap;
+  }
+  function renderPicker(){
+    const wrap=ensurePicker();if(!wrap)return;const select=wrap.querySelector('select'),roles=appState.roles||[],role=selectedRole();
+    wrap.style.display=roles.length?'flex':'none';select.innerHTML='';
+    roles.forEach(item=>{const option=document.createElement('option'),count=diaryRecordsForRole(item.id).filter(r=>r.author==='them'&&r.isNew===true).length;option.value=String(item.id);option.textContent=(count?'● ':'')+roleLabel(item)+(count?`（${count}篇新日记）`:'');option.selected=!!role&&String(item.id)===String(role.id);select.appendChild(option)});
+  }
+  window.traceSelectDiaryRole=function(roleId){
+    const role=(appState.roles||[]).find(r=>String(r.id)===String(roleId));if(!role)return false;initDiaryData();appState.diaryData.selectedRoleId=String(role.id);try{saveState?.()}catch(e){}
+    const result=maybeGenerateRoleDiary(role,new Date());if(result.changed)try{saveState?.()}catch(e){}markDiarySeenForRole(role.id);renderPicker();window.renderDiary();return true;
+  };
+  window.openDiaryModal=function(){
+    closeGameModal();initDiaryData();const role=selectedRole();if(role){const result=maybeGenerateRoleDiary(role,new Date());if(result.changed)saveState()}
+    document.getElementById('diary-modal').classList.add('open');updateDiaryCardLimitSummary();renderPicker();
+    const unreadDiary=!!role&&hasUnreadDiaryForRole(role.id),unreadMail=typeof hasAnyUnreadMail==='function'&&hasAnyUnreadMail();window.switchDiaryTab(!unreadDiary&&unreadMail?'mail':'diary');window.renderDiary();checkArrivedLetters();renderMailList();
+  };
+  window.switchDiaryTab=function(tab){
+    ['diary','mail'].forEach(name=>{document.getElementById('diary-tab-'+name)?.classList.toggle('active',name===tab);document.getElementById('tab-btn-'+name)?.classList.toggle('active',name===tab)});
+    if(tab==='diary'){const role=selectedRole();if(role)markDiarySeenForRole(role.id);renderPicker();window.renderDiary()}
+  };
+  const oldOpenWrite=window.openWriteDiaryModal;
+  window.openWriteDiaryModal=function(){const role=selectedRole();if(!role){showToast('请先创建角色');return}oldOpenWrite?.();const title=document.querySelector('#write-diary-modal .modal-header h3');if(title)title.textContent=`与 ${roleLabel(role)} 写交换日记`};
+  window.saveDiary=function(){
+    initDiaryData();const role=selectedRole(),mood=document.getElementById('diary-mood-value').value,content=document.getElementById('diary-content-input').value.trim();if(!role){showToast('请先选择角色');return}if(!content){showToast('总得写点什么吧~');return}
+    appState.diaryData.records.unshift({id:Date.now(),roleId:String(role.id),date:getLocalYMD(new Date()),author:'me',mood,content,time:Date.now(),isNew:false});saveState();closeWriteDiaryModal();window.renderDiary();showToast('✅ 日记已合上');
+  };
+  window.renderDiary=function(){
+    initDiaryData();const list=document.getElementById('diary-list-area');if(!list)return;list.innerHTML='';const role=selectedRole();renderPicker();
+    if(!role){list.innerHTML='<div class="trace-diary-role-empty">请先创建一个角色</div>';return}const records=diaryRecordsForRole(role.id).slice().sort((a,b)=>Number(b.time||0)-Number(a.time||0));
+    if(!records.length){list.innerHTML=`<div style="text-align:center;color:var(--text-sub);font-size:12px;margin-top:30px">还没有与 ${escapeDiaryHtml(roleLabel(role))} 交换过日记</div>`;return}
+    const name=roleLabel(role);records.forEach(r=>{const d=new Date(r.time),timeStr=`${r.date} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`,isMe=r.author==='me',visible=(!isMe&&Array.isArray(r.cardSources)&&r.cardSources.length)?joinDiaryCardsNaturally(r.cardSources):String(r.content||''),card=document.createElement('div');card.className=`diary-card ${isMe?'me':'them'}`;card.dataset.roleId=String(r.roleId||'');card.innerHTML=`<div class="diary-header"><span style="font-weight:bold;color:var(--text-main)">${escapeDiaryHtml(isMe?appState.settings.meName:name)}的日记</span><span>${escapeDiaryHtml(timeStr)}</span></div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div class="diary-mood">${escapeDiaryHtml(r.mood)}</div>${isMe?`<button class="btn-noshadow icon-btn" style="border:none;box-shadow:none;padding:2px;font-size:12px;color:var(--text-sub)" onclick="deleteDiary(${Number(r.id)})">✕</button>`:''}</div><div class="diary-content">${escapeDiaryHtml(visible)}</div>`;list.appendChild(card)});
+  };
+  window.showMoodStats=function(){const role=selectedRole(),records=role?diaryRecordsForRole(role.id):[],counts={};records.forEach(r=>{const emoji=String(r.mood||'').split(' ')[0];if(emoji)counts[emoji]=(counts[emoji]||0)+1});const keys=Object.keys(counts);if(!keys.length){uiAlert('还没有足够的心情数据哦');return}let content=`${roleLabel(role)} 的心情统计：\n`;keys.sort((a,b)=>counts[b]-counts[a]).forEach(key=>content+=`${key} ${counts[key]} 次\n`);uiAlert(content.trim())};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{ensurePicker();renderPicker()},{once:true});else{ensurePicker();renderPicker()}
+})();
+</script>
+<style id="trace-r18-chat-polish-style">
+/* 对方头像：略微放大，并隔离旧主题边框与气泡尾部遮罩。 */
+html body.ios-system-theme:not(.hide-avatar) #chat-area .them .bubble-avatar{width:32px!important;height:32px!important;min-width:32px!important;border:0!important;outline:0!important;box-shadow:none!important;padding:0!important;background:transparent!important;position:relative!important;z-index:4!important;margin-bottom:0!important}
+html body.ios-system-theme:not(.hide-avatar) #chat-area .them .bubble-container{gap:10px!important}
+/* 只在时间戳开启时收紧高度；未开启时间戳的普通气泡保持原样。 */
+body.ios-system-theme.ios-show-timestamp #chat-area .bubble{padding:6px 34px 11px 11px!important}
+body.ios-system-theme.ios-show-timestamp #chat-area .bubble-time{bottom:3px!important;font-size:8px!important;line-height:9px!important}
+body.ios-system-theme.ios-show-timestamp .ios-group-bubble{padding:6px 34px 11px 11px!important}
+body.ios-system-theme.ios-show-timestamp .ios-group-time{bottom:3px!important;font-size:8px!important;line-height:9px!important}
+/* 表情、图片、混合图片与问卷直接展示内容，不套普通文字气泡。 */
+html body.ios-system-theme #chat-area .message-wrap .bubble:has(> img),html body.ios-system-theme #chat-area .message-wrap .bubble:has(> .ios-poll-holder),html body.ios-system-theme #chat-area .message-wrap .bubble:has(> .ios-group-mix){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;min-height:0!important;border-radius:0!important;overflow:visible!important}
+html body.ios-system-theme #chat-area .message-wrap.them .bubble:has(> img),html body.ios-system-theme #chat-area .message-wrap.me .bubble:has(> img),html body.ios-system-theme #chat-area .message-wrap.them .bubble:has(> .ios-poll-holder),html body.ios-system-theme #chat-area .message-wrap.me .bubble:has(> .ios-poll-holder),html body.ios-system-theme #chat-area .message-wrap.them .bubble:has(> .ios-group-mix),html body.ios-system-theme #chat-area .message-wrap.me .bubble:has(> .ios-group-mix){background-color:transparent!important;background-image:none!important}
+html body.ios-system-theme #chat-area .message-wrap .bubble:has(> img)::before,html body.ios-system-theme #chat-area .message-wrap .bubble:has(> img)::after,html body.ios-system-theme #chat-area .message-wrap .bubble:has(> .ios-poll-holder)::before,html body.ios-system-theme #chat-area .message-wrap .bubble:has(> .ios-poll-holder)::after,html body.ios-system-theme #chat-area .message-wrap .bubble:has(> .ios-group-mix)::before,html body.ios-system-theme #chat-area .message-wrap .bubble:has(> .ios-group-mix)::after{display:none!important}
+html body.ios-system-theme.ios-show-timestamp #chat-area .message-wrap .bubble:has(> img),html body.ios-system-theme.ios-show-timestamp #chat-area .message-wrap .bubble:has(> .ios-poll-holder),html body.ios-system-theme.ios-show-timestamp #chat-area .message-wrap .bubble:has(> .ios-group-mix){padding-bottom:11px!important}
+.trace-quote-action{position:absolute;z-index:8;bottom:-30px;border:0;border-radius:14px;padding:5px 10px;background:rgba(50,50,55,.92);color:#fff;font:500 12px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:nowrap}
+.message-wrap.them .trace-quote-action{left:42px}.message-wrap.me .trace-quote-action{right:0}
+</style>
+<script id="trace-r18-private-quote-runtime">
+(function(){
+  const quoteCooldown=new Map();
+  function roleFor(id){return (appState.roles||[]).find(r=>String(r.id)===String(id))}
+  function plain(value){const box=document.createElement('div');box.innerHTML=String(value||'');return String(box.textContent||box.innerText||'').replace(/\s+/g,' ').trim()}
+  window.traceQuoteTextFromMessage=function(msg,role){
+    if(!msg)return'';let text='';if(msg.type==='img')text='[表情与贴纸]';else if(msg.type==='poll')text=plain(msg.text||'[问卷]');else if(msg.type==='tarot')text='[互动消息]';else text=plain(msg.text||msg.content||'');
+    if(!text)return'';const who=msg.sender==='me'?String(appState.settings?.meName||'我'):(String(role?.remark||'').trim()||role?.name||'Ta');return `${who}：${text.slice(0,120)}`;
+  };
+  window.traceStartPrivateQuote=function(messageId){
+    const role=typeof getCurrentRole==='function'?getCurrentRole():null,msg=role?.messages?.find(m=>String(m.id)===String(messageId));if(!msg||msg.sender==='system'||msg.withdrawn)return false;const text=window.traceQuoteTextFromMessage(msg,role);if(!text)return false;
+    currentQuote=text;const preview=document.getElementById('reply-preview'),label=document.getElementById('reply-text');if(preview)preview.style.display='flex';if(label)label.textContent=text;document.querySelectorAll('.trace-quote-action').forEach(el=>el.remove());document.getElementById('msg-input')?.focus();return true;
+  };
+  function installQuoteTap(){const area=document.getElementById('chat-area');if(!area||area.dataset.traceQuoteTap==='1')return;area.dataset.traceQuoteTap='1';area.addEventListener('click',event=>{
+    if(event.target.closest('.trace-quote-action')||event.target.closest('.bubble-avatar'))return;const bubble=event.target.closest('.message-wrap:not(.system) .bubble');if(!bubble)return;const wrap=bubble.closest('.message-wrap'),id=wrap?.querySelector('.msg-checkbox')?.value;if(!id)return;document.querySelectorAll('.trace-quote-action').forEach(el=>el.remove());const button=document.createElement('button');button.type='button';button.className='trace-quote-action';button.textContent='↩ 引用';button.onclick=e=>{e.preventDefault();e.stopPropagation();window.traceStartPrivateQuote(id)};wrap.style.position='relative';wrap.appendChild(button);
+  });document.addEventListener('click',event=>{if(!event.target.closest('#chat-area'))document.querySelectorAll('.trace-quote-action').forEach(el=>el.remove())});}
+  window.tracePickRoleQuote=function(roleId){
+    const role=roleFor(roleId);if(!role||Math.random()>=.08)return null;const key=String(role.id),now=Date.now();if(now-(quoteCooldown.get(key)||0)<90000)return null;const candidates=(role.messages||[]).filter(m=>m.sender==='me'&&!m.withdrawn&&m.type!=='system').slice(-12);if(!candidates.length)return null;const recent=candidates.slice(-6),msg=recent[Math.floor(Math.random()*recent.length)],text=window.traceQuoteTextFromMessage(msg,role);if(!text)return null;quoteCooldown.set(key,now);return text;
+  };
+  const originalAdd=window.addMessage;
+  if(typeof originalAdd==='function'&&!originalAdd.__traceQuoteWrapped){const wrapped=function(msg,targetRoleId=null){if(msg&&msg.sender==='them'&&!msg.quoteText&&['text','mix'].includes(msg.type)){const role=targetRoleId==null?(typeof getCurrentRole==='function'?getCurrentRole():null):roleFor(targetRoleId);msg.quoteText=window.tracePickRoleQuote(role?.id)||null}return originalAdd.apply(this,arguments)};wrapped.__traceQuoteWrapped=true;window.addMessage=wrapped}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installQuoteTap,{once:true});else installQuoteTap();
+})();
+</script>
+
+<style id="trace-r19-group-quote-style">
+.ios-group-quote-box{position:relative;z-index:3;max-width:100%;margin:0 0 5px;padding:4px 7px;border-left:2px solid currentColor;border-radius:3px;color:inherit;opacity:.64;font-size:11px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ios-group-bubble:has(> .ios-group-quote-box){display:block!important}
+.trace-group-quote-action{position:absolute;z-index:12;bottom:-28px;right:4px;border:0;border-radius:14px;padding:5px 10px;background:rgba(50,50,55,.92);color:#fff;font:500 12px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:nowrap}
+.ios-group-message.me{position:relative}
+.trace-group-reply-preview{display:none;align-items:center;gap:8px;margin:7px 12px 0;padding:7px 10px;border-radius:11px;background:var(--ios-fill);color:var(--ios-secondary);font-size:12px;line-height:1.25}
+.trace-group-reply-preview.show{display:flex}.trace-group-reply-preview span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trace-group-reply-preview button{width:22px;height:22px;border:0;border-radius:50%;background:rgba(120,120,128,.16);color:inherit;font:inherit;padding:0}
+</style>
+<script id="trace-r19-group-quote-runtime">
+(function(){
+  const pending=new Map(),cooldown=new Map();let initializing=true;
+  const groups=()=>Array.isArray(appState.groupChats)?appState.groupChats:[];
+  function plain(value){const box=document.createElement('div');box.innerHTML=String(value||'');return String(box.textContent||box.innerText||'').replace(/\s+/g,' ').trim()}
+  function quoteText(msg){if(!msg)return'';let text='';if(msg.type==='img')text='[表情与贴纸]';else if(msg.type==='poll')text=plain(msg.content||'[问卷]');else text=plain(msg.content||'');return text?`我：${text.slice(0,120)}`:''}
+  function locate(messageId){for(const group of groups()){const msg=(group.messages||[]).find(item=>String(item.id)===String(messageId));if(msg)return{group,msg}}return null}
+  function pickUserQuote(group){const candidates=(group.messages||[]).filter(msg=>msg.senderId==='me'&&!msg.withdrawn&&msg.type!=='system').slice(-12),recent=candidates.slice(-6);if(!recent.length)return'';return quoteText(recent[Math.floor(Math.random()*recent.length)])}
+  function processNew(){let changed=false;for(const group of groups())for(const msg of group.messages||[]){if(msg.senderId==='me'||msg.senderId==='system'||msg.type==='system')continue;if(msg.traceGroupQuoteChecked)continue;msg.traceGroupQuoteChecked=true;changed=true;if(!['text','mix'].includes(msg.type)||msg.quoteText||Math.random()>=.08)continue;const key=String(group.id),now=Date.now();if(now-(cooldown.get(key)||0)<60000)continue;const text=pickUserQuote(group);if(text){msg.quoteText=text;cooldown.set(key,now)}}return changed}
+  function decorateRow(row){if(!row||row.classList.contains('ios-group-system'))return;const id=row.dataset.groupMessageId,found=locate(id),bubble=row.querySelector('.ios-group-bubble');if(!found||!bubble)return;let box=bubble.querySelector('.ios-group-quote-box');if(found.msg.quoteText){if(!box){box=document.createElement('div');box.className='ios-group-quote-box';bubble.insertBefore(box,bubble.firstChild)}if(box.textContent!==found.msg.quoteText)box.textContent=found.msg.quoteText}else box?.remove()}
+  function scan(){document.querySelectorAll('#ios-group-message-list [data-group-message-id]').forEach(decorateRow)}
+  function preview(){let el=document.getElementById('trace-group-reply-preview');if(!el){el=document.createElement('div');el.id='trace-group-reply-preview';el.className='trace-group-reply-preview';el.innerHTML='<span></span><button type="button" aria-label="取消引用">×</button>';document.querySelector('.ios-group-compose')?.before(el);el.querySelector('button').onclick=window.traceCancelGroupQuote}const item=[...pending.values()].at(-1);el.classList.toggle('show',!!item);el.querySelector('span').textContent=item?.text||''}
+  window.traceCancelGroupQuote=function(){pending.clear();preview()};
+  window.traceStartGroupQuote=function(messageId){const found=locate(messageId);if(!found||found.msg.senderId!=='me')return false;const text=quoteText(found.msg);if(!text)return false;pending.clear();pending.set(String(found.group.id),{text,messageId:String(found.msg.id)});document.querySelectorAll('.trace-group-quote-action').forEach(el=>el.remove());preview();document.getElementById('ios-group-input')?.focus();return true};
+  function installTap(){const list=document.getElementById('ios-group-message-list');if(!list||list.dataset.traceGroupQuote==='1')return;list.dataset.traceGroupQuote='1';list.addEventListener('click',event=>{if(event.target.closest('.trace-group-quote-action'))return;const row=event.target.closest('.ios-group-message.me[data-group-message-id]');if(!row)return;document.querySelectorAll('.trace-group-quote-action').forEach(el=>el.remove());const button=document.createElement('button');button.type='button';button.className='trace-group-quote-action';button.textContent='↩ 引用';button.onclick=e=>{e.preventDefault();e.stopPropagation();window.traceStartGroupQuote(row.dataset.groupMessageId)};row.appendChild(button)});new MutationObserver(()=>{const changed=processNew();scan();if(changed)originalSave?.()}).observe(list,{childList:true,subtree:true})}
+  for(const group of groups())for(const msg of group.messages||[])if(msg.senderId!=='me'&&msg.senderId!=='system')msg.traceGroupQuoteChecked=true;initializing=false;
+  const originalSave=window.saveState;
+  if(typeof originalSave==='function'&&!originalSave.__traceGroupQuoteWrapped){const wrapped=async function(){processNew();return originalSave.apply(this,arguments)};wrapped.__traceGroupQuoteWrapped=true;window.saveState=wrapped}
+  const originalSend=window.iosSendGroupMessage;
+  if(typeof originalSend==='function'&&!originalSend.__traceGroupQuoteWrapped){const wrapped=function(){const active=[...pending.entries()][0],before=active?new Set((groups().find(g=>String(g.id)===active[0])?.messages||[]).map(m=>String(m.id))):null,result=originalSend.apply(this,arguments);if(result&&active){const group=groups().find(g=>String(g.id)===active[0]),msg=(group?.messages||[]).slice().reverse().find(m=>m.senderId==='me'&&!before.has(String(m.id)));if(msg)msg.quoteText=active[1].text;pending.clear();preview();originalSave?.();queueMicrotask(scan)}return result};wrapped.__traceGroupQuoteWrapped=true;window.iosSendGroupMessage=wrapped}
+  function install(){installTap();preview();processNew();scan()}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+})();
+</script>
+
+<!-- ===== r20: animated stickers + full-screen iOS feature pages ===== -->
+<style id="trace-r20-ios-fullscreen-style">
+/* Chat notices are quiet system text, never framed cards. */
+body.ios-system-theme #chat-area .message-wrap.system > div,
+body.ios-system-theme #chat-area .trace-private-pat-system,
+body.ios-system-theme #chat-area .trace-withdrawn-label,
+body.ios-system-theme .ios-group-system span {
+  display:inline-block !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  padding:3px 10px !important;
+  color:var(--ios-secondary) !important;
+  font-size:11px !important;
+  line-height:1.45 !important;
+}
+
+/* Sticker and word-card group controls use iOS fills instead of black frames. */
+body.ios-system-theme .sticker-nav {
+  gap:7px !important;
+  border-bottom:.5px solid var(--ios-separator) !important;
+}
+body.ios-system-theme .sticker-nav-item {
+  border:0 !important;
+  border-radius:999px !important;
+  background:var(--ios-fill) !important;
+  color:var(--ios-label) !important;
+  padding:6px 11px !important;
+  font-weight:500 !important;
+}
+body.ios-system-theme .sticker-nav-item.active {
+  background:var(--ios-blue) !important;
+  color:#fff !important;
+}
+body.ios-system-theme .sticker-add {
+  border:0 !important;
+  border-radius:14px !important;
+  background:var(--ios-fill) !important;
+  color:var(--ios-blue) !important;
+}
+body.ios-system-theme #settings-modal .group-select-row select,
+body.ios-system-theme #settings-modal .group-select-row button,
+body.ios-system-theme #settings-modal #card-filter-select {
+  min-height:40px !important;
+  border:0 !important;
+  border-radius:10px !important;
+  box-shadow:none !important;
+  background:var(--ios-fill) !important;
+  color:var(--ios-label) !important;
+  padding:0 12px !important;
+  font:500 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif !important;
+}
+body.ios-system-theme #settings-modal .group-select-row button { color:var(--ios-blue) !important; white-space:nowrap; }
+
+/* Every top-level feature launched from 功能 behaves like a normal app page. */
+body.ios-system-theme .modal-overlay.trace-feature-page {
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  padding:0 !important;
+  margin:0 !important;
+  align-items:stretch !important;
+  justify-content:stretch !important;
+  background:var(--ios-bg) !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+  z-index:100000 !important;
+}
+body.ios-system-theme .modal-overlay.trace-feature-page:not(#ui-dialog-modal) > .modal-content {
+  width:100% !important;
+  max-width:none !important;
+  height:100dvh !important;
+  max-height:none !important;
+  min-height:100dvh !important;
+  margin:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  background:var(--ios-bg) !important;
+  transform:none !important;
+  overflow:hidden !important;
+}
+body.ios-system-theme .modal-overlay.trace-feature-page.open:not(#ui-dialog-modal) > .modal-content { transform:none !important; border-radius:0 !important; }
+body.ios-system-theme .trace-feature-page .modal-header {
+  position:relative !important;
+  z-index:3 !important;
+  flex:0 0 auto !important;
+  min-height:calc(52px + var(--ios-safe-top)) !important;
+  padding:var(--ios-safe-top) 16px 0 !important;
+  background:color-mix(in srgb,var(--ios-card) 94%,transparent) !important;
+  border:0 !important;
+  border-bottom:.5px solid var(--ios-separator) !important;
+  box-shadow:none !important;
+}
+body.ios-system-theme .trace-feature-page .modal-header h3 {
+  flex:1 !important;
+  text-align:center !important;
+  font-size:17px !important;
+  font-weight:600 !important;
+  letter-spacing:0 !important;
+}
+body.ios-system-theme .trace-feature-page .modal-header .close-btn {
+  position:absolute !important;
+  right:16px !important;
+  bottom:8px !important;
+  min-width:44px !important;
+  min-height:36px !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  color:var(--ios-blue) !important;
+  box-shadow:none !important;
+  font-size:16px !important;
+  font-weight:400 !important;
+}
+body.ios-system-theme .trace-feature-page .modal-body {
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  padding:16px 16px calc(30px + var(--ios-safe-bottom)) !important;
+  background:var(--ios-bg) !important;
+}
+body.ios-system-theme .trace-feature-page .tab-nav {
+  flex:0 0 auto !important;
+  border:0 !important;
+  border-bottom:.5px solid var(--ios-separator) !important;
+  background:var(--ios-card) !important;
+  box-shadow:none !important;
+}
+body.ios-system-theme .trace-feature-page .tab-btn { border:0 !important; box-shadow:none !important; }
+
+/* Remove the original author's square black outlines inside feature pages. */
+body.ios-system-theme .trace-feature-page .btn-full,
+body.ios-system-theme .trace-feature-page .btn-noshadow,
+body.ios-system-theme .trace-feature-page .game-icon-btn,
+body.ios-system-theme .trace-feature-page input,
+body.ios-system-theme .trace-feature-page select,
+body.ios-system-theme .trace-feature-page textarea,
+body.ios-system-theme .trace-feature-page .music-player-box,
+body.ios-system-theme .trace-feature-page .decision-box,
+body.ios-system-theme .trace-feature-page .diary-card,
+body.ios-system-theme .trace-feature-page .mail-card,
+body.ios-system-theme .trace-feature-page .period-calendar,
+body.ios-system-theme .trace-feature-page .piggy-bank-wrap {
+  border:0 !important;
+  box-shadow:none !important;
+  border-radius:13px !important;
+}
+body.ios-system-theme .trace-feature-page input,
+body.ios-system-theme .trace-feature-page select,
+body.ios-system-theme .trace-feature-page textarea { background:var(--ios-fill) !important; color:var(--ios-label) !important; }
+body.ios-system-theme .trace-feature-page .game-icon-btn { background:var(--ios-card) !important; padding:18px 10px !important; }
+body.ios-system-theme .trace-feature-page .btn-full,
+body.ios-system-theme .trace-feature-page .btn-noshadow { background:var(--ios-fill) !important; color:var(--ios-blue) !important; letter-spacing:0 !important; }
+body.ios-system-theme .trace-feature-page .btn-full.primary { background:var(--ios-blue) !important; color:#fff !important; }
+body.ios-system-theme .trace-feature-page .btn-full.danger { background:rgba(255,59,48,.10) !important; color:var(--ios-red) !important; }
+body.ios-system-theme .trace-feature-page [style*="border-style: dashed"],
+body.ios-system-theme .trace-feature-page [style*="border: 1px dashed"],
+body.ios-system-theme .trace-feature-page [style*="border:1px dashed"],
+body.ios-system-theme .trace-feature-page [style*="dashed"] { border:0 !important; box-shadow:none !important; }
+
+/* Gomoku and mysticism retain their content, with soft iOS surfaces. */
+body.ios-system-theme #gomoku-modal .gomoku-avatar,
+body.ios-system-theme #gomoku-modal .gomoku-name,
+body.ios-system-theme #gomoku-modal .gomoku-bubble,
+body.ios-system-theme #gomoku-modal .gomoku-bubble::after { border:0 !important; box-shadow:none !important; }
+body.ios-system-theme #gomoku-modal .gomoku-avatar { border-radius:50% !important; }
+body.ios-system-theme #gomoku-modal .gomoku-name { border-radius:999px !important; background:var(--ios-fill) !important; padding:4px 8px !important; }
+body.ios-system-theme #gomoku-modal .gomoku-bubble { border-radius:14px !important; box-shadow:0 5px 18px rgba(0,0,0,.10) !important; }
+body.ios-system-theme #gomoku-modal canvas#gomoku-canvas { border:0 !important; border-radius:16px !important; box-shadow:0 5px 18px rgba(0,0,0,.08) !important; }
+body.ios-system-theme #tarot-modal .tarot-spread-btn,
+body.ios-system-theme #tarot-modal .tarot-card-face,
+body.ios-system-theme #tarot-modal .tarot-card-pos,
+body.ios-system-theme #tarot-modal .tarot-label { border:0 !important; box-shadow:none !important; }
+body.ios-system-theme #tarot-modal .tarot-spread-btn { border-radius:999px !important; background:var(--ios-fill) !important; color:var(--ios-label) !important; }
+body.ios-system-theme #tarot-modal .tarot-spread-btn.active { background:var(--ios-blue) !important; color:#fff !important; }
+body.ios-system-theme #tarot-modal .tarot-card-face { border-radius:13px !important; background:var(--ios-card) !important; box-shadow:0 5px 16px rgba(0,0,0,.10) !important; }
+body.ios-system-theme #tarot-modal .tarot-card-pos { border-radius:999px !important; background:var(--ios-fill) !important; padding:2px 6px !important; }
+
+/* Listen Together: replace leftover inline black and dashed boxes. */
+body.ios-system-theme #music-modal .modal-body > div[style*="border-bottom"] { border-bottom:.5px solid var(--ios-separator) !important; }
+body.ios-system-theme #music-modal #qr-login-box,
+body.ios-system-theme #music-modal #my-playlists-box {
+  border:0 !important;
+  border-radius:14px !important;
+  background:var(--ios-card) !important;
+  box-shadow:none !important;
+}
+body.ios-system-theme #music-modal #qr-img { border:0 !important; border-radius:10px !important; }
+body.ios-system-theme #music-modal audio { width:100% !important; }
+
+/* Focus must fully cover the Features page, including the safe-area strip. */
+body.ios-system-theme #focus-modal.trace-feature-page { background:#000 !important; }
+body.ios-system-theme #focus-modal.trace-feature-page #focus-wrap {
+  position:absolute !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  min-height:100dvh !important;
+  margin:0 !important;
+}
+</style>
+<script id="trace-r20-ios-fullscreen-runtime">
+(function(){
+  const featureIds=['game-modal','gomoku-modal','tarot-modal','decision-modal','gacha-modal','music-modal','diary-modal','focus-modal','wish-modal','anniversary-modal','period-modal','piggy-bank-modal','photo-modal'];
+
+  function markFeaturePages(){
+    featureIds.forEach(id=>document.getElementById(id)?.classList.add('trace-feature-page'));
+  }
+
+  function inferImageType(file,bytes){
+    const mime=String(file?.type||'').toLowerCase();
+    const name=String(file?.name||'').toLowerCase();
+    const ascii=Array.from(bytes.slice(0,12),b=>String.fromCharCode(b)).join('');
+    if(mime==='image/gif'||/\.gif$/i.test(name)||ascii.startsWith('GIF87a')||ascii.startsWith('GIF89a'))return'image/gif';
+    if(mime==='image/webp'||/\.webp$/i.test(name)||(ascii.startsWith('RIFF')&&ascii.slice(8,12)==='WEBP'))return'image/webp';
+    if(mime==='image/png'||mime==='image/apng'||/\.(png|apng)$/i.test(name)||(bytes[0]===0x89&&ascii.slice(1,4)==='PNG'))return'image/png';
+    return'';
+  }
+
+  function bufferToDataURL(buffer,type){
+    return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(new Blob([buffer],{type}))});
+  }
+
+  window.traceImportStickerFiles=async function(files){
+    let count=0;
+    for(const file of Array.from(files||[])){
+      try{
+        const buffer=await file.arrayBuffer();
+        const bytes=new Uint8Array(buffer.slice(0,16));
+        const originalType=inferImageType(file,bytes);
+        const url=originalType ? await bufferToDataURL(buffer,originalType) : await compressImage(file,400);
+        appState.stickers.push({name:file.name||'本地图片',url,group:currentStickerGroup||'默认',animated:originalType==='image/gif'||originalType==='image/webp'||originalType==='image/png'});
+        count++;
+      }catch(error){ console.error('sticker import failed',error); }
+    }
+    if(count){saveState();renderAllowedGroups();renderStickers();renderStickerManage()}
+    return count;
+  };
+
+  function installStickerImport(){
+    const input=document.getElementById('sticker-upload');
+    if(!input||input.dataset.traceAnimatedImport==='1')return;
+    input.dataset.traceAnimatedImport='1';
+    input.onchange=async event=>{await window.traceImportStickerFiles(event.target.files);event.target.value=''};
+  }
+
+  function install(){markFeaturePages();installStickerImport()}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+})();
+</script>
+
 </body>
 </html>
 
