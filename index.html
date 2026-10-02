@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-BJSYERETPJ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-BJSYERETPJ');
-</script>
     <!-- 引入 PWA 清单 -->
     <link rel="manifest" href="manifest.json">
     <!-- 设置手机状态栏的颜色 -->
@@ -11636,6 +11628,166 @@ body.ios-system-theme #focus-modal #focus-close-btn.trace-feature-back {
 }
 #focus-modal .trace-feature-role-copy small { color:rgba(255,255,255,.62); }
 body.ios-system-theme #focus-modal .trace-feature-role-select { background:rgba(255,255,255,.16) !important;color:#fff !important; }
+
+/* Add Anniversary is a nested sheet: keep both navigation actions visible. */
+body.ios-system-theme #add-anni-modal .modal-content {
+  display:flex !important;
+  flex-direction:column !important;
+  height:min(80dvh,620px) !important;
+  max-height:calc(100dvh - max(var(--ios-safe-top),8px)) !important;
+  overflow:hidden !important;
+}
+body.ios-system-theme #add-anni-modal .modal-header {
+  flex:0 0 auto !important;
+  display:grid !important;
+  grid-template-columns:78px minmax(0,1fr) 78px !important;
+  align-items:center !important;
+  min-height:54px !important;
+  padding:0 16px !important;
+}
+body.ios-system-theme #add-anni-modal .modal-header h3 {
+  grid-column:2 !important;
+  grid-row:1 !important;
+  text-align:center !important;
+  margin:0 !important;
+  font-size:17px !important;
+  font-weight:600 !important;
+  letter-spacing:0 !important;
+}
+body.ios-system-theme #add-anni-modal .trace-anni-cancel,
+body.ios-system-theme #add-anni-modal .trace-anni-save-nav {
+  position:static !important;
+  width:auto !important;
+  min-width:0 !important;
+  min-height:44px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:var(--ios-blue) !important;
+  font:400 16px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif !important;
+  letter-spacing:0 !important;
+  white-space:nowrap !important;
+}
+body.ios-system-theme #add-anni-modal .trace-anni-cancel { grid-column:1 !important;grid-row:1 !important;justify-self:start !important; }
+body.ios-system-theme #add-anni-modal .trace-anni-save-nav { grid-column:3 !important;grid-row:1 !important;justify-self:end !important;font-weight:600 !important; }
+body.ios-system-theme #add-anni-modal .modal-body {
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  padding:16px 16px calc(22px + var(--ios-safe-bottom)) !important;
+}
+.trace-anni-type-segment { display:grid;grid-template-columns:1fr 1fr;gap:3px;margin:0 0 18px;padding:3px;border-radius:10px;background:var(--ios-fill); }
+.trace-anni-type-segment button { min-height:34px;border:0;border-radius:8px;background:transparent;color:var(--ios-label);font:500 14px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif; }
+.trace-anni-type-segment button.active { background:var(--ios-card);box-shadow:0 1px 4px rgba(0,0,0,.10);font-weight:600; }
+.trace-anni-type-help { margin:-10px 2px 16px;color:var(--ios-secondary);font-size:11px;line-height:1.45; }
+.trace-anni-recurring-row { display:none;gap:10px;align-items:center; }
+.trace-anni-recurring-row.show { display:flex; }
+body.ios-system-theme #add-anni-modal .trace-anni-recurring-row select { flex:1;min-height:44px;border:0;border-radius:12px;background:var(--ios-fill);color:var(--ios-label);padding:0 12px;font:inherit; }
+.trace-anni-trigger-note { margin:4px 0 18px;padding:11px 12px;border-radius:12px;background:var(--ios-fill);color:var(--ios-secondary);font-size:11px;line-height:1.5; }
+body.ios-system-theme #anniversary-modal .anni-card { border:0 !important;border-radius:16px !important;box-shadow:none !important;overflow:hidden !important;background:var(--ios-card) !important; }
+body.ios-system-theme #anniversary-modal .anni-mask { background:var(--ios-card) !important;backdrop-filter:none !important;align-items:flex-start !important;text-align:left !important;padding:14px !important; }
+body.ios-system-theme #anniversary-modal .anni-title { margin:0 0 5px !important;font-size:16px !important;letter-spacing:0 !important; }
+body.ios-system-theme #anniversary-modal .anni-days { font-size:13px !important; }
+body.ios-system-theme #anniversary-modal .anni-days span { font:700 18px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif !important; }
+body.ios-system-theme #anniversary-modal .anni-date { border:0 !important;margin-top:7px !important;padding:0 !important;font-size:11px !important; }
+body.ios-system-theme #anniversary-modal .anni-del { top:11px !important;right:11px !important;border:0 !important;border-radius:999px !important;background:rgba(255,59,48,.10) !important;color:var(--ios-red) !important;padding:5px 8px !important; }
+.trace-anni-kind { display:inline-flex;align-items:center;min-height:20px;margin-bottom:8px;padding:2px 7px;border-radius:999px;background:var(--ios-fill);color:var(--ios-secondary);font-size:10px;font-weight:600; }
+.trace-anni-role-empty { padding:48px 16px;text-align:center;color:var(--ios-secondary);font-size:13px;line-height:1.5; }
+
+/* Blue and purple skins need a quieter, still readable quoted-message layer. */
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="viber_purple"] #chat-area .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="qq"] #chat-area .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="telegram"] #chat-area .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="viber_purple"] .ios-group-quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="qq"] .ios-group-quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="telegram"] .ios-group-quote-box {
+  opacity:1 !important;
+  margin-bottom:6px !important;
+  padding:5px 8px !important;
+  border-radius:6px !important;
+  font-weight:400 !important;
+  text-shadow:none !important;
+}
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .me .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="viber_purple"] #chat-area .me .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="qq"] #chat-area .me .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="telegram"] #chat-area .me .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.me .ios-group-quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="viber_purple"] .ios-group-message.me .ios-group-quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="qq"] .ios-group-message.me .ios-group-quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="telegram"] .ios-group-message.me .ios-group-quote-box {
+  background:rgba(0,0,0,.12) !important;
+  border-left:2px solid rgba(255,255,255,.55) !important;
+  color:rgba(255,255,255,.82) !important;
+}
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .them .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="viber_purple"] #chat-area .them .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="qq"] #chat-area .them .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.them .ios-group-quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="viber_purple"] .ios-group-message.them .ios-group-quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="qq"] .ios-group-message.them .ios-group-quote-box {
+  background:rgba(118,118,128,.10) !important;
+  border-left:2px solid rgba(60,60,67,.36) !important;
+  color:rgba(0,0,0,.62) !important;
+}
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="telegram"] #chat-area .them .quote-box,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="telegram"] .ios-group-message.them .ios-group-quote-box,
+body.ios-system-theme.dark-mode.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .them .quote-box,
+body.ios-system-theme.dark-mode.trace-current-theme[data-trace-chat-theme="viber_purple"] #chat-area .them .quote-box,
+body.ios-system-theme.dark-mode.trace-current-theme[data-trace-chat-theme="qq"] #chat-area .them .quote-box,
+body.ios-system-theme.dark-mode.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.them .ios-group-quote-box,
+body.ios-system-theme.dark-mode.trace-current-theme[data-trace-chat-theme="viber_purple"] .ios-group-message.them .ios-group-quote-box,
+body.ios-system-theme.dark-mode.trace-current-theme[data-trace-chat-theme="qq"] .ios-group-message.them .ios-group-quote-box {
+  background:rgba(255,255,255,.07) !important;
+  border-left:2px solid rgba(255,255,255,.34) !important;
+  color:rgba(255,255,255,.66) !important;
+}
+
+/* A continuous iMessage curl: rounded bubble edge, colored lobe, then a surface cutout. */
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .me .bubble,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .them .bubble,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.me .ios-group-bubble,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.them .ios-group-bubble { border-radius:18px !important; }
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .me .bubble::before,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.me .ios-group-bubble::before {
+  display:block !important;right:-7px !important;left:auto !important;bottom:-1px !important;top:auto !important;
+  width:19px !important;height:20px !important;border:0 !important;border-radius:0 0 0 16px / 0 0 0 14px !important;
+  background:var(--tc-me) !important;transform:none !important;clip-path:none !important;z-index:0 !important;
+}
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .me .bubble::after,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.me .ios-group-bubble::after {
+  display:block !important;right:-11px !important;left:auto !important;bottom:-2px !important;top:auto !important;
+  width:12px !important;height:22px !important;border:0 !important;border-radius:0 0 0 11px / 0 0 0 10px !important;
+  background:var(--tc-chat) !important;transform:none !important;clip-path:none !important;z-index:1 !important;
+}
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .them .bubble::before,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.them .ios-group-bubble::before {
+  display:block !important;left:-7px !important;right:auto !important;bottom:-1px !important;top:auto !important;
+  width:19px !important;height:20px !important;border:0 !important;border-radius:0 0 16px 0 / 0 0 14px 0 !important;
+  background:var(--tc-them) !important;transform:none !important;clip-path:none !important;z-index:0 !important;
+}
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .them .bubble::after,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.them .ios-group-bubble::after {
+  display:block !important;left:-11px !important;right:auto !important;bottom:-2px !important;top:auto !important;
+  width:12px !important;height:22px !important;border:0 !important;border-radius:0 0 11px 0 / 0 0 10px 0 !important;
+  background:var(--tc-chat) !important;transform:none !important;clip-path:none !important;z-index:1 !important;
+}
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .message-wrap.system .bubble::before,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .message-wrap.system .bubble::after,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .bubble:has(> img)::before,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .bubble:has(> img)::after,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .bubble:has(> .ios-poll-holder)::before,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .bubble:has(> .ios-poll-holder)::after,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.media .ios-group-bubble::before,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.media .ios-group-bubble::after,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.poll .ios-group-bubble::before,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.poll .ios-group-bubble::after { display:none !important; }
 </style>
 <script id="trace-r21-navigation-role-runtime">
 (function(){
@@ -11680,6 +11832,7 @@ body.ios-system-theme #focus-modal .trace-feature-role-select { background:rgba(
       const avatar=document.getElementById('focus-ta-avatar');if(avatar)avatar.src=role.avatar||'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     }
     if(save&&typeof saveState==='function')saveState();
+    if(modalId==='anniversary-modal'&&typeof window.renderAnniversaries==='function')window.renderAnniversaries();
     return role;
   }
   window.traceSetFeatureRole=function(modalId,id){return applySelectedRole(modalId,id,true)};
@@ -11712,7 +11865,173 @@ body.ios-system-theme #focus-modal .trace-feature-role-select { background:rgba(
   function normalizeAll(){
     document.querySelectorAll('.trace-feature-page').forEach(modal=>normalizeHeader(modal));
     const focusBack=document.getElementById('focus-close-btn');if(focusBack){focusBack.classList.add('trace-feature-back');focusBack.textContent='‹ 返回';focusBack.setAttribute('aria-label','返回功能页')}
+    normalizeAnniversaryEditor();
     Object.keys(roleFeatures).forEach(roleBar);
+  }
+
+  function normalizeAnniversaryEditor(){
+    const modal=document.getElementById('add-anni-modal'),header=modal?.querySelector(':scope > .modal-content > .modal-header'),body=modal?.querySelector(':scope > .modal-content > .modal-body');
+    if(!modal||!header||!body)return;
+    const cancel=[...header.querySelectorAll('button')].find(button=>(button.getAttribute('onclick')||'').includes('closeAddAnniModal'));
+    const save=body.querySelector('button[onclick*="saveAnniversary"]')||header.querySelector('.trace-anni-save-nav');
+    const title=header.querySelector('h3');
+    if(cancel){cancel.classList.add('trace-anni-cancel');cancel.textContent='取消';header.insertBefore(cancel,title)}
+    if(save){save.classList.add('trace-anni-save-nav');save.textContent='保存';header.appendChild(save)}
+
+    if(!body.querySelector('.trace-anni-type-segment')){
+      const segment=document.createElement('div');segment.className='trace-anni-type-segment';
+      segment.innerHTML='<button type="button" data-kind="anniversary" onclick="traceSetAnniversaryType(\'anniversary\')">纪念日</button><button type="button" data-kind="important" onclick="traceSetAnniversaryType(\'important\')">重要日</button>';
+      const help=document.createElement('div');help.className='trace-anni-type-help';
+      body.prepend(help);body.prepend(segment);
+
+      const dateInput=document.getElementById('anni-date-input'),dateItem=dateInput?.closest('.input-item');
+      if(dateItem)dateItem.classList.add('trace-anni-exact-item');
+      const recurring=document.createElement('div');recurring.className='input-item trace-anni-recurring-item';recurring.style.marginBottom='16px';
+      recurring.innerHTML='<span>每年日期</span><div class="trace-anni-recurring-row"><select id="trace-anni-month" aria-label="月份"></select><select id="trace-anni-day" aria-label="日期"></select></div>';
+      dateItem?.insertAdjacentElement('afterend',recurring);
+      const month=recurring.querySelector('#trace-anni-month');
+      month.innerHTML=Array.from({length:12},(_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${i+1} 月</option>`).join('');
+      month.addEventListener('change',()=>fillAnniversaryDays());
+
+      const note=document.createElement('div');note.className='trace-anni-trigger-note';note.textContent='到达当天后，当前分类角色会随机主动发信息、来电、写日记或写信；同一天只触发一次。';
+      recurring.insertAdjacentElement('afterend',note);
+    }
+    window.traceSetAnniversaryType?.(currentAnniType);
+  }
+
+  let currentAnniType='anniversary';
+  const pad2=value=>String(value).padStart(2,'0');
+  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const localYmd=date=>typeof getLocalYMD==='function'?getLocalYMD(date):`${date.getFullYear()}-${pad2(date.getMonth()+1)}-${pad2(date.getDate())}`;
+  const monthDayFromDate=value=>/^\d{4}-(\d{2})-(\d{2})$/.test(String(value||''))?String(value).slice(5):'';
+
+  function fillAnniversaryDays(){
+    const month=document.getElementById('trace-anni-month'),day=document.getElementById('trace-anni-day');if(!month||!day)return;
+    const previous=Number(day.value||1),count=new Date(2024,Number(month.value||1),0).getDate();
+    day.innerHTML=Array.from({length:count},(_,i)=>`<option value="${pad2(i+1)}">${i+1} 日</option>`).join('');
+    day.value=pad2(Math.min(previous,count));
+  }
+
+  window.traceSetAnniversaryType=function(kind){
+    currentAnniType=kind==='important'?'important':'anniversary';
+    document.querySelectorAll('#add-anni-modal .trace-anni-type-segment button').forEach(button=>button.classList.toggle('active',button.dataset.kind===currentAnniType));
+    const exact=document.querySelector('#add-anni-modal .trace-anni-exact-item'),recurringItem=document.querySelector('#add-anni-modal .trace-anni-recurring-item'),recurring=document.querySelector('#add-anni-modal .trace-anni-recurring-row'),help=document.querySelector('#add-anni-modal .trace-anni-type-help');
+    if(exact)exact.style.display=currentAnniType==='anniversary'?'':'none';
+    if(recurringItem)recurringItem.style.display=currentAnniType==='important'?'':'none';
+    recurring?.classList.toggle('show',currentAnniType==='important');
+    if(help)help.textContent=currentAnniType==='anniversary'?'保存完整年月日，适合恋爱起点、生日等需要记录年份的日子。':'只记录月和日，每年重复，不需要填写具体年份。';
+    if(currentAnniType==='important')fillAnniversaryDays();
+  };
+
+  function selectedAnniversaryRole(){return roleById(selectedId('anniversary-modal'))}
+  function normalizeAnniversaryEntry(entry,fallbackRoleId){
+    let changed=false;
+    if(!entry.roleId&&fallbackRoleId){entry.roleId=String(fallbackRoleId);changed=true}
+    if(entry.kind!=='important'&&entry.kind!=='anniversary'){entry.kind='anniversary';changed=true}
+    if(!entry.monthDay){const value=monthDayFromDate(entry.date);if(value){entry.monthDay=value;changed=true}}
+    return changed;
+  }
+  function migrateAnniversaries(){
+    if(!Array.isArray(appState.anniversaries))appState.anniversaries=[];
+    const fallback=selectedId('anniversary-modal');let changed=false;
+    appState.anniversaries.forEach(entry=>{changed=normalizeAnniversaryEntry(entry,fallback)||changed});
+    if(changed&&typeof saveState==='function')saveState();
+    return changed;
+  }
+  function nextOccurrence(monthDay,now){
+    const match=/^(\d{2})-(\d{2})$/.exec(String(monthDay||''));if(!match)return null;
+    const month=Number(match[1])-1,day=Number(match[2]),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    for(let year=now.getFullYear();year<=now.getFullYear()+8;year++){
+      const target=new Date(year,month,day);if(target.getMonth()!==month||target.getDate()!==day)continue;
+      if(target>=today)return target;
+    }
+    return null;
+  }
+  function occurrenceForEntry(entry,now){
+    const recurring=nextOccurrence(entry.monthDay||monthDayFromDate(entry.date),now);if(entry.kind==='important'||!entry.date)return recurring;
+    const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(entry.date));if(!match)return recurring;
+    const start=new Date(Number(match[1]),Number(match[2])-1,Number(match[3]));return recurring&&recurring>=start?recurring:start;
+  }
+  function anniversaryDueToday(entry,now){
+    const monthDay=entry.monthDay||monthDayFromDate(entry.date);if(monthDay!==`${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`)return false;
+    if(entry.kind==='anniversary'&&entry.date){const startYear=Number(String(entry.date).slice(0,4));if(startYear&&now.getFullYear()<startYear)return false}
+    return true;
+  }
+
+  function anniversaryCards(role,max){
+    try{return typeof pickDiaryCardsForRole==='function'?pickDiaryCardsForRole(role,max):[]}catch(e){return[]}
+  }
+  function anniversaryCardText(cards){
+    try{return typeof joinDiaryCardsNaturally==='function'?joinDiaryCardsNaturally(cards):cards.map(card=>String(card?.text||'')).filter(Boolean).join('，')}catch(e){return''}
+  }
+  function anniversarySources(cards){return cards.map(card=>({text:String(card?.text||'').trim(),group:String(card?.group||'日常')}))}
+
+  window.traceRunAnniversaryAction=function(entry,forcedAction=''){
+    const role=roleById(entry?.roleId);if(!role)return false;
+    const actions=['message','call','diary','letter'],action=actions.includes(forcedAction)?forcedAction:actions[Math.floor(Math.random()*actions.length)];
+    const name=String(entry.name||'这个日子').trim()||'这个日子',now=Date.now();
+    if(action==='call'){
+      const queued=window.traceQueueIncomingCall?.(role.id,null);
+      if(queued!==false&&queued!=null)return true;
+      return window.traceRunAnniversaryAction(entry,'message');
+    }
+    if(action==='message'){
+      const cards=anniversaryCards(role,1),extra=anniversaryCardText(cards);
+      addMessage({id:now+Math.random(),text:`今天是「${name}」，我当然记得。${extra?`\n${extra}`:''}`,type:'text',sender:'them',time:now,quoteText:null,isRead:false,cardSources:anniversarySources(cards)},role.id);
+      try{window.iosRenderConversations?.()}catch(e){}return true;
+    }
+    if(typeof initDiaryData!=='function')return false;initDiaryData();
+    if(action==='diary'){
+      const cards=anniversaryCards(role,Math.min(2,Number(appState.settings?.diaryMaxCards||2))),extra=anniversaryCardText(cards);
+      appState.diaryData.records.unshift({id:now+Math.floor(Math.random()*10000),roleId:String(role.id),date:localYmd(new Date()),author:'them',mood:'✨ 纪念',content:`今天是「${name}」。${extra?`\n\n${extra}`:'想把这一天好好记下来。'}`,cardSources:anniversarySources(cards),time:now,isNew:true});
+      saveState();syncDiaryBadge?.();return true;
+    }
+    const cards=anniversaryCards(role,Math.min(2,Number(appState.settings?.letterMaxCards||2))),extra=anniversaryCardText(cards),id=typeof nextMailId==='function'?nextMailId():now*1000;
+    appState.diaryData.letters.unshift({id,batchId:`anniversary-${entry.id}-${localYmd(new Date())}`,roleId:String(role.id),author:'them',content:`今天是「${name}」。\n\n${extra||'这封信留给今天，也留给以后想起这一天的我们。'}`,cardSources:anniversarySources(cards),sendTime:now,arriveTime:now,isRead:false});
+    saveState();syncDiaryBadge?.();return true;
+  };
+
+  window.traceCheckAnniversaryTriggers=function(now=new Date(),forcedAction=''){
+    migrateAnniversaries();const today=localYmd(now);let changed=false,count=0;
+    appState.anniversaries.forEach(entry=>{
+      if(!anniversaryDueToday(entry,now)||entry.lastTriggeredDate===today)return;
+      entry.lastTriggeredDate=today;changed=true;
+      try{if(window.traceRunAnniversaryAction(entry,forcedAction))count++}catch(error){console.warn('anniversary action failed',error)}
+    });
+    if(changed)saveState();return count;
+  };
+
+  function installAnniversarySystem(){
+    normalizeAnniversaryEditor();
+    const originalOpen=window.openAddAnniModal;
+    if(typeof originalOpen==='function'&&!originalOpen.__traceR21Anniversary){
+      const wrapped=function(){const out=originalOpen.apply(this,arguments);normalizeAnniversaryEditor();window.traceSetAnniversaryType('anniversary');const month=document.getElementById('trace-anni-month');if(month)month.value=pad2(new Date().getMonth()+1);fillAnniversaryDays();const day=document.getElementById('trace-anni-day');if(day)day.value=pad2(new Date().getDate());return out};
+      wrapped.__traceR21Anniversary=true;window.openAddAnniModal=wrapped;
+    }
+    window.saveAnniversary=async function(){
+      const role=selectedAnniversaryRole(),name=document.getElementById('anni-name-input')?.value.trim(),dateInput=document.getElementById('anni-date-input')?.value||'';
+      const month=document.getElementById('trace-anni-month')?.value||'',day=document.getElementById('trace-anni-day')?.value||'',monthDay=currentAnniType==='important'?`${month}-${day}`:monthDayFromDate(dateInput);
+      if(!role){await uiAlert('请先在纪念日页面选择角色。');return}
+      if(!name||!monthDay||(currentAnniType==='anniversary'&&!dateInput)){await uiAlert(currentAnniType==='important'?'名称和每年日期不能为空！':'名称和日期不能为空！');return}
+      if(!Array.isArray(appState.anniversaries))appState.anniversaries=[];
+      appState.anniversaries.push({id:Date.now(),name,kind:currentAnniType,roleId:String(role.id),date:currentAnniType==='anniversary'?dateInput:'',monthDay,bg:typeof tempAnniBg==='string'?tempAnniBg:'',lastTriggeredDate:'',createdAt:Date.now()});
+      saveState();closeAddAnniModal();window.renderAnniversaries();window.traceCheckAnniversaryTriggers(new Date());
+    };
+    window.renderAnniversaries=function(){
+      const list=document.getElementById('anni-list');if(!list)return;migrateAnniversaries();list.innerHTML='';
+      const role=selectedAnniversaryRole();if(!role){list.innerHTML='<div class="trace-anni-role-empty">请先创建一个角色</div>';return}
+      const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+      const entries=appState.anniversaries.filter(entry=>String(entry.roleId)===String(role.id)).map(entry=>({entry,target:occurrenceForEntry(entry,today)})).filter(item=>item.target).sort((a,b)=>a.target-b.target);
+      if(!entries.length){list.innerHTML=`<div class="trace-anni-role-empty">还没有为 ${escapeHtml(roleLabel(role))} 添加纪念日或重要日</div>`;return}
+      entries.forEach(({entry,target})=>{
+        const days=Math.round((target-today)/86400000),isExact=entry.kind!=='important',startYear=Number(String(entry.date||'').slice(0,4)),years=isExact&&startYear?Math.max(0,today.getFullYear()-startYear):0;
+        const status=days===0?(isExact&&years>0?`今天 · 第 <span>${years}</span> 周年`:'就是 <span>今天</span>'): `还有 <span>${days}</span> 天`;
+        const [month,day]=(entry.monthDay||monthDayFromDate(entry.date)).split('-').map(Number),dateLabel=isExact&&entry.date?`始于 ${entry.date.replace(/^(\d{4})-(\d{2})-(\d{2})$/,(_,y,m,d)=>`${y}年${Number(m)}月${Number(d)}日`)}`:`每年 ${month}月${day}日`;
+        const card=document.createElement('div');card.className='anni-card';card.style.cssText=entry.bg?`background-image:url("${String(entry.bg).replace(/"/g,'%22')}")`:'background:var(--bg)';
+        card.innerHTML=`<div class="anni-mask"><button type="button" class="anni-del" onclick="deleteAnniversary(${Number(entry.id)})">删除</button><div class="trace-anni-kind">${isExact?'纪念日':'重要日'}</div><div class="anni-title">${escapeHtml(entry.name)}</div><div class="anni-days">${status}</div><div class="anni-date">${dateLabel}</div></div>`;list.appendChild(card);
+      });
+    };
+    if(!window.__traceAnniversaryTimerR21){window.__traceAnniversaryTimerR21=true;setTimeout(()=>window.traceCheckAnniversaryTriggers(new Date()),1800);setInterval(()=>window.traceCheckAnniversaryTriggers(new Date()),60000)}
   }
 
   function wrapOpen(modalId,fnName){
@@ -11721,7 +12040,7 @@ body.ios-system-theme #focus-modal .trace-feature-role-select { background:rgba(
     wrapped.__traceRolePicker=true;window[fnName]=wrapped;
   }
 
-  function install(){normalizeAll();Object.entries(roleFeatures).forEach(([id,fn])=>wrapOpen(id,fn))}
+  function install(){normalizeAll();Object.entries(roleFeatures).forEach(([id,fn])=>wrapOpen(id,fn));installAnniversarySystem()}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
 </script>
