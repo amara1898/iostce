@@ -11750,6 +11750,16 @@ body.ios-system-theme.dark-mode.trace-current-theme[data-trace-chat-theme="qq"] 
 }
 
 /* A continuous iMessage curl: rounded bubble edge, colored lobe, then a surface cutout. */
+body.ios-system-theme #chat-area,
+body.ios-system-theme .ios-group-message-list {
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:hidden !important;
+  overscroll-behavior-x:none !important;
+  touch-action:pan-y !important;
+}
+body.ios-system-theme #chat-area .message-wrap,
+body.ios-system-theme .ios-group-message { max-width:100% !important; }
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .me .bubble,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .them .bubble,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.me .ios-group-bubble,
@@ -11790,6 +11800,38 @@ body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.media .ios-group-bubble::after,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.poll .ios-group-bubble::before,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.poll .ios-group-bubble::after { display:none !important; }
+
+/* Empty or unavailable content must stay understandable without opening a log. */
+.trace-empty-message {
+  color:inherit;
+  opacity:.68;
+  font-style:italic;
+}
+.bubble.trace-media-failed-bubble,
+.ios-group-bubble.trace-media-failed-bubble {
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+}
+.trace-media-fallback {
+  min-width:154px;
+  max-width:230px;
+  border:0;
+  border-radius:14px;
+  background:var(--ios-fill,rgba(118,118,128,.12));
+  color:var(--ios-label,var(--text-main));
+  padding:11px 13px;
+  text-align:left;
+  font:inherit;
+  line-height:1.35;
+}
+.trace-media-fallback strong { display:block;font-size:14px;font-weight:600; }
+.trace-media-fallback small { display:block;margin-top:3px;color:var(--ios-secondary,var(--text-sub));font-size:11px; }
+.bubble.trace-media-failed-bubble::before,
+.bubble.trace-media-failed-bubble::after,
+.ios-group-bubble.trace-media-failed-bubble::before,
+.ios-group-bubble.trace-media-failed-bubble::after { display:none !important; }
 </style>
 <script id="trace-r21-navigation-role-runtime">
 (function(){
@@ -12036,13 +12078,111 @@ body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios
     if(!window.__traceAnniversaryTimerR21){window.__traceAnniversaryTimerR21=true;setTimeout(()=>window.traceCheckAnniversaryTriggers(new Date()),1800);setInterval(()=>window.traceCheckAnniversaryTriggers(new Date()),60000)}
   }
 
+  function visibleMessageText(value){
+    const node=document.createElement('div');node.innerHTML=String(value??'');
+    return String(node.textContent||'').replace(/[\s\u200B-\u200D\uFEFF]+/g,'').trim();
+  }
+  function hasMediaSource(value){return visibleMessageText(value).length>0}
+  function sanitizePrivateMessage(msg){
+    if(!msg||msg.sender==='system'||msg.type==='system')return false;
+    const type=msg.type||'text',textEmpty=!visibleMessageText(msg.text),mediaEmpty=!hasMediaSource(type==='mix'?msg.img:msg.text);
+    if((type==='text'&&textEmpty)||(type==='mix'&&textEmpty&&mediaEmpty)){
+      if(!Object.prototype.hasOwnProperty.call(msg,'traceOriginalText'))msg.traceOriginalText=String(msg.text??'');
+      msg.traceOriginalEmpty=true;msg.text='［空白消息］';return true;
+    }
+    return false;
+  }
+  function sanitizeGroupMessage(msg){
+    if(!msg||msg.senderId==='system'||msg.type==='system')return false;
+    const type=msg.type||'text',textEmpty=!visibleMessageText(msg.content),mediaEmpty=!hasMediaSource(type==='mix'?msg.img:msg.content);
+    if((type==='text'&&textEmpty)||(type==='mix'&&textEmpty&&mediaEmpty)){
+      if(!Object.prototype.hasOwnProperty.call(msg,'traceOriginalContent'))msg.traceOriginalContent=String(msg.content??'');
+      msg.traceOriginalEmpty=true;msg.content='［空白消息］';return true;
+    }
+    return false;
+  }
+  function sanitizeAllMessages(){
+    let changed=false;
+    for(const role of roles())for(const msg of role.messages||[])changed=sanitizePrivateMessage(msg)||changed;
+    for(const group of appState.groupChats||[])for(const msg of group.messages||[])changed=sanitizeGroupMessage(msg)||changed;
+    return changed;
+  }
+  function sourceSummary(source){
+    const value=String(source||'');
+    if(!value)return'消息里没有可用的图片地址';
+    if(value.startsWith('data:'))return`本地图片数据（${Math.round(value.length/1024)} KB）`;
+    return value.length>160?value.slice(0,157)+'…':value;
+  }
+  function showMediaFailure(source){
+    const detail='图片或表情未能读取。\n\n原始来源：'+sourceSummary(source);
+    if(typeof uiAlert==='function')uiAlert(detail);else alert(detail);
+  }
+  function replaceBrokenImage(img,source){
+    if(!img||img.dataset.traceMediaChecked==='failed')return;
+    img.dataset.traceMediaChecked='failed';
+    const bubble=img.closest('.bubble,.ios-group-bubble');if(!bubble)return;
+    bubble.classList.add('trace-media-failed-bubble');img.remove();
+    if(bubble.querySelector('.trace-media-fallback'))return;
+    const button=document.createElement('button');button.type='button';button.className='trace-media-fallback';
+    button.innerHTML='<strong>图片或表情加载失败</strong><small>轻点查看原始信息</small>';
+    button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();showMediaFailure(source)});
+    const time=bubble.querySelector('.bubble-time,.ios-group-time');bubble.insertBefore(button,time||null);
+  }
+  function watchMedia(img,source){
+    if(!img||img.dataset.traceMediaChecked)return;
+    img.dataset.traceMediaChecked='watching';img.addEventListener('error',()=>replaceBrokenImage(img,source),{once:true});
+    if(img.complete&&img.naturalWidth===0)queueMicrotask(()=>replaceBrokenImage(img,source));
+  }
+  function privateWrapFor(area,msg){
+    const boxes=[...(area||document).querySelectorAll('.message-wrap .msg-checkbox')];
+    const checkbox=boxes.reverse().find(box=>String(box.value)===String(msg?.id));return checkbox?.closest('.message-wrap')||null;
+  }
+  function decoratePrivateMessage(area,msg){
+    const wrap=privateWrapFor(area,msg),bubble=wrap?.querySelector('.bubble');if(!bubble)return;
+    if(msg.traceOriginalEmpty){const text=[...bubble.children].find(node=>node.tagName==='SPAN'&&!node.classList.contains('read-status'));if(text){text.classList.add('trace-empty-message');text.title='原消息没有文字内容，可能来自空白字卡';}}
+    if(msg.type==='img'||msg.type==='mix'){const img=[...bubble.children].find(node=>node.tagName==='IMG');watchMedia(img,msg.type==='mix'?msg.img:msg.text)}
+  }
+  function locateGroupMessage(id){for(const group of appState.groupChats||[]){const msg=(group.messages||[]).find(item=>String(item.id)===String(id));if(msg)return msg}return null}
+  function decorateGroupMessages(){
+    document.querySelectorAll('#ios-group-message-list [data-group-message-id]').forEach(row=>{
+      const msg=locateGroupMessage(row.dataset.groupMessageId),bubble=row.querySelector('.ios-group-bubble');if(!msg||!bubble)return;
+      if(msg.traceOriginalEmpty){const text=bubble.querySelector('.ios-group-text');if(text){text.classList.add('trace-empty-message');text.title='原消息没有文字内容，可能来自空白字卡';}}
+      bubble.querySelectorAll('.ios-group-sticker-image').forEach(img=>watchMedia(img,msg.type==='mix'?msg.img:msg.content));
+    });
+  }
+  function installMessageFallbacks(){
+    const originalCards=window.getBoundWordcardsForRole;
+    if(typeof originalCards==='function'&&!originalCards.__traceNonemptyR21){
+      const wrapped=function(){return (originalCards.apply(this,arguments)||[]).filter(card=>visibleMessageText(card?.text));};
+      wrapped.__traceNonemptyR21=true;window.getBoundWordcardsForRole=wrapped;try{getBoundWordcardsForRole=wrapped}catch(error){}
+    }
+    const originalAdd=window.addMessage;
+    if(typeof originalAdd==='function'&&!originalAdd.__traceFallbackR21){
+      const wrapped=function(msg){sanitizePrivateMessage(msg);return originalAdd.apply(this,arguments)};
+      wrapped.__traceFallbackR21=true;window.addMessage=wrapped;try{addMessage=wrapped}catch(error){}
+    }
+    const originalAppend=window.appendMessageDOM;
+    if(typeof originalAppend==='function'&&!originalAppend.__traceFallbackR21){
+      const wrapped=function(msg,area){sanitizePrivateMessage(msg);const result=originalAppend.apply(this,arguments);decoratePrivateMessage(area,msg);return result};
+      wrapped.__traceFallbackR21=true;window.appendMessageDOM=wrapped;try{appendMessageDOM=wrapped}catch(error){}
+    }
+    const originalRender=window.renderMessages;
+    if(typeof originalRender==='function'&&!originalRender.__traceFallbackR21){
+      const wrapped=function(){const changed=sanitizeAllMessages();if(changed&&typeof saveState==='function')saveState();return originalRender.apply(this,arguments)};
+      wrapped.__traceFallbackR21=true;window.renderMessages=wrapped;try{renderMessages=wrapped}catch(error){}
+    }
+    const list=document.getElementById('ios-group-message-list');
+    if(list&&!list.dataset.traceMediaFallbackR21){list.dataset.traceMediaFallbackR21='1';new MutationObserver(decorateGroupMessages).observe(list,{childList:true,subtree:true})}
+    const changed=sanitizeAllMessages();if(changed&&typeof saveState==='function')saveState();decorateGroupMessages();
+  }
+
   function wrapOpen(modalId,fnName){
     const original=window[fnName];if(typeof original!=='function'||original.__traceRolePicker)return;
     const wrapped=function(){const id=selectedId(modalId);if(id)applySelectedRole(modalId,id,false);const out=original.apply(this,arguments);normalizeAll();roleBar(modalId);applySelectedRole(modalId,id,false);return out};
     wrapped.__traceRolePicker=true;window[fnName]=wrapped;
   }
 
-  function install(){normalizeAll();Object.entries(roleFeatures).forEach(([id,fn])=>wrapOpen(id,fn));installAnniversarySystem()}
+  function install(){normalizeAll();Object.entries(roleFeatures).forEach(([id,fn])=>wrapOpen(id,fn));installAnniversarySystem();installMessageFallbacks()}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
 </script>
