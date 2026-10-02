@@ -11756,27 +11756,29 @@ body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.them .ios-group-bubble { border-radius:18px !important; }
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .me .bubble::before,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.me .ios-group-bubble::before {
-  display:block !important;right:-7px !important;left:auto !important;bottom:-1px !important;top:auto !important;
-  width:19px !important;height:20px !important;border:0 !important;border-radius:0 0 0 16px / 0 0 0 14px !important;
-  background:var(--tc-me) !important;transform:none !important;clip-path:none !important;z-index:0 !important;
+  display:block !important;right:-7px !important;left:auto !important;bottom:-2px !important;top:auto !important;
+  width:0 !important;height:20px !important;border:0 !important;border-right:20px solid var(--tc-me) !important;
+  border-radius:0 !important;border-bottom-left-radius:16px 14px !important;
+  background:transparent !important;transform:translate(0,-2px) !important;clip-path:none !important;z-index:0 !important;
 }
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .me .bubble::after,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.me .ios-group-bubble::after {
-  display:block !important;right:-11px !important;left:auto !important;bottom:-2px !important;top:auto !important;
-  width:12px !important;height:22px !important;border:0 !important;border-radius:0 0 0 11px / 0 0 0 10px !important;
-  background:var(--tc-chat) !important;transform:none !important;clip-path:none !important;z-index:1 !important;
+  display:block !important;right:-56px !important;left:auto !important;bottom:-2px !important;top:auto !important;
+  width:26px !important;height:20px !important;border:0 !important;border-radius:0 !important;border-bottom-left-radius:10px !important;
+  background:var(--tc-chat) !important;transform:translate(-30px,-2px) !important;clip-path:none !important;z-index:1 !important;
 }
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .them .bubble::before,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.them .ios-group-bubble::before {
-  display:block !important;left:-7px !important;right:auto !important;bottom:-1px !important;top:auto !important;
-  width:19px !important;height:20px !important;border:0 !important;border-radius:0 0 16px 0 / 0 0 14px 0 !important;
-  background:var(--tc-them) !important;transform:none !important;clip-path:none !important;z-index:0 !important;
+  display:block !important;left:-7px !important;right:auto !important;bottom:-2px !important;top:auto !important;
+  width:0 !important;height:20px !important;border:0 !important;border-left:20px solid var(--tc-them) !important;
+  border-radius:0 !important;border-bottom-right-radius:16px 14px !important;
+  background:transparent !important;transform:translate(0,-2px) !important;clip-path:none !important;z-index:0 !important;
 }
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .them .bubble::after,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.them .ios-group-bubble::after {
-  display:block !important;left:-11px !important;right:auto !important;bottom:-2px !important;top:auto !important;
-  width:12px !important;height:22px !important;border:0 !important;border-radius:0 0 11px 0 / 0 0 10px 0 !important;
-  background:var(--tc-chat) !important;transform:none !important;clip-path:none !important;z-index:1 !important;
+  display:block !important;left:-56px !important;right:auto !important;bottom:-2px !important;top:auto !important;
+  width:26px !important;height:20px !important;border:0 !important;border-radius:0 !important;border-bottom-right-radius:10px !important;
+  background:var(--tc-chat) !important;transform:translate(30px,-2px) !important;clip-path:none !important;z-index:1 !important;
 }
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .message-wrap.system .bubble::before,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .message-wrap.system .bubble::after,
