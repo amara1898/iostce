@@ -11253,16 +11253,16 @@ html body.ios-system-theme.ios-show-timestamp #chat-area .message-wrap .bubble:h
   const pending=new Map(),cooldown=new Map();let initializing=true;
   const groups=()=>Array.isArray(appState.groupChats)?appState.groupChats:[];
   function plain(value){const box=document.createElement('div');box.innerHTML=String(value||'');return String(box.textContent||box.innerText||'').replace(/\s+/g,' ').trim()}
-  function quoteText(msg){if(!msg)return'';let text='';if(msg.type==='img')text='[表情与贴纸]';else if(msg.type==='poll')text=plain(msg.content||'[问卷]');else text=plain(msg.content||'');return text?`我：${text.slice(0,120)}`:''}
+  function quoteText(msg,group){if(!msg)return'';let text='';if(msg.type==='img')text='[表情与贴纸]';else if(msg.type==='poll')text=plain(msg.content||'[问卷]');else text=plain(msg.content||'');const role=(appState.roles||[]).find(item=>String(item.id)===String(msg.senderId)),label=msg.senderId==='me'?'我':String(role?.remark||role?.name||'角色').trim()||'角色';return text?`${label}：${text.slice(0,120)}`:''}
   function locate(messageId){for(const group of groups()){const msg=(group.messages||[]).find(item=>String(item.id)===String(messageId));if(msg)return{group,msg}}return null}
-  function pickUserQuote(group){const candidates=(group.messages||[]).filter(msg=>msg.senderId==='me'&&!msg.withdrawn&&msg.type!=='system').slice(-12),recent=candidates.slice(-6);if(!recent.length)return'';return quoteText(recent[Math.floor(Math.random()*recent.length)])}
+  function pickUserQuote(group){const candidates=(group.messages||[]).filter(msg=>msg.senderId==='me'&&!msg.withdrawn&&msg.type!=='system').slice(-12),recent=candidates.slice(-6);if(!recent.length)return'';return quoteText(recent[Math.floor(Math.random()*recent.length)],group)}
   function processNew(){let changed=false;for(const group of groups())for(const msg of group.messages||[]){if(msg.senderId==='me'||msg.senderId==='system'||msg.type==='system')continue;if(msg.traceGroupQuoteChecked)continue;msg.traceGroupQuoteChecked=true;changed=true;if(!['text','mix'].includes(msg.type)||msg.quoteText||Math.random()>=.08)continue;const key=String(group.id),now=Date.now();if(now-(cooldown.get(key)||0)<60000)continue;const text=pickUserQuote(group);if(text){msg.quoteText=text;cooldown.set(key,now)}}return changed}
   function decorateRow(row){if(!row||row.classList.contains('ios-group-system'))return;const id=row.dataset.groupMessageId,found=locate(id),bubble=row.querySelector('.ios-group-bubble');if(!found||!bubble)return;let box=bubble.querySelector('.ios-group-quote-box');if(found.msg.quoteText){if(!box){box=document.createElement('div');box.className='ios-group-quote-box';bubble.insertBefore(box,bubble.firstChild)}if(box.textContent!==found.msg.quoteText)box.textContent=found.msg.quoteText}else box?.remove()}
   function scan(){document.querySelectorAll('#ios-group-message-list [data-group-message-id]').forEach(decorateRow)}
   function preview(){let el=document.getElementById('trace-group-reply-preview');if(!el){el=document.createElement('div');el.id='trace-group-reply-preview';el.className='trace-group-reply-preview';el.innerHTML='<span></span><button type="button" aria-label="取消引用">×</button>';document.querySelector('.ios-group-compose')?.before(el);el.querySelector('button').onclick=window.traceCancelGroupQuote}const item=[...pending.values()].at(-1);el.classList.toggle('show',!!item);el.querySelector('span').textContent=item?.text||''}
   window.traceCancelGroupQuote=function(){pending.clear();preview()};
-  window.traceStartGroupQuote=function(messageId){const found=locate(messageId);if(!found||found.msg.senderId!=='me')return false;const text=quoteText(found.msg);if(!text)return false;pending.clear();pending.set(String(found.group.id),{text,messageId:String(found.msg.id)});document.querySelectorAll('.trace-group-quote-action').forEach(el=>el.remove());preview();document.getElementById('ios-group-input')?.focus();return true};
-  function installTap(){const list=document.getElementById('ios-group-message-list');if(!list||list.dataset.traceGroupQuote==='1')return;list.dataset.traceGroupQuote='1';list.addEventListener('click',event=>{if(event.target.closest('.trace-group-quote-action'))return;const row=event.target.closest('.ios-group-message.me[data-group-message-id]');if(!row)return;document.querySelectorAll('.trace-group-quote-action').forEach(el=>el.remove());const button=document.createElement('button');button.type='button';button.className='trace-group-quote-action';button.textContent='↩ 引用';button.onclick=e=>{e.preventDefault();e.stopPropagation();window.traceStartGroupQuote(row.dataset.groupMessageId)};row.appendChild(button)});new MutationObserver(()=>{const changed=processNew();scan();if(changed)originalSave?.()}).observe(list,{childList:true,subtree:true})}
+  window.traceStartGroupQuote=function(messageId){const found=locate(messageId);if(!found||found.msg.senderId==='system'||found.msg.type==='system')return false;const text=quoteText(found.msg,found.group);if(!text)return false;pending.clear();pending.set(String(found.group.id),{text,messageId:String(found.msg.id)});document.querySelectorAll('.trace-group-quote-action').forEach(el=>el.remove());preview();document.getElementById('ios-group-input')?.focus();return true};
+  function installTap(){const list=document.getElementById('ios-group-message-list');if(!list||list.dataset.traceGroupQuote==='1')return;list.dataset.traceGroupQuote='1';list.addEventListener('click',event=>{if(event.target.closest('.trace-group-quote-action'))return;if(event.target.closest('.ios-group-member-avatar'))return;const row=event.target.closest('.ios-group-message[data-group-message-id]');if(!row)return;document.querySelectorAll('.trace-group-quote-action').forEach(el=>el.remove());const button=document.createElement('button');button.type='button';button.className='trace-group-quote-action';button.textContent='↩ 引用';button.onclick=e=>{e.preventDefault();e.stopPropagation();window.traceStartGroupQuote(row.dataset.groupMessageId)};row.appendChild(button)});new MutationObserver(()=>{const changed=processNew();scan();if(changed)originalSave?.()}).observe(list,{childList:true,subtree:true})}
   for(const group of groups())for(const msg of group.messages||[])if(msg.senderId!=='me'&&msg.senderId!=='system')msg.traceGroupQuoteChecked=true;initializing=false;
   const originalSave=window.saveState;
   if(typeof originalSave==='function'&&!originalSave.__traceGroupQuoteWrapped){const wrapped=async function(){processNew();return originalSave.apply(this,arguments)};wrapped.__traceGroupQuoteWrapped=true;window.saveState=wrapped}
@@ -11760,6 +11760,14 @@ body.ios-system-theme .ios-group-message-list {
 }
 body.ios-system-theme #chat-area .message-wrap,
 body.ios-system-theme .ios-group-message { max-width:100% !important; }
+body.ios-system-theme .ios-group-message.me,
+body.ios-system-theme .ios-group-message.them { position:relative !important; }
+body.ios-system-theme #chat-area .bubble-avatar,
+body.ios-system-theme .ios-group-member-avatar {
+  position:relative !important;
+  z-index:4 !important;
+  isolation:isolate !important;
+}
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .me .bubble,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .them .bubble,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.me .ios-group-bubble,
@@ -11799,7 +11807,11 @@ body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #cha
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.media .ios-group-bubble::before,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.media .ios-group-bubble::after,
 body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.poll .ios-group-bubble::before,
-body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.poll .ios-group-bubble::after { display:none !important; }
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-message.poll .ios-group-bubble::after,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .bubble.trace-media-content::before,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] #chat-area .bubble.trace-media-content::after,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-bubble.trace-media-content::before,
+body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios-group-bubble.trace-media-content::after { display:none !important; }
 
 /* Empty or unavailable content must stay understandable without opening a log. */
 .trace-empty-message {
@@ -12139,6 +12151,7 @@ body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios
   }
   function decoratePrivateMessage(area,msg){
     const wrap=privateWrapFor(area,msg),bubble=wrap?.querySelector('.bubble');if(!bubble)return;
+    if(msg.type==='img'||msg.type==='mix'||msg.type==='poll'){wrap.classList.add('media');bubble.classList.add('trace-media-content')}
     if(msg.traceOriginalEmpty){const text=[...bubble.children].find(node=>node.tagName==='SPAN'&&!node.classList.contains('read-status'));if(text){text.classList.add('trace-empty-message');text.title='原消息没有文字内容，可能来自空白字卡';}}
     if(msg.type==='img'||msg.type==='mix'){const img=[...bubble.children].find(node=>node.tagName==='IMG');watchMedia(img,msg.type==='mix'?msg.img:msg.text)}
   }
@@ -12146,6 +12159,7 @@ body.ios-system-theme.trace-current-theme[data-trace-chat-theme="imessage"] .ios
   function decorateGroupMessages(){
     document.querySelectorAll('#ios-group-message-list [data-group-message-id]').forEach(row=>{
       const msg=locateGroupMessage(row.dataset.groupMessageId),bubble=row.querySelector('.ios-group-bubble');if(!msg||!bubble)return;
+      if(msg.type==='img'||msg.type==='mix'||msg.type==='poll'){row.classList.add('media');bubble.classList.add('trace-media-content')}
       if(msg.traceOriginalEmpty){const text=bubble.querySelector('.ios-group-text');if(text){text.classList.add('trace-empty-message');text.title='原消息没有文字内容，可能来自空白字卡';}}
       bubble.querySelectorAll('.ios-group-sticker-image').forEach(img=>watchMedia(img,msg.type==='mix'?msg.img:msg.content));
     });
