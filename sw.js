@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-iostce-r22-rounded-list-statusbar';
+const CACHE_NAME = 'trace-cache-iostce-r22-state-safe';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

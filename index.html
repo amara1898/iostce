@@ -2143,10 +2143,13 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+window.__traceStateHydrated = false;
 window.onload = async () => {
     initTypingElement();
     try {
-        const savedState = await getDBVal('state');
+        let savedState = await getDBVal('state');
+        if (!savedState) savedState = await getDBVal('state_backup_safe');
+        if (savedState && traceStateLooksMeaningful(savedState)) await setDBVal('state_backup_safe', savedState);
         if (savedState) {
             if (!savedState.roles) {
                 savedState.roles = [{ id: 'default', name: savedState.settings.themName || 'Ta', avatar: savedState.settings.themAvatar || '', messages: savedState.messages || [] }];
@@ -2171,7 +2174,8 @@ window.onload = async () => {
         
     } catch (e) { 
         applySettingsToUI(); updateDelayDisplay(); 
-    } finally { 
+    } finally {
+        window.__traceStateHydrated = true; 
         // 核心修改：在开屏动画层遮挡时，预加载所有可视区域的图片
         const chatArea = document.getElementById('chat-area');
         const images = Array.from(chatArea.querySelectorAll('img'));
@@ -2217,6 +2221,15 @@ window.onload = async () => {
 
 
 };
+
+function traceStateLooksMeaningful(state) {
+    if (!state || typeof state !== 'object') return false;
+    const roles = Array.isArray(state.roles) ? state.roles : [];
+    const groups = Array.isArray(state.groupChats) ? state.groupChats : [];
+    const customizedRole = roles.some(role => String(role?.id || '') !== 'default' || String(role?.name || 'Ta') !== 'Ta' || !!role?.avatar || !!role?.remark);
+    const messageCount = roles.reduce((sum, role) => sum + (Array.isArray(role?.messages) ? role.messages.length : 0), 0) + groups.reduce((sum, group) => sum + (Array.isArray(group?.messages) ? group.messages.length : 0), 0);
+    return customizedRole || roles.length > 1 || groups.length > 0 || messageCount > 0 || (Array.isArray(state.cards) && state.cards.length > 1) || (Array.isArray(state.stickers) && state.stickers.length > 0) || (Array.isArray(state.anniversaries) && state.anniversaries.length > 0) || (Array.isArray(state.diaryData?.letters) && state.diaryData.letters.length > 0);
+}
 
 async function saveState() { try { await setDBVal('state', appState); } catch (e) { console.error("数据库写入失败:", e); } }
 
@@ -12492,9 +12505,10 @@ body.trace-global-tone-dark.ios-root-active #ios-system-shell::after,body.trace-
   function installShortReleaseNotes(){const original=window.iosOpenReleaseNotes;if(typeof original!=='function'||original.__traceShortNotes)return;const wrapped=async function(){const out=await original.apply(this,arguments),root=document.getElementById('ios-release-notes-content');if(root)root.innerHTML='<div class="ios-release-current"><div class="ios-release-current-kicker">当前版本</div><div class="ios-release-current-version">v12</div></div><div class="ios-release-section-title">本次调整</div><div class="ios-release-card"><article class="ios-release-item"><ul><li>合并主题、全局背景、玻璃和气泡设置。</li><li>气泡预设改为折叠，主题编辑改为全屏。</li><li>修复主页面壁纸的白底遮挡和底栏布局。</li></ul></article></div>';return out};wrapped.__traceShortNotes=true;window.iosOpenReleaseNotes=wrapped}
   function wireHeader(){const wrap=document.querySelector('#main-top-bar .tb-avatar-wrap'),info=document.querySelector('#main-top-bar .tb-info');if(wrap){wrap.onclick=event=>{event.preventDefault();event.stopPropagation();traceOpenRoleAppearance(appState.currentRoleId)};wrap.title='单人设置';wrap.setAttribute('aria-label','打开当前角色设置')}if(info){info.onclick=event=>{event.preventDefault();event.stopPropagation();traceOpenRoleAppearance(appState.currentRoleId)}}}
   function wrap(name,after){const original=window[name];if(typeof original!=='function'||original.__traceAppearanceR22)return;const wrapped=function(){const out=original.apply(this,arguments);Promise.resolve(out).finally(()=>setTimeout(()=>after.apply(this,arguments),0));return out};wrapped.__traceAppearanceR22=true;window[name]=wrapped;try{if(name==='switchRole')switchRole=wrapped;else if(name==='applySettingsToUI')applySettingsToUI=wrapped;else if(name==='updateSettings')updateSettings=wrapped;else if(name==='applyDarkMode')applyDarkMode=wrapped}catch(error){}}
-  function install(){if(appearanceReady)return;appearanceReady=true;const migrated=ensureAppearance();ensurePages();wrap('iosOpenChat',applyResolvedAppearance);wrap('iosShowPage',applyGlobalRootAppearance);wrap('switchRole',applyResolvedAppearance);wrap('applySettingsToUI',applyResolvedAppearance);wrap('updateSettings',applyResolvedAppearance);wrap('applyDarkMode',applyResolvedAppearance);installShortReleaseNotes();const previousSettings=window.iosRenderSettings;if(typeof previousSettings==='function'&&!previousSettings.__traceAppearanceR22){const fn=function(){const out=previousSettings.apply(this,arguments);injectSettings();return out};fn.__traceAppearanceR22=true;window.iosRenderSettings=fn}if(migrated)saveState?.();injectSettings();wireHeader();applyResolvedAppearance()}
+  function install(){if(appearanceReady||window.__traceStateHydrated!==true)return;appearanceReady=true;const migrated=ensureAppearance();ensurePages();wrap('iosOpenChat',applyResolvedAppearance);wrap('iosShowPage',applyGlobalRootAppearance);wrap('switchRole',applyResolvedAppearance);wrap('applySettingsToUI',applyResolvedAppearance);wrap('updateSettings',applyResolvedAppearance);wrap('applyDarkMode',applyResolvedAppearance);installShortReleaseNotes();const previousSettings=window.iosRenderSettings;if(typeof previousSettings==='function'&&!previousSettings.__traceAppearanceR22){const fn=function(){const out=previousSettings.apply(this,arguments);injectSettings();return out};fn.__traceAppearanceR22=true;window.iosRenderSettings=fn}if(migrated)saveState?.();injectSettings();wireHeader();applyResolvedAppearance()}
+  function installWhenStateReady(){if(appearanceReady)return;if(window.__traceStateHydrated!==true){setTimeout(installWhenStateReady,100);return}install()}
   document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(document.getElementById('trace-role-appearance-page')?.classList.contains('open'))traceCloseRoleAppearance();else if(document.getElementById('trace-global-appearance-page')?.classList.contains('open'))traceCloseGlobalAppearance()});
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(install,900));window.addEventListener('load',()=>setTimeout(install,1350));setTimeout(install,1800);
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(installWhenStateReady,100));window.addEventListener('load',installWhenStateReady);setTimeout(installWhenStateReady,500);
 })();
 </script>
 
