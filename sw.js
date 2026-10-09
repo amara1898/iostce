@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-iostce-r22-recovery-scan';
+const CACHE_NAME = 'trace-cache-iostce-r22-edge-to-edge-full-glass';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
