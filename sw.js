@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-iostce-r22-edge-to-edge-full-glass';
+const CACHE_NAME = 'trace-cache-iostce-r22-netease-complete-playlists';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
