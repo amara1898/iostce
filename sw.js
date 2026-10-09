@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-iostce-r22-appearance';
+const CACHE_NAME = 'trace-cache-iostce-r22-settings-merge';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
