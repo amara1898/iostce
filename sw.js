@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-iostce-r22-netease-complete-playlists';
+const CACHE_NAME = 'trace-cache-iostce-r22-netease-ios-playback-fix';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
