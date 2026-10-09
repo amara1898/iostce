@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-iostce-r22-state-safe';
+const CACHE_NAME = 'trace-cache-iostce-r22-recovery-scan';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
