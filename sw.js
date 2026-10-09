@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-v12-r22-wordcard-group-export';
+const CACHE_NAME = 'trace-cache-iostce-r22-appearance';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
