@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-iostce-r22-smooth-imessage-tail';
+const CACHE_NAME = 'trace-cache-iostce-r22-inset-imessage-tail';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
