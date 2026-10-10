@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-iostce-r22-inset-imessage-tail';
+const CACHE_NAME = 'trace-cache-iostce-r22-safari-svg-tail';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
