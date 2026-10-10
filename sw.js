@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trace-cache-iostce-r22-deeper-inset-tail';
+const CACHE_NAME = 'trace-cache-iostce-r22-tail-inset-root-v4';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
